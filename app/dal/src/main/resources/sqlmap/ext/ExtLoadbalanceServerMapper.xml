@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doctorwork.sword.gateway.dal.mapper.ext.ExtLoadbalanceServerMapper">
+    <resultMap id="BaseResultMap" type="com.doctorwork.sword.gateway.dal.model.LoadbalanceServer"
+               extends="com.doctorwork.sword.gateway.dal.mapper.LoadbalanceServerMapper.BaseResultMap"/>
+    <sql id="Base_Column_List">
+        <include refid="com.doctorwork.sword.gateway.dal.mapper.LoadbalanceServerMapper.Base_Column_List"/>
+    </sql>
+    <select id="get" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from loadbalance_server
+        where is_delete = 0
+        and lb_mark = #{lbMark}
+    </select>
+</mapper>
