@@ -11,11 +11,11 @@
     <name>gateway</name>
 
     <modules>
-        <module>app/common</module>
-        <module>app/dal</module>
-        <module>app/core</module>
-        <module>app/boot</module>
-        <module>app/loadbalance</module>
+        <module>gateway-server/common</module>
+        <module>gateway-server/dal</module>
+        <module>gateway-server/core</module>
+        <module>gateway-server/boot</module>
+        <module>gateway-server/loadbalance</module>
     </modules>
 
     <parent>
@@ -49,22 +49,22 @@
             </dependency>
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-dal</artifactId>
+                <artifactId>gateway-server-dal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-core</artifactId>
+                <artifactId>gateway-server-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-common</artifactId>
+                <artifactId>gateway-server-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-loadbalance</artifactId>
+                <artifactId>gateway-server-loadbalance</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!--redis-->

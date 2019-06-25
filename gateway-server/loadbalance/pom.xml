@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gateway-loadbalance</artifactId>
+    <artifactId>gateway-server-loadbalance</artifactId>
 
 
     <dependencies>
@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.doctorwork.sword</groupId>
-            <artifactId>gateway-core</artifactId>
+            <artifactId>gateway-server-core</artifactId>
         </dependency>
     </dependencies>
 </project>
