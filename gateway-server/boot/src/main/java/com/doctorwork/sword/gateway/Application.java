@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ImportResource;
  * @author wangkai
  */
 @SpringBootApplication
-@ImportResource(locations = {"classpath:spring-apollo.xml", "classpath:spring-dal.xml"})
+@ImportResource(locations = {"classpath:spring-*.xml"})
 public class Application {
     /**
      * NettyServer

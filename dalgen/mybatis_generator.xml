@@ -45,15 +45,15 @@
 
 
 		<!-- 生成模型的包名和位置 -->
-		<javaModelGenerator targetPackage="com.doctorwork.gateway.dal.model" targetProject="../app/dal/src/main/java">
+		<javaModelGenerator targetPackage="com.doctorwork.sword.gateway.dal.model" targetProject="../gateway-server/dal/src/main/java">
 			<property name="trimStrings" value="true" />
 		</javaModelGenerator>
 
 		<!-- 生成的映射文件位置 -->
-		<sqlMapGenerator targetPackage="sqlmap" targetProject="../app/dal/src/main/resources" />
+		<sqlMapGenerator targetPackage="sqlmap" targetProject="../gateway-server/dal/src/main/resources" />
 
 		<!-- 生成DAO的包名和位置 -->
-		<javaClientGenerator targetPackage="com.doctorwork.gateway.dal.mapper" targetProject="../app/dal/src/main/java" type="XMLMAPPER">
+		<javaClientGenerator targetPackage="com.doctorwork.sword.gateway.dal.mapper" targetProject="../gateway-server/dal/src/main/java" type="XMLMAPPER">
 			<property name="enableSubPackages" value="false" />
 		</javaClientGenerator>
 
