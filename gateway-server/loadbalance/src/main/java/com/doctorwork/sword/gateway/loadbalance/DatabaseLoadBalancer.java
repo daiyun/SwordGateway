@@ -58,9 +58,10 @@ public class DatabaseLoadBalancer extends DynamicServerListLoadBalancer<DataBase
     public void enableAndInitLearnNewServersFeature() {
         RibbonLoadBalanceParam param = null;
         if (this.ribbonLoadBalanceConfig != null && (param = this.ribbonLoadBalanceConfig.extParam()) != null) {
-            if (param.getAutoRefresh() != null && !param.getAutoRefresh())
+            if (param.getAutoRefresh() != null && !param.getAutoRefresh()){
                 logger.info("禁止负载器{} 服务自动刷新策略", name);
-            return;
+                return;
+            }
         }
         logger.info("启用负载器{} 服务自动刷新策略[{}](该策略会刷新服务状态)", name, serverListUpdater);
         if (param != null && getServerListUpdater() instanceof PollingServerListUpdater) {
