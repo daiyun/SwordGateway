@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.filter.AccessLogGatewayFilterFactory;
+import com.doctorwork.sword.gateway.filter.factory.AccessLogGatewayFilterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
