@@ -79,7 +79,7 @@ public class AccessLogGatewayFilterFactory extends AbstractGatewayFilterFactory<
                                                 "\tPath:[{}]\n" +
                                                 "\tUri:[{}]\n" +
                                                 "\tQueryParams:[{}]\n" +
-                                                "\tBody:[{}]" +
+                                                "\tBody:[{}]\n" +
                                                 "---------",
                                         traceId,
                                         getMethod(),
