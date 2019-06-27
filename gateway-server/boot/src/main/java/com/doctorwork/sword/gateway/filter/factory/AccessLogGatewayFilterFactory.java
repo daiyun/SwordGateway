@@ -74,12 +74,12 @@ public class AccessLogGatewayFilterFactory extends AbstractGatewayFilterFactory<
                             .doOnNext(buffer -> recordBytes(stream, buffer))
                             .doOnComplete(() -> {
                                 logger.info("\n----Request[TraceId:{}]:\n" +
-                                                "Method:[{}]\n" +
-                                                "Heads:[{}]\n" +
-                                                "Path:[{}]\n" +
-                                                "Uri:[{}]\n" +
-                                                "QueryParams:[{}]\n" +
-                                                "Body:[{}]" +
+                                                "\tMethod:[{}]\n" +
+                                                "\tHeads:[{}]\n" +
+                                                "\tPath:[{}]\n" +
+                                                "\tUri:[{}]\n" +
+                                                "\tQueryParams:[{}]\n" +
+                                                "\tBody:[{}]" +
                                                 "---------",
                                         traceId,
                                         getMethod(),
@@ -103,10 +103,10 @@ public class AccessLogGatewayFilterFactory extends AbstractGatewayFilterFactory<
                             .doOnNext(buffer -> recordBytes(stream, buffer))
                             .doOnComplete(() -> {
                                 logger.info("\n----Response[TraceId:{}]:\n" +
-                                                "StatusCode:[{}]\n" +
-                                                "Cost:[{}ms]\n" +
-                                                "Heads:[{}]\n" +
-                                                "Body:{}\n" +
+                                                "\tStatusCode:[{}]\n" +
+                                                "\tCost:[{}ms]\n" +
+                                                "\tHeads:[{}]\n" +
+                                                "\tBody:[{}]\n" +
                                                 "---------",
                                         traceId,
                                         getStatusCode(),
