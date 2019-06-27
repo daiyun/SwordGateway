@@ -15,7 +15,6 @@ import java.util.List;
  * @Modified By:
  */
 public class RecorderServerHttpRequestDecorator extends ServerHttpRequestDecorator {
-
     private final List<DataBuffer> dataBuffers = new ArrayList<>();
 
     public RecorderServerHttpRequestDecorator(ServerHttpRequest delegate) {
@@ -35,6 +34,4 @@ public class RecorderServerHttpRequestDecorator extends ServerHttpRequestDecorat
         return Flux.fromIterable(dataBuffers)
                 .map(buf -> buf.factory().wrap(buf.asByteBuffer()));
     }
-
-
 }
