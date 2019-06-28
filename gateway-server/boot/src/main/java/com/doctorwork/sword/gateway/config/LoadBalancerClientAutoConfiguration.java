@@ -9,9 +9,11 @@ import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.Server;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.gateway.filter.LoadBalancerClientFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,7 +25,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Configuration
 public class LoadBalancerClientAutoConfiguration {
 
-    private static ConcurrentHashMap<String, ILoadBalancer> loadBalancerConcurrentHashMap = new ConcurrentHashMap<>();
+    private static Map<String, ILoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
+    private static final String LOCK_LB = "LOCK_FOR_LOADBALANCE----";
+
+
+    @Bean
+    @ConditionalOnMissingBean({LoadBalancerClientFilter.class})
+    public LoadBalancerClientFilter loadBalancerClientFilter(LoadBalancerClient client) {
+        return new LoadBalancerClientFilter(client);
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -32,21 +42,27 @@ public class LoadBalancerClientAutoConfiguration {
             @Override
             protected Server getServer(String serviceId) {
                 ILoadBalancer loadBalancer = this.getLoadBalancer(serviceId);
+
                 return loadBalancer == null ? null : loadBalancer.chooseServer(serviceId);
             }
 
             @Override
             protected ILoadBalancer getLoadBalancer(String serviceId) {
-                ILoadBalancer loadBalancer = loadBalancerConcurrentHashMap.get(serviceId);
+                ILoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
                 if (loadBalancer == null) {
                     LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(serviceId);
                     if (loadbalanceInfo == null)
                         return loadBalancer;
-                    DataBaseServerList serverList = new DataBaseServerList(gatewayLoadBalanceService, serviceId);
-                    DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
-                    dynamicLoadBalancer.init(loadbalanceInfo);
-                    loadBalancerConcurrentHashMap.put(serviceId, dynamicLoadBalancer);
-                    return dynamicLoadBalancer;
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(LOCK_LB).append(serviceId);
+                    String lock = sb.toString().intern();
+                    synchronized (lock) {
+                        DataBaseServerList serverList = new DataBaseServerList(gatewayLoadBalanceService, serviceId);
+                        DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
+                        dynamicLoadBalancer.init(loadbalanceInfo);
+                        loadBalancerMap.putIfAbsent(serviceId, dynamicLoadBalancer);
+                    }
+                    return loadBalancerMap.get(serviceId);
                 }
                 return loadBalancer;
             }
