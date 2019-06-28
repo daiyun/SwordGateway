@@ -68,4 +68,8 @@ public class RibbonLoadBalanceConfig {
         }
         return null;
     }
+
+    public LoadbalanceInfo getLoadbalanceInfo() {
+        return loadbalanceInfo;
+    }
 }

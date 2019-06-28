@@ -95,6 +95,11 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>com.netflix.netflix-commons</groupId>
+                <artifactId>netflix-commons-util</artifactId>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>

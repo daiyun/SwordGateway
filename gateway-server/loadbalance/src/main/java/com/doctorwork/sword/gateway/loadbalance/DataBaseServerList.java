@@ -26,16 +26,13 @@ public class DataBaseServerList extends AbstractServerList<DataBaseServer> {
     private String serviceId;
     private GatewayLoadBalanceService gatewayLoadBalanceService;
 
-    public DataBaseServerList(GatewayLoadBalanceService gatewayLoadBalanceService) {
+    public DataBaseServerList(GatewayLoadBalanceService gatewayLoadBalanceService, String serviceId) {
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
+        this.serviceId = serviceId;
     }
 
     @Override
     public void initWithNiwsConfig(IClientConfig clientConfig) {
-        this.serviceId = clientConfig.getClientName();
-    }
-
-    public void initFromDependencies(IClientConfig clientConfig) {
         this.serviceId = clientConfig.getClientName();
     }
 

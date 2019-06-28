@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * @Date: 9:56 2019/6/11
  * @Modified By:
  */
+@Deprecated
 public class DatabaseLoadBalancer extends DynamicServerListLoadBalancer<DataBaseServer> {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseLoadBalancer.class);

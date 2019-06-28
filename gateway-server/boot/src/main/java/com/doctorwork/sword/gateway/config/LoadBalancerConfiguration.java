@@ -6,6 +6,7 @@ import com.doctorwork.sword.gateway.loadbalance.DatabaseLoadBalancer;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
@@ -17,14 +18,17 @@ import org.springframework.context.annotation.Bean;
  */
 public class LoadBalancerConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ILoadBalancer loadBalancer(IClientConfig config, GatewayLoadBalanceService gatewayLoadBalanceService) {
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(config.getClientName());
-        if (loadbalanceInfo == null)
-            throw new RuntimeException("no available loadbalance for " + config.getClientName());
-        DataBaseServerList serverList = new DataBaseServerList(gatewayLoadBalanceService);
-        serverList.initFromDependencies(config);
-        return new DatabaseLoadBalancer(serverList, config, loadbalanceInfo);
-    }
+//    @Autowired
+//    private GatewayLoadBalanceService gatewayLoadBalanceService;
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public ILoadBalancer loadBalancer(IClientConfig config) {
+//        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(config.getClientName());
+//        if (loadbalanceInfo == null)
+//            throw new RuntimeException("no available loadbalance for " + config.getClientName());
+//        DataBaseServerList serverList = new DataBaseServerList(gatewayLoadBalanceService);
+//        serverList.initFromDependencies(config);
+//        return new DatabaseLoadBalancer(serverList, config, loadbalanceInfo);
+//    }
 }
