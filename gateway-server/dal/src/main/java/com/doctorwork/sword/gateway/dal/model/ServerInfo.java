@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-06-22
+ * @since 2019-07-01
  */
 public class ServerInfo implements Serializable {
     /**

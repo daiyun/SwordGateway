@@ -141,5 +141,33 @@
 			<columnOverride column="gmt_modified" isGeneratedAlways="true"></columnOverride>
 			<columnOverride column="gmt_create" isGeneratedAlways="true"></columnOverride>
 		</table>
+		<table tableName="discover_config" domainObjectName="DiscoverConfig" enableInsert="true" enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByPrimaryKey="false"
+			   enableDeleteByExample="false" enableCountByExample="false" selectByExampleQueryId="false" selectByPrimaryKeyQueryId="false">
+
+			<!--generatedKey会在生成的insert区域中添加下面的语句，为了获取插入mysql的这一行的id <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long"> SELECT LAST_INSERT_ID() </selectKey> -->
+			<generatedKey column="id" sqlStatement="MySql" identity="true" />
+
+			<!-- ignoreColumn设置一个MGB忽略的列，如果设置了改列，那么在生成的domain中，生成的SQL中，都不会有该列出现 column:指定要忽略的列的名字； (注意，一个table元素中可以有多个ignoreColumn元素) -->
+			<!-- <ignoreColumn column="mediumintType" /> -->
+
+			<!-- columnOverride isGeneratedAlways="true" 在insert和update的语句中不出现对应的字段 和ignoreColumn区别：ignoreColumn在生成的实体对象中都不会出现对应的字段 -->
+			<columnOverride column="is_delete" isGeneratedAlways="true"></columnOverride>
+			<columnOverride column="gmt_modified" isGeneratedAlways="true"></columnOverride>
+			<columnOverride column="gmt_create" isGeneratedAlways="true"></columnOverride>
+		</table>
+		<table tableName="discover_loadbalance_pool" domainObjectName="DiscoverLoadbalancePool" enableInsert="true" enableSelectByPrimaryKey="true" enableUpdateByPrimaryKey="true" enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByPrimaryKey="false"
+			   enableDeleteByExample="false" enableCountByExample="false" selectByExampleQueryId="false" selectByPrimaryKeyQueryId="false">
+
+			<!--generatedKey会在生成的insert区域中添加下面的语句，为了获取插入mysql的这一行的id <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long"> SELECT LAST_INSERT_ID() </selectKey> -->
+			<generatedKey column="id" sqlStatement="MySql" identity="true" />
+
+			<!-- ignoreColumn设置一个MGB忽略的列，如果设置了改列，那么在生成的domain中，生成的SQL中，都不会有该列出现 column:指定要忽略的列的名字； (注意，一个table元素中可以有多个ignoreColumn元素) -->
+			<!-- <ignoreColumn column="mediumintType" /> -->
+
+			<!-- columnOverride isGeneratedAlways="true" 在insert和update的语句中不出现对应的字段 和ignoreColumn区别：ignoreColumn在生成的实体对象中都不会出现对应的字段 -->
+			<columnOverride column="is_delete" isGeneratedAlways="true"></columnOverride>
+			<columnOverride column="gmt_modified" isGeneratedAlways="true"></columnOverride>
+			<columnOverride column="gmt_create" isGeneratedAlways="true"></columnOverride>
+		</table>
     </context>
 </generatorConfiguration>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 主库数据源 -->
+    <bean id="appDiscoveryProperties" class="com.doctorwork.sword.gateway.discovery.common.AppDiscoveryProperties">
+        <property name="appId" value=""/>
+        <property name="appName" value=""/>
+    </bean>
+
+    <bean id="zookeeperProperties" class="com.doctorwork.sword.gateway.discovery.common.build.ZookeeperProperties"/>
+
+    <bean id="curatorBuilder" class="com.doctorwork.sword.gateway.discovery.common.build.CuratorBuilder">
+        <constructor-arg index="0" value="zookeeperProperties"/>
+    </bean>
+
+    <bean id="curatorFramework" factory-bean="curatorBuilder" factory-method="build"/>
+
+    <bean id="discoveryBuilder" class="com.doctorwork.sword.gateway.discovery.common.build.DiscoveryBuilder">
+        <constructor-arg index="0" ref="curatorFramework"/>
+        <constructor-arg index="1" value="#{appDiscoveryProperties.zkRoot}"/>
+    </bean>
+
+    <bean id="serviceDiscovery" factory-bean="discoveryBuilder" factory-method="build"/>
+
+    <bean class="com.doctorwork.sword.gateway.discovery.server.AppRegistryConfiguration">
+        <constructor-arg index="0" ref="serviceDiscovery"/>
+        <constructor-arg index="1" ref="appDiscoveryProperties"/>
+    </bean>
+
+</beans>
+
+
