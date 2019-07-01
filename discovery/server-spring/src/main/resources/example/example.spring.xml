@@ -9,15 +9,15 @@
         <property name="appName" value=""/>
     </bean>
 
-    <bean id="zookeeperProperties" class="com.doctorwork.sword.gateway.discovery.common.build.ZookeeperProperties"/>
+    <bean id="zookeeperProperties" class="com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties"/>
 
-    <bean id="curatorBuilder" class="com.doctorwork.sword.gateway.discovery.common.build.CuratorBuilder">
+    <bean id="curatorBuilder" class="com.doctorwork.sword.gateway.discovery.common.builder.CuratorBuilder">
         <constructor-arg index="0" value="zookeeperProperties"/>
     </bean>
 
     <bean id="curatorFramework" factory-bean="curatorBuilder" factory-method="build"/>
 
-    <bean id="discoveryBuilder" class="com.doctorwork.sword.gateway.discovery.common.build.DiscoveryBuilder">
+    <bean id="discoveryBuilder" class="com.doctorwork.sword.gateway.discovery.common.builder.DiscoveryBuilder">
         <constructor-arg index="0" ref="curatorFramework"/>
         <constructor-arg index="1" value="#{appDiscoveryProperties.zkRoot}"/>
     </bean>
