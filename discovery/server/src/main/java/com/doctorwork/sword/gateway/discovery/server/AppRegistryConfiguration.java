@@ -5,9 +5,6 @@ import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 
 import javax.annotation.PreDestroy;
 import java.util.UUID;
@@ -21,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Modified By:
  */
 
-public class AppRegistryConfiguration implements ApplicationListener<ApplicationEvent> {
+public class AppRegistryConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(AppRegistryConfiguration.class);
     private AppInstanceRegistration appInstanceRegistration;
     private AppRegistry appRegistry;
@@ -71,14 +68,6 @@ public class AppRegistryConfiguration implements ApplicationListener<Application
         if (this.running.compareAndSet(true, false) && appDiscoveryProperties.isEnabled()) {
             this.appRegistry.deregister(appInstanceRegistration);
             this.appRegistry.close();
-        }
-    }
-
-    @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof ContextRefreshedEvent) {
-            logger.info("容器初始化完成事件，注册服务");
-            this.webInit(null);
         }
     }
 }

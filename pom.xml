@@ -11,6 +11,10 @@
     <name>gateway</name>
 
     <modules>
+        <module>discovery/common</module>
+        <module>discovery/server</module>
+        <module>discovery/server-spring</module>
+        <module>discovery/client</module>
         <module>gateway-server/common</module>
         <module>gateway-server/dal</module>
         <module>gateway-server/core</module>
