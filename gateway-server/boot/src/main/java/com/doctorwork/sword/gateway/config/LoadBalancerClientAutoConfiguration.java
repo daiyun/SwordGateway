@@ -25,8 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Configuration
 public class LoadBalancerClientAutoConfiguration {
 
-    private static Map<String, ILoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
-    private static final String LOCK_LB = "LOCK_FOR_LOADBALANCE----";
+    private static final Map<String, ILoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
 
 
     @Bean
@@ -53,7 +52,7 @@ public class LoadBalancerClientAutoConfiguration {
                     synchronized (loadBalancerMap) {
                         LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(serviceId);
                         if (loadbalanceInfo == null)
-                            return loadBalancer;
+                            return null;
                         loadBalancer = loadBalancerMap.get(serviceId);
                         if (loadBalancer != null) {
                             return loadBalancer;
