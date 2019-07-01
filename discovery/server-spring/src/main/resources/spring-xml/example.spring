@@ -3,32 +3,31 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
           http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- 主库数据源 -->
-    <bean id="appDiscoveryProperties" class="com.doctorwork.sword.gateway.discovery.common.AppDiscoveryProperties">
-        <property name="appId" value=""/>
-        <property name="appName" value=""/>
+    <bean id="discoveryProperties" class="com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties" >
+        <property name="appPort" value="${server.port}" />
     </bean>
 
     <bean id="zookeeperProperties" class="com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties"/>
 
     <bean id="curatorBuilder" class="com.doctorwork.sword.gateway.discovery.common.builder.CuratorBuilder">
-        <constructor-arg index="0" value="zookeeperProperties"/>
+        <constructor-arg index="0" ref="zookeeperProperties"/>
     </bean>
 
     <bean id="curatorFramework" factory-bean="curatorBuilder" factory-method="build"/>
 
     <bean id="discoveryBuilder" class="com.doctorwork.sword.gateway.discovery.common.builder.DiscoveryBuilder">
         <constructor-arg index="0" ref="curatorFramework"/>
-        <constructor-arg index="1" value="#{appDiscoveryProperties.zkRoot}"/>
+        <constructor-arg index="1" value="#{discoveryProperties.zkRoot}"/>
     </bean>
 
     <bean id="serviceDiscovery" factory-bean="discoveryBuilder" factory-method="build"/>
 
-    <bean class="com.doctorwork.sword.gateway.discovery.server.AppRegistryConfiguration">
+    <bean id="appRegistryConfiguration" class="com.doctorwork.sword.gateway.discovery.server.AppRegistryConfiguration">
         <constructor-arg index="0" ref="serviceDiscovery"/>
-        <constructor-arg index="1" ref="appDiscoveryProperties"/>
+        <constructor-arg index="1" ref="discoveryProperties"/>
     </bean>
 
+    <bean class="com.doctorwork.sword.gateway.discovery.server.Registry">
+        <property name="appRegistryConfiguration" ref="appRegistryConfiguration"/>
+    </bean>
 </beans>
-
-

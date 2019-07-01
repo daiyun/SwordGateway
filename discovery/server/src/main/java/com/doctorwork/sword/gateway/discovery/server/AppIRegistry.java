@@ -11,11 +11,11 @@ import org.apache.curator.x.discovery.ServiceInstance;
  * @Date: 16:43 2019/5/31
  * @Modified By:
  */
-public class AppRegistry implements Registry<AppInstanceRegistration> {
+public class AppIRegistry implements IRegistry<AppInstanceRegistration> {
 
     private ServiceDiscovery<ZookeeperInstance> serviceDiscovery;
 
-    public AppRegistry(ServiceDiscovery<ZookeeperInstance> serviceDiscovery) {
+    public AppIRegistry(ServiceDiscovery<ZookeeperInstance> serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
     }
 

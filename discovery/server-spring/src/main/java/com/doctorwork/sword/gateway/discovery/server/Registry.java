@@ -12,14 +12,15 @@ public class Registry implements ApplicationListener<ApplicationEvent> {
 
     private AppRegistryConfiguration appRegistryConfiguration;
 
-    public Registry(AppRegistryConfiguration appRegistryConfiguration) {
-        this.appRegistryConfiguration = appRegistryConfiguration;
-    }
-
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
-            this.appRegistryConfiguration.webInit(null);
+            if (appRegistryConfiguration != null)
+                this.appRegistryConfiguration.webInit(null);
         }
+    }
+
+    public void setAppRegistryConfiguration(AppRegistryConfiguration appRegistryConfiguration) {
+        this.appRegistryConfiguration = appRegistryConfiguration;
     }
 }

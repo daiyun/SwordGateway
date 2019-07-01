@@ -18,7 +18,7 @@ import java.util.concurrent.*;
  * @Date: 10:18 2019/5/31
  * @Modified By:
  */
-public class AppDiscoveryProperties {
+public class DiscoveryProperties {
 
     private HostInfo hostInfo;
 
@@ -46,7 +46,7 @@ public class AppDiscoveryProperties {
 
     private ExecutorService executorService;
 
-    public AppDiscoveryProperties() {
+    public DiscoveryProperties() {
         this.executorService = Executors.newSingleThreadExecutor();
         this.hostInfo = findFirstNonLoopbackHostInfo();
     }

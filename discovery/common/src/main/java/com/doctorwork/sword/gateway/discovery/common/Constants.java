@@ -18,4 +18,8 @@ public class Constants {
     public static final String DEFAULT_IP_ADDRESS = "127.0.0.1";
 
     public static final String DEFAULT_URI_SPEC = "{scheme}://{address}:{port}";
+
+    public static final String META_INF_APP_PROPERTIES = "META-INF/app.properties";
+
+    public static final String PROPERTIES_APP_ID_KEY = "app.id";
 }
