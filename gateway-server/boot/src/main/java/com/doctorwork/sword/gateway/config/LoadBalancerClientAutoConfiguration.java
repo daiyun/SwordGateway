@@ -50,13 +50,14 @@ public class LoadBalancerClientAutoConfiguration {
             protected ILoadBalancer getLoadBalancer(String serviceId) {
                 ILoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
                 if (loadBalancer == null) {
-                    LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(serviceId);
-                    if (loadbalanceInfo == null)
-                        return loadBalancer;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(LOCK_LB).append(serviceId);
-                    String lock = sb.toString().intern();
-                    synchronized (lock) {
+                    synchronized (loadBalancerMap) {
+                        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(serviceId);
+                        if (loadbalanceInfo == null)
+                            return loadBalancer;
+                        loadBalancer = loadBalancerMap.get(serviceId);
+                        if (loadBalancer != null) {
+                            return loadBalancer;
+                        }
                         DataBaseServerList serverList = new DataBaseServerList(gatewayLoadBalanceService, serviceId);
                         DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
                         dynamicLoadBalancer.init(loadbalanceInfo);
