@@ -34,4 +34,12 @@ public class DiscoveryConfigParam implements Param {
     public void setDiscoveryProperties(DiscoveryProperties discoveryProperties) {
         this.discoveryProperties = discoveryProperties;
     }
+
+    public static void main(String[] args) {
+        DiscoveryConfigParam discoveryConfigParam = new DiscoveryConfigParam();
+        discoveryConfigParam.setDiscoveryProperties(new DiscoveryProperties());
+        discoveryConfigParam.setZookeeperProperties(new ZookeeperProperties());
+        String json = JacksonUtil.toJSon(discoveryConfigParam);
+        System.out.println(json);
+    }
 }

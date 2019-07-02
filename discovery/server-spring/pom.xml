@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.doctorwork.sword</groupId>
-    <artifactId>gateway-discovert-server-spring</artifactId>
+    <artifactId>gateway-discovery-server-spring</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>

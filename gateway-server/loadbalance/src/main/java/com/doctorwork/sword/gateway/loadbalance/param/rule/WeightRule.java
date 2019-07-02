@@ -1,6 +1,7 @@
 package com.doctorwork.sword.gateway.loadbalance.param.rule;
 
 import com.doctorwork.sword.gateway.loadbalance.DynamicLoadBalancer;
+import com.doctorwork.sword.gateway.loadbalance.server.AbstractServer;
 import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServer;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
@@ -48,12 +49,12 @@ public class WeightRule extends RoundRobinRule {
             int weightSum = 0;
             final LinkedHashMap<Server, IntegerWrapper> serverToWeightMap = new LinkedHashMap<Server, IntegerWrapper>();
             for (int i = 0; i < length; i++) {
-                DataBaseServer dataBaseServer = (DataBaseServer) allList.get(i);
-                int weight = dataBaseServer.weight();
+                AbstractServer server = (AbstractServer) allList.get(i);
+                int weight = server.weight();
                 maxWeight = Math.max(maxWeight, weight); // Choose the maximum weight
                 minWeight = Math.min(minWeight, weight); // Choose the minimum weight
                 if (weight > 0) {
-                    serverToWeightMap.put(dataBaseServer, new IntegerWrapper(weight));
+                    serverToWeightMap.put(server, new IntegerWrapper(weight));
                     weightSum += weight;
                 }
             }

@@ -64,6 +64,8 @@ public class DiscoveryProperties {
     }
 
     public String getHost() {
+        if (hostInfo == null)
+            return null;
         if (this.preferIpAddress) {
             return this.hostInfo.getIpAddress();
         }

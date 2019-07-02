@@ -38,6 +38,9 @@ public class AppRegistryConfiguration {
         if (!StringUtils.isEmpty(appId)) {
             discoveryProperties.setAppName(appId);
         }
+        if (!StringUtils.isEmpty(discoveryProperties.getAppName())) {
+            discoveryProperties.setAppName(discoveryProperties.getAppName().replaceAll("_", "-"));
+        }
         ZookeeperInstance zookeeperInstance = new ZookeeperInstance(UUID.randomUUID().toString().replaceAll("-", ""),
                 discoveryProperties.getAppName(), discoveryProperties.getMetadata());
         AppInstanceRegistration.RegistrationBuilder builder = AppInstanceRegistration.builder()
@@ -64,7 +67,7 @@ public class AppRegistryConfiguration {
                 this.port.compareAndSet(0, this.discoveryProperties.getAppPort());
             }
         }
-        if(this.port.get() == 0){
+        if (this.port.get() == 0) {
             throw new RuntimeException("port cannot be 0,plz set the appPort in DiscoveryProperties");
         }
         appInstanceRegistration.setPort(this.port.get());
