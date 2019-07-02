@@ -6,6 +6,13 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.dal.model.DiscoverLoadbalancePool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author:czq
@@ -26,5 +33,19 @@ public class GatewayDiscoveryService {
             return null;
         DiscoverConfig discoverConfig = extDiscoverConfigMapper.get(pool.getDscrId());
         return discoverConfig;
+    }
+
+    public List<DiscoverConfig> preLoadList() {
+        return extDiscoverConfigMapper.preLoad();
+    }
+
+    public Map<String, String> poolMap(List<DiscoverConfig> discoverConfigs) {
+        if (CollectionUtils.isEmpty(discoverConfigs))
+            return Collections.emptyMap();
+        Set<String> dscrIds = discoverConfigs.stream().map(DiscoverConfig::getDscrId).collect(Collectors.toSet());
+        List<DiscoverLoadbalancePool> pools = extDiscoverLoadbalancePoolMapper.list(dscrIds);
+        if (CollectionUtils.isEmpty(pools))
+            return Collections.emptyMap();
+        return pools.stream().collect(Collectors.toMap(DiscoverLoadbalancePool::getLbMark, DiscoverLoadbalancePool::getDscrId, (k1, k2) -> k1));
     }
 }

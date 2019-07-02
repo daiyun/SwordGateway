@@ -12,11 +12,18 @@ import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties
  * @Modified By:
  */
 public class DiscoveryConfigParam implements Param {
+    private Boolean preLoad;
     private ZookeeperProperties zookeeperProperties;
     private DiscoveryProperties discoveryProperties;
 
     public static DiscoveryConfigParam build(DiscoverConfig discoverConfig) {
-        return JacksonUtil.toObject(discoverConfig.getDscrConfig(), DiscoveryConfigParam.class);
+        DiscoveryConfigParam discoveryConfigParam = new DiscoveryConfigParam();
+        discoveryConfigParam.setPreLoad(discoverConfig.getDscrPreloadEnable() == 0);
+        ZookeeperProperties zookeeperProperties = JacksonUtil.toObject(discoverConfig.getDscrRegitryConfig(), ZookeeperProperties.class);
+        DiscoveryProperties discoveryProperties = JacksonUtil.toObject(discoverConfig.getDscrConfig(), DiscoveryProperties.class);
+        discoveryConfigParam.setZookeeperProperties(zookeeperProperties);
+        discoveryConfigParam.setDiscoveryProperties(discoveryProperties);
+        return discoveryConfigParam;
     }
 
     public ZookeeperProperties getZookeeperProperties() {
@@ -36,10 +43,15 @@ public class DiscoveryConfigParam implements Param {
     }
 
     public static void main(String[] args) {
-        DiscoveryConfigParam discoveryConfigParam = new DiscoveryConfigParam();
-        discoveryConfigParam.setDiscoveryProperties(new DiscoveryProperties());
-        discoveryConfigParam.setZookeeperProperties(new ZookeeperProperties());
-        String json = JacksonUtil.toJSon(discoveryConfigParam);
-        System.out.println(json);
+        System.out.println(JacksonUtil.toJSon(new DiscoveryProperties()));
+        System.out.println(JacksonUtil.toJSon(new ZookeeperProperties()));
+    }
+
+    public Boolean isPreLoad() {
+        return preLoad;
+    }
+
+    public void setPreLoad(Boolean preLoad) {
+        this.preLoad = preLoad;
     }
 }

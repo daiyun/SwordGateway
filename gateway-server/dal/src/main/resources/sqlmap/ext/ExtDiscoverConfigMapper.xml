@@ -13,4 +13,11 @@
         where is_delete = 0
         and dscr_id = #{dscrId}
     </select>
+    <select id="preLoad" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from discover_config
+        where is_delete = 0
+        and dscr_preload_enable = 0
+    </select>
 </mapper>

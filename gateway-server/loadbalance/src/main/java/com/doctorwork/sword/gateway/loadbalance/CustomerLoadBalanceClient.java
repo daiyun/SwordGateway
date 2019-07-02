@@ -22,6 +22,7 @@ import org.apache.curator.x.discovery.ServiceCache;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.details.ServiceCacheListener;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,14 +40,12 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient {
 
     private GatewayLoadBalanceService gatewayLoadBalanceService;
     private GatewayDiscoveryService gatewayDiscoveryService;
-    private ZookeeperProperties defaultZookeeperProperties;
-    private DiscoveryProperties defaultDiscoveryProperties;
+    private DiscoveryConfigParam defaultDiscoveryConfigParam;
 
-    public CustomerLoadBalanceClient(GatewayLoadBalanceService gatewayLoadBalanceService, GatewayDiscoveryService gatewayDiscoveryService, ZookeeperProperties defaultZookeeperProperties, DiscoveryProperties defaultDiscoveryProperties) {
+    public CustomerLoadBalanceClient(GatewayLoadBalanceService gatewayLoadBalanceService, GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfigParam defaultDiscoveryConfigParam) {
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
         this.gatewayDiscoveryService = gatewayDiscoveryService;
-        this.defaultZookeeperProperties = defaultZookeeperProperties;
-        this.defaultDiscoveryProperties = defaultDiscoveryProperties;
+        this.defaultDiscoveryConfigParam = defaultDiscoveryConfigParam;
     }
 
     @Override
@@ -89,6 +88,44 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient {
         return loadBalancer;
     }
 
+    public void preLoadDiscovery() {
+        logger.info("预加载服务发现配置");
+        List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
+        //db preload
+        for (DiscoverConfig discoverConfig : preLoadList) {
+            String mark = ".".concat(discoverConfig.getDscrId());
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
+            if (serviceDiscovery == null) {
+                DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(discoverConfig);
+                ZookeeperProperties zookeeperProperties = discoveryConfigParam.getZookeeperProperties();
+                DiscoveryProperties discoveryProperties = discoveryConfigParam.getDiscoveryProperties();
+                serviceDiscovery = buildServiceDiscovery(zookeeperProperties, discoveryProperties);
+                if (serviceDiscovery != null) {
+                    discoveryMap.putIfAbsent(mark, serviceDiscovery);
+                }
+            }
+        }
+        //pool load
+//        Map<String, String> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
+//        for (Map.Entry<String, String> entry : poolMap.entrySet()) {
+//            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(entry.getValue());
+//            if (serviceDiscovery != null)
+//                discoveryMap.putIfAbsent(entry.getKey(), serviceDiscovery);
+//        }
+        //local preload
+        if (defaultDiscoveryConfigParam != null && defaultDiscoveryConfigParam.isPreLoad() != null
+                && defaultDiscoveryConfigParam.isPreLoad()) {
+            String mark = DEFAULT_SERVICEDISCOVERY;
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
+            if (serviceDiscovery == null) {
+                ZookeeperProperties defaultZookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
+                DiscoveryProperties defaultDiscoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
+                serviceDiscovery = buildServiceDiscovery(defaultZookeeperProperties, defaultDiscoveryProperties);
+                discoveryMap.putIfAbsent(mark, serviceDiscovery);
+            }
+        }
+    }
+
     private ServiceDiscovery<ZookeeperInstance> serviceDiscovery(String serviceId) {
         ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(serviceId);
         if (serviceDiscovery != null) {
@@ -101,19 +138,29 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient {
             DiscoverConfig discoverConfig = gatewayDiscoveryService.discoverConfig(serviceId);
             String mark;
             if (discoverConfig == null) {
+                if (defaultDiscoveryConfigParam == null)
+                    return null;
                 //local properties
                 mark = DEFAULT_SERVICEDISCOVERY;
                 serviceDiscovery = discoveryMap.get(mark);
                 if (serviceDiscovery != null) {
-                    discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+                    ServiceDiscovery<ZookeeperInstance> old = discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+                    if (old == null) {
+                        buildServiceCache(serviceId, serviceDiscovery);
+                    }
                     return serviceDiscovery;
                 }
+                ZookeeperProperties defaultZookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
+                DiscoveryProperties defaultDiscoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
                 serviceDiscovery = buildServiceDiscovery(defaultZookeeperProperties, defaultDiscoveryProperties);
             } else {
                 mark = "." + discoverConfig.getDscrId();
                 serviceDiscovery = discoveryMap.get(mark);
                 if (serviceDiscovery != null) {
-                    discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+                    ServiceDiscovery<ZookeeperInstance> old = discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+                    if (old == null) {
+                        buildServiceCache(serviceId, serviceDiscovery);
+                    }
                     return serviceDiscovery;
                 }
                 DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(discoverConfig);
@@ -124,7 +171,10 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient {
             if (serviceDiscovery == null)
                 return null;
             discoveryMap.putIfAbsent(mark, serviceDiscovery);
-            discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+            ServiceDiscovery<ZookeeperInstance> old = discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
+            if (old == null) {
+                buildServiceCache(serviceId, serviceDiscovery);
+            }
         }
         return discoveryMap.get(serviceId);
     }
@@ -136,23 +186,32 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient {
         ServiceDiscovery<ZookeeperInstance> serviceDiscovery = defaultDiscoveryBuilder.build();
         try {
             serviceDiscovery.start();
+            //cache listen
         } catch (Exception e) {
             logger.error("error create serviceDiscovery for default({})", discoveryProperties.getZkRoot(), e);
             return null;
         }
-        //simple
-        ServiceCache<ZookeeperInstance> serviceCache = serviceDiscovery.serviceCacheBuilder().build();
-        serviceCache.addListener(new ServiceCacheListener() {
-            @Override
-            public void cacheChanged() {
-
-            }
-
-            @Override
-            public void stateChanged(CuratorFramework client, ConnectionState newState) {
-
-            }
-        });
         return serviceDiscovery;
+    }
+
+    private void buildServiceCache(String serviceId, ServiceDiscovery<ZookeeperInstance> serviceDiscovery) {
+        try {
+            ServiceCache<ZookeeperInstance> serviceCache = serviceDiscovery.serviceCacheBuilder().name(serviceId).build();
+            serviceCache.start();
+            serviceCache.addListener(new ServiceCacheListener() {
+                @Override
+                public void cacheChanged() {
+                    logger.warn("节点配置变更");
+                }
+
+                @Override
+                public void stateChanged(CuratorFramework client, ConnectionState newState) {
+                    logger.warn("节点连接状态变更");
+                }
+            });
+        } catch (Exception e) {
+            logger.error("error create servicecache for default({})", serviceId, e);
+        }
+
     }
 }

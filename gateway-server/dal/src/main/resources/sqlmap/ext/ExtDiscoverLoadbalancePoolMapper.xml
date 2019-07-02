@@ -15,4 +15,14 @@
         and lb_mark = #{lbMark}
         limit 1
     </select>
+    <select id="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from discover_loadbalance_pool
+        where is_delete = 0
+        and dscr_id in
+        <foreach item="item" collection="collection" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

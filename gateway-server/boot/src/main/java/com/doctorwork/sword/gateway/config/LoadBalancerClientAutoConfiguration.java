@@ -3,6 +3,7 @@ package com.doctorwork.sword.gateway.config;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
+import com.doctorwork.sword.gateway.loadbalance.param.DiscoveryConfigParam;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,7 +33,14 @@ public class LoadBalancerClientAutoConfiguration {
                                                  GatewayDiscoveryService gatewayDiscoveryService,
                                                  DiscoveryProperties defaultDiscoveryProperties,
                                                  ZookeeperProperties defaultZookeeperProperties) {
-        return new CustomerLoadBalanceClient(gatewayLoadBalanceService, gatewayDiscoveryService,
-                defaultZookeeperProperties, defaultDiscoveryProperties);
+        DiscoveryConfigParam discoveryConfigParam = null;
+        if (defaultDiscoveryProperties != null && defaultZookeeperProperties != null) {
+            discoveryConfigParam = new DiscoveryConfigParam();
+            discoveryConfigParam.setZookeeperProperties(defaultZookeeperProperties);
+            discoveryConfigParam.setDiscoveryProperties(defaultDiscoveryProperties);
+        }
+        CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, gatewayDiscoveryService, discoveryConfigParam);
+        customerLoadBalanceClient.preLoadDiscovery();
+        return customerLoadBalanceClient;
     }
 }
