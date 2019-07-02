@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.loadbalance.param.rule;
 
+import com.doctorwork.sword.gateway.loadbalance.DynamicLoadBalancer;
 import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServer;
-import com.doctorwork.sword.gateway.loadbalance.DatabaseLoadBalancer;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.RoundRobinRule;
@@ -40,7 +40,7 @@ public class WeightRule extends RoundRobinRule {
             logger.warn("no server");
             return null;
         }
-        if (lb instanceof DatabaseLoadBalancer) {
+        if (lb instanceof DynamicLoadBalancer) {
             List<Server> allList = lb.getAllServers();
             int length = allList.size(); // Number of invokers
             int maxWeight = 0; // The maximum weight

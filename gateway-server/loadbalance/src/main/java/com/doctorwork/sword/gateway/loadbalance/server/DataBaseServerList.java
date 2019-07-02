@@ -24,7 +24,7 @@ public class DataBaseServerList extends CustomerServerList<DataBaseServer> {
 
     private GatewayLoadBalanceService gatewayLoadBalanceService;
 
-    public DataBaseServerList(GatewayLoadBalanceService gatewayLoadBalanceService, String serviceId) {
+    public DataBaseServerList(String serviceId, GatewayLoadBalanceService gatewayLoadBalanceService) {
         super(serviceId);
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
     }

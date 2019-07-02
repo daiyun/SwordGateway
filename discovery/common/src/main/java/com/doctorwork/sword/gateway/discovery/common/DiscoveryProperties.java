@@ -1,7 +1,5 @@
 package com.doctorwork.sword.gateway.discovery.common;
 
-import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -47,8 +45,14 @@ public class DiscoveryProperties {
     private ExecutorService executorService;
 
     public DiscoveryProperties() {
-        this.executorService = Executors.newSingleThreadExecutor();
-        this.hostInfo = findFirstNonLoopbackHostInfo();
+    }
+
+    public DiscoveryProperties(boolean findIp) {
+        this();
+        if (findIp) {
+            this.executorService = Executors.newSingleThreadExecutor();
+            this.hostInfo = findFirstNonLoopbackHostInfo();
+        }
     }
 
     public HostInfo getHostInfo() {
@@ -60,7 +64,7 @@ public class DiscoveryProperties {
     }
 
     public String getHost() {
-        if (this.preferIpAddress && StringUtils.hasText(this.hostInfo.getHostname())) {
+        if (this.preferIpAddress) {
             return this.hostInfo.getIpAddress();
         }
         return this.hostInfo.getHostname();

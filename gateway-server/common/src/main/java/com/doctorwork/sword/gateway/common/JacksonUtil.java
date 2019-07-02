@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reflections.Reflections;
@@ -25,6 +26,10 @@ public class JacksonUtil {
 
     private static final class HOLDER {
         private static final ObjectMapper INSTANT = new ObjectMapper();
+
+        static {
+            INSTANT.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        }
     }
 
     public static ObjectMapper getInstance() {

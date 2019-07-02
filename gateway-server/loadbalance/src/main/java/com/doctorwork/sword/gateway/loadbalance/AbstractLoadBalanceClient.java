@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.Server;
 import com.netflix.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -25,6 +27,7 @@ import java.util.*;
  * @Modified By:
  */
 public abstract class AbstractLoadBalanceClient implements LoadBalancerClient {
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractLoadBalanceClient.class);
     private static List<Integer> securePorts = Arrays.asList(443, 8443);
     private static final Map<String, String> unsecureSchemeMapping;
 

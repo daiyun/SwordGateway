@@ -6,4 +6,11 @@
     <sql id="Base_Column_List">
         <include refid="com.doctorwork.sword.gateway.dal.mapper.DiscoverConfigMapper.Base_Column_List"/>
     </sql>
+    <select id="get" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from discover_config
+        where is_delete = 0
+        and dscr_id = #{dscrId}
+    </select>
 </mapper>

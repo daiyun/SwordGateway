@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * @date 2019/6/22
  */
 @JsonTypeName(Constants.LBRULE_BESTAVAILABLE)
-public class BestAvailableRuleParam extends RuleParam{
+public class BestAvailableRuleParam extends RuleParam {
     public BestAvailableRuleParam() {
         super(Constants.LBRULE_BESTAVAILABLE);
     }
