@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * @Author:czq
@@ -30,6 +31,8 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
     volatile ServerList<T> serverListImpl;
 
     volatile ServerListFilter<T> filter;
+
+    private volatile LongAdder count = new LongAdder();
 
     protected final ServerListUpdater.UpdateAction updateAction = new ServerListUpdater.UpdateAction() {
         @Override
@@ -101,6 +104,20 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         startServerListRefreshing();
     }
 
+    @Override
+    public Server chooseServer(Object key) {
+        count.increment();
+        if (rule == null) {
+            return null;
+        } else {
+            try {
+                return rule.choose(key);
+            } catch (Exception e) {
+                logger.warn("LoadBalancer [{}]:  Error choosing server for key {}", name, key, e);
+                return null;
+            }
+        }
+    }
 
     @Override
     public void setServersList(List lsrv) {
@@ -108,8 +125,6 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         List<T> serverList = (List<T>) lsrv;
         Map<String, List<Server>> serversInZones = new HashMap<String, List<Server>>();
         for (Server server : serverList) {
-            // make sure ServerStats is created to avoid creating them on hot
-            // path
             getLoadBalancerStats().getSingleServerStat(server);
             String zone = server.getZone();
             if (zone != null) {
@@ -156,10 +171,6 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
     }
 
     @Override
-    /**
-     * Makes no sense to ping an inmemory disc client
-     *
-     */
     public void forceQuickPing() {
         // no-op
     }
@@ -195,19 +206,11 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         updateAllServerList(servers);
     }
 
-    /**
-     * Update the AllServer list in the LoadBalancer if necessary and enabled
-     *
-     * @param ls
-     */
     protected void updateAllServerList(List<T> ls) {
-        // other threads might be doing this - in which case, we pass
         if (serverListUpdateInProgress.compareAndSet(false, true)) {
             try {
                 for (T s : ls) {
-                    s.setAlive(true); // set so that clients can start using these
-                    // servers right away instead
-                    // of having to wait out the ping cycle.
+                    s.setAlive(true);
                 }
                 setServersList(ls);
                 super.forceQuickPing();

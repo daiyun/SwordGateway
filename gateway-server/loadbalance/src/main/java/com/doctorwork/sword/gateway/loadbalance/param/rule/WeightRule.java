@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.loadbalance.param.rule;
 
-import com.doctorwork.sword.gateway.loadbalance.DataBaseServer;
+import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServer;
 import com.doctorwork.sword.gateway.loadbalance.DatabaseLoadBalancer;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;

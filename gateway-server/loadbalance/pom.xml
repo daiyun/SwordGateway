@@ -34,5 +34,9 @@
             <groupId>com.doctorwork.sword</groupId>
             <artifactId>gateway-server-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.doctorwork.sword</groupId>
+            <artifactId>gateway-discovery-common</artifactId>
+        </dependency>
     </dependencies>
 </project>

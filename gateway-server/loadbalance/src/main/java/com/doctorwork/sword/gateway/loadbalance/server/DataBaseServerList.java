@@ -1,4 +1,4 @@
-package com.doctorwork.sword.gateway.loadbalance;
+package com.doctorwork.sword.gateway.loadbalance.server;
 
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceServer;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,45 +20,42 @@ import java.util.stream.Collectors;
  * @Date: 10:04 2019/6/18
  * @Modified By:
  */
-public class DataBaseServerList extends AbstractServerList<DataBaseServer> {
+public class DataBaseServerList extends CustomerServerList<DataBaseServer> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataBaseServerList.class);
-
-    private String serviceId;
     private GatewayLoadBalanceService gatewayLoadBalanceService;
 
     public DataBaseServerList(GatewayLoadBalanceService gatewayLoadBalanceService, String serviceId) {
+        super(serviceId);
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
-        this.serviceId = serviceId;
-    }
-
-    @Override
-    public void initWithNiwsConfig(IClientConfig clientConfig) {
-        this.serviceId = clientConfig.getClientName();
     }
 
     @Override
     public List<DataBaseServer> getInitialListOfServers() {
         List<DataBaseServer> dataBaseServers = getServers(this.gatewayLoadBalanceService);
-        logger.info("初始化负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", serviceId, dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
+        logger.info("获取初始化DB负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", getServiceId(), dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
         return dataBaseServers;
     }
 
     @Override
     public List<DataBaseServer> getUpdatedListOfServers() {
         List<DataBaseServer> dataBaseServers = getServers(this.gatewayLoadBalanceService);
-        logger.info("更新负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", serviceId, dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
+        logger.info("获取更新DB负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", getServiceId(), dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
         return dataBaseServers;
     }
 
     @SuppressWarnings("unchecked")
     protected List<DataBaseServer> getServers(GatewayLoadBalanceService gatewayLoadBalanceService) {
         try {
-            List<LoadbalanceServer> servers = gatewayLoadBalanceService.loadBalanceServers(this.serviceId);
+            List<LoadbalanceServer> servers = gatewayLoadBalanceService.loadBalanceServers(getServiceId());
             if (CollectionUtils.isEmpty(servers)) {
                 return Collections.emptyList();
             }
-            return servers.stream().map(loadbalanceServer -> new DataBaseServer(loadbalanceServer)).collect(Collectors.toList());
+            List<DataBaseServer> list = new ArrayList<>();
+            for (LoadbalanceServer loadbalanceServer : servers) {
+                DataBaseServer dataBaseServer = new DataBaseServer(loadbalanceServer);
+                list.add(dataBaseServer);
+            }
+            return list;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

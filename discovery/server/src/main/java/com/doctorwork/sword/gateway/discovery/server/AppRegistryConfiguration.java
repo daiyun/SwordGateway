@@ -33,12 +33,13 @@ public class AppRegistryConfiguration {
     private AtomicInteger port = new AtomicInteger(0);
 
     public AppRegistryConfiguration(ServiceDiscovery<ZookeeperInstance> serviceDiscovery, DiscoveryProperties discoveryProperties) {
-        ZookeeperInstance zookeeperInstance = new ZookeeperInstance(UUID.randomUUID().toString().replaceAll("-", ""), "test", discoveryProperties.getMetadata());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(Constants.META_INF_APP_PROPERTIES);
         String appId = findAppProperties(inputStream);
         if (!StringUtils.isEmpty(appId)) {
             discoveryProperties.setAppName(appId);
         }
+        ZookeeperInstance zookeeperInstance = new ZookeeperInstance(UUID.randomUUID().toString().replaceAll("-", ""),
+                discoveryProperties.getAppName(), discoveryProperties.getMetadata());
         AppInstanceRegistration.RegistrationBuilder builder = AppInstanceRegistration.builder()
                 .address(discoveryProperties.getHost())
                 .name(discoveryProperties.getAppName())

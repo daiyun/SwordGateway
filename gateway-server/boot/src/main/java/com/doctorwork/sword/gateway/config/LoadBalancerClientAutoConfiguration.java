@@ -2,7 +2,7 @@ package com.doctorwork.sword.gateway.config;
 
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.loadbalance.AbstractLoadBalanceClient;
-import com.doctorwork.sword.gateway.loadbalance.DataBaseServerList;
+import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServerList;
 import com.doctorwork.sword.gateway.loadbalance.DynamicLoadBalancer;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
 import com.netflix.loadbalancer.ILoadBalancer;

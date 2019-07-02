@@ -1,7 +1,8 @@
-package com.doctorwork.sword.gateway.loadbalance;
+package com.doctorwork.sword.gateway.loadbalance.server;
 
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceServer;
-import com.netflix.loadbalancer.Server;
+
+import java.util.Objects;
 
 /**
  * @Author:czq
@@ -9,15 +10,13 @@ import com.netflix.loadbalancer.Server;
  * @Date: 18:43 2019/6/10
  * @Modified By:
  */
-public class DataBaseServer extends Server {
-    private final MetaInfo metaInfo;
+public class DataBaseServer extends AbstractServer {
+
     private final LoadbalanceServer loadbalanceServer;
 
     public DataBaseServer(LoadbalanceServer loadbalanceServer) {
         // TODO: ssl support
-        super(loadbalanceServer.getSrvIp(), loadbalanceServer.getSrvPort());
-        this.loadbalanceServer = loadbalanceServer;
-        this.metaInfo = new MetaInfo() {
+        super(loadbalanceServer.getSrvIp(), loadbalanceServer.getSrvPort(), new MetaInfo() {
             @Override
             public String getAppName() {
                 return loadbalanceServer.getApolloId();
@@ -37,14 +36,11 @@ public class DataBaseServer extends Server {
             public String getInstanceId() {
                 return String.valueOf(loadbalanceServer.getSrvId());
             }
-        };
+        });
+        this.loadbalanceServer = loadbalanceServer;
     }
 
     @Override
-    public MetaInfo getMetaInfo() {
-        return this.metaInfo;
-    }
-
     public Integer weight() {
         Integer weight = loadbalanceServer.getSrvWeight();
         return weight == null ? 0 : weight;
