@@ -49,34 +49,39 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
             if (zookeeperServerList != null) {
                 zookeeperServers = zookeeperServerList.getInitialListOfServers();
             }
+            //如果都配置了则以服务发现列表为准
             if (CollectionUtils.isEmpty(dataBaseServers)) {
                 if (!CollectionUtils.isEmpty(zookeeperServers)) {
                     servers.addAll(zookeeperServers);
                     return servers;
                 }
-            } else if (CollectionUtils.isEmpty(zookeeperServers)) {
-                if (!CollectionUtils.isEmpty(dataBaseServers)) {
-                    servers.addAll(dataBaseServers);
-                    return servers;
-                }
+            }
+            else if (CollectionUtils.isEmpty(zookeeperServers)) {
+//                if (!CollectionUtils.isEmpty(dataBaseServers)) {
+//                    servers.addAll(dataBaseServers);
+//                    return servers;
+//                }
+                return Collections.emptyList();
             } else {
-                for (DataBaseServer dataBaseServer : dataBaseServers) {
-                    boolean flag = true;
-                    for (ZookeeperServer zookeeperServer : zookeeperServers) {
-                        if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
-                            flag = false;
-                            CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
-                            servers.add(compositiveServer);
-                        }
-                    }
-                    if (flag)
-                        servers.add(dataBaseServer);
-                }
+//                for (DataBaseServer dataBaseServer : dataBaseServers) {
+//                    boolean flag = true;
+//                    for (ZookeeperServer zookeeperServer : zookeeperServers) {
+//                        if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
+//                            flag = false;
+//                            CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
+//                            servers.add(compositiveServer);
+//                        }
+//                    }
+//                    if (flag)
+//                        servers.add(dataBaseServer);
+//                }
                 for (ZookeeperServer zookeeperServer : zookeeperServers) {
                     boolean flag = true;
                     for (DataBaseServer dataBaseServer : dataBaseServers) {
                         if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
                             flag = false;
+                            CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
+                            servers.add(compositiveServer);
                         }
                     }
                     if (flag)
