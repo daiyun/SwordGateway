@@ -4,6 +4,8 @@ import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.discovery.common.AppStatusEnum;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
+import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
+import com.doctorwork.sword.gateway.loadbalance.ServiceDiscoveryWrapper;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.StringUtils;
@@ -23,11 +25,11 @@ import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
  */
 public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
-    private final ServiceDiscovery<ZookeeperInstance> serviceDiscovery;
+    private final ServiceDiscoveryWrapper serviceDiscoveryWrapper;
 
-    public ZookeeperServerList(String serviceId, ServiceDiscovery<ZookeeperInstance> serviceDiscovery) {
+    public ZookeeperServerList(String serviceId, ServiceDiscoveryWrapper serviceDiscoveryWrapper) {
         super(serviceId);
-        this.serviceDiscovery = serviceDiscovery;
+        this.serviceDiscoveryWrapper = serviceDiscoveryWrapper;
     }
 
     @Override
@@ -46,10 +48,11 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     protected List<ZookeeperServer> getServers() {
         try {
-            if (this.serviceDiscovery == null) {
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = serviceDiscoveryWrapper.serviceDiscovery();
+            if (serviceDiscovery == null) {
                 return Collections.emptyList();
             }
-            Collection<ServiceInstance<ZookeeperInstance>> instances = this.serviceDiscovery
+            Collection<ServiceInstance<ZookeeperInstance>> instances = serviceDiscovery
                     .queryForInstances(getServiceId());
             if (instances == null || instances.isEmpty()) {
                 return Collections.emptyList();

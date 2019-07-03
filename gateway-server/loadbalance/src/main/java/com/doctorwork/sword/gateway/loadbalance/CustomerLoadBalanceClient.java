@@ -17,11 +17,9 @@ import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.Server;
 import com.netflix.loadbalancer.ServerList;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.x.discovery.ServiceCache;
 import org.apache.curator.x.discovery.ServiceDiscovery;
-import org.apache.curator.x.discovery.details.ServiceCacheListener;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,10 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date: 19:27 2019/7/2
  * @Modified By:
  */
-public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient implements IDiscoveryRepository<ServiceDiscovery<ZookeeperInstance>> {
+public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient implements IDiscoveryRepository {
 
     private final Map<String, ILoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
     private final Map<String, ServiceDiscovery<ZookeeperInstance>> discoveryMap = new ConcurrentHashMap<>();
+    private final Map<String, ServiceDiscoveryWrapper> discoveryWrapperMap = new ConcurrentHashMap<>();
     private static final String DEFAULT_SERVICEDISCOVERY = ".default";
 
     private GatewayLoadBalanceService gatewayLoadBalanceService;
@@ -71,9 +70,9 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 if (loadbalanceInfo.getDscrEnable() == null || loadbalanceInfo.getDscrEnable().equals(0)) {
                     serverList = new DataBaseServerList(serviceId, gatewayLoadBalanceService);
                 } else {
-                    ServiceDiscovery<ZookeeperInstance> serviceDiscovery = this.get(serviceId);
+                    ServiceDiscoveryWrapper wrapper = this.serviceWrapper(serviceId);
                     serverList = new CompositiveServerList(serviceId, new DataBaseServerList(serviceId, gatewayLoadBalanceService),
-                            new ZookeeperServerList(serviceId, serviceDiscovery));
+                            new ZookeeperServerList(serviceId, wrapper));
                 }
                 DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
                 dynamicLoadBalancer.init(loadbalanceInfo);
@@ -85,44 +84,27 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
     }
 
     public void preLoadDiscovery() {
-        logger.info("预加载服务发现配置");
         List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
-        //db preload
-        for (DiscoverConfig discoverConfig : preLoadList) {
-            String mark = ".".concat(discoverConfig.getDscrId());
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
-            if (serviceDiscovery == null) {
-                DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(discoverConfig);
-                ZookeeperProperties zookeeperProperties = discoveryConfigParam.getZookeeperProperties();
-                DiscoveryProperties discoveryProperties = discoveryConfigParam.getDiscoveryProperties();
-                serviceDiscovery = buildServiceDiscovery(zookeeperProperties, discoveryProperties);
-                if (serviceDiscovery != null) {
-                    discoveryMap.putIfAbsent(mark, serviceDiscovery);
-                }
-            }
-        }
-        //pool load
-        Map<String, String> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
-        for (Map.Entry<String, String> entry : poolMap.entrySet()) {
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(".".concat(entry.getValue()));
-            if (serviceDiscovery != null) {
-                ServiceDiscovery<ZookeeperInstance> tmp = discoveryMap.putIfAbsent(entry.getKey(), serviceDiscovery);
-                if (tmp == null) {
-                    buildServiceCache(entry.getKey(), serviceDiscovery);
-                }
-            }
+        //pre load
+        Map<String, DiscoverConfig> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
+        for (Map.Entry<String, DiscoverConfig> entry : poolMap.entrySet()) {
+            logger.info("pre load service discovery config for {}", entry.getKey());
+            loadService(entry.getKey(), entry.getValue());
         }
         //local preload
-        if (defaultDiscoveryConfigParam != null && defaultDiscoveryConfigParam.isPreLoad() != null
-                && defaultDiscoveryConfigParam.isPreLoad()) {
-            String mark = DEFAULT_SERVICEDISCOVERY;
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
-            if (serviceDiscovery == null) {
-                ZookeeperProperties defaultZookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
-                DiscoveryProperties defaultDiscoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
-                serviceDiscovery = buildServiceDiscovery(defaultZookeeperProperties, defaultDiscoveryProperties);
-                if (serviceDiscovery != null) {
-                    discoveryMap.putIfAbsent(mark, serviceDiscovery);
+        synchronized (discoveryMap) {
+            if (defaultDiscoveryConfigParam != null && defaultDiscoveryConfigParam.isPreLoad() != null
+                    && defaultDiscoveryConfigParam.isPreLoad()) {
+                logger.info("pre load service discovery config for local");
+                String mark = DEFAULT_SERVICEDISCOVERY;
+                ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
+                if (serviceDiscovery == null) {
+                    ZookeeperProperties defaultZookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
+                    DiscoveryProperties defaultDiscoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
+                    serviceDiscovery = buildServiceDiscovery(defaultZookeeperProperties, defaultDiscoveryProperties);
+                    if (serviceDiscovery != null) {
+                        discoveryMap.putIfAbsent(mark, serviceDiscovery);
+                    }
                 }
             }
         }
@@ -143,82 +125,136 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         return serviceDiscovery;
     }
 
-    private void buildServiceCache(String serviceId, ServiceDiscovery<ZookeeperInstance> serviceDiscovery) {
-        try {
-            ServiceCache<ZookeeperInstance> serviceCache = serviceDiscovery.serviceCacheBuilder().name(serviceId).build();
-            serviceCache.start();
-            serviceCache.addListener(new ServiceCacheListener() {
-                @Override
-                public void cacheChanged() {
-                    logger.warn("节点配置变更");
-                }
-
-                @Override
-                public void stateChanged(CuratorFramework client, ConnectionState newState) {
-                    logger.warn("节点连接状态变更");
-                }
-            });
-        } catch (Exception e) {
-            logger.error("error create servicecache for default({})", serviceId, e);
+    @Override
+    public ServiceDiscoveryWrapper serviceWrapper(String serviceId) {
+        ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryWrapperMap.get(serviceId);
+        if (serviceDiscoveryWrapper != null)
+            return serviceDiscoveryWrapper;
+        synchronized (discoveryWrapperMap) {
+            //double check
+            serviceDiscoveryWrapper = discoveryWrapperMap.get(serviceId);
+            if (serviceDiscoveryWrapper != null)
+                return serviceDiscoveryWrapper;
+            ServiceDiscoveryWrapper wrapper = new ServiceDiscoveryWrapper(serviceId, null, this);
+            discoveryWrapperMap.put(serviceId, wrapper);
+            return serviceDiscoveryWrapper;
         }
-
     }
 
     @Override
-    public ServiceDiscovery<ZookeeperInstance> get(String serviceId) {
-        return discoveryMap.get(serviceId);
+    public ServiceDiscovery<ZookeeperInstance> serviceDisovery(String serviceId) {
+        ServiceDiscoveryWrapper wrapper = serviceWrapper(serviceId);
+        if (wrapper == null)
+            return null;
+        return discoveryMap.get(wrapper.getDscrMapKey());
     }
 
     @Override
-    public void load(String serviceId) {
-        ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(serviceId);
-        if (serviceDiscovery != null) {
-            return;
-        }
-        synchronized (discoveryMap) {
-            serviceDiscovery = discoveryMap.get(serviceId);
-            if (serviceDiscovery != null)
+    public void reload() {
+        //is necessary?
+    }
+
+    @Override
+    public void loadService(String serviceId, DiscoverConfig discoverConfig) {
+        DiscoverConfig config = discoverConfig;
+        if (discoverConfig == null)
+            config = gatewayDiscoveryService.serviceTodiscoverConfig(serviceId);
+        ZookeeperProperties zookeeperProperties;
+        DiscoveryProperties discoveryProperties;
+        String mark;
+        if (config == null) {
+            if (defaultDiscoveryConfigParam == null)
                 return;
-            //to set the default value
-            discoveryMap.putIfAbsent(serviceId, null);
-            DiscoverConfig discoverConfig = gatewayDiscoveryService.discoverConfig(serviceId);
-            String mark;
-            ZookeeperProperties zookeeperProperties;
-            DiscoveryProperties discoveryProperties;
-            if (discoverConfig == null) {
-                if (defaultDiscoveryConfigParam == null)
-                    return;
-                //local properties
-                mark = DEFAULT_SERVICEDISCOVERY;
-                zookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
-                discoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
+            //local properties
+            mark = DEFAULT_SERVICEDISCOVERY;
+            zookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
+            discoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
+        } else {
+            mark = "." + config.getDscrId();
+            DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(config);
+            zookeeperProperties = discoveryConfigParam.getZookeeperProperties();
+            discoveryProperties = discoveryConfigParam.getDiscoveryProperties();
+        }
+        ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryMap.get(mark);
+        if (serviceDiscovery == null) {
+            synchronized (discoveryMap) {
+                //double check
+                serviceDiscovery = discoveryMap.get(mark);
+                if (serviceDiscovery == null) {
+                    serviceDiscovery = buildServiceDiscovery(zookeeperProperties, discoveryProperties);
+                    if (serviceDiscovery == null) {
+                        logger.warn("service discovery for {} can not be created", mark);
+                        return;
+                    }
+                    discoveryMap.put(mark, serviceDiscovery);
+                }
+            }
+        }
+        synchronized (discoveryWrapperMap) {
+            ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryWrapperMap.get(serviceId);
+            if (serviceDiscoveryWrapper == null) {
+                ServiceDiscoveryWrapper saveWrapper = new ServiceDiscoveryWrapper(serviceId, mark, this);
+                discoveryWrapperMap.put(serviceId, saveWrapper);
             } else {
-                mark = "." + discoverConfig.getDscrId();
-                DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(discoverConfig);
-                zookeeperProperties = discoveryConfigParam.getZookeeperProperties();
-                discoveryProperties = discoveryConfigParam.getDiscoveryProperties();
+                serviceDiscoveryWrapper.reload(mark);
             }
-            serviceDiscovery = discoveryMap.get(mark);
-            if (serviceDiscovery != null) {
-                ServiceDiscovery<ZookeeperInstance> old = discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
-                if (old == null) {
-                    buildServiceCache(serviceId, serviceDiscovery);
+        }
+    }
+
+    @Override
+    public void loadDiscovery(String dscrId, DiscoverConfig discoverConfig) throws IOException {
+        DiscoverConfig config = discoverConfig;
+        if (discoverConfig == null)
+            config = gatewayDiscoveryService.discoverConfig(dscrId);
+        ZookeeperProperties zookeeperProperties;
+        DiscoveryProperties discoveryProperties;
+        String mark;
+        if (config == null) {
+            if (defaultDiscoveryConfigParam == null)
+                return;
+            //local properties
+            mark = DEFAULT_SERVICEDISCOVERY;
+            zookeeperProperties = defaultDiscoveryConfigParam.getZookeeperProperties();
+            discoveryProperties = defaultDiscoveryConfigParam.getDiscoveryProperties();
+        } else {
+            mark = "." + config.getDscrId();
+            DiscoveryConfigParam discoveryConfigParam = DiscoveryConfigParam.build(config);
+            zookeeperProperties = discoveryConfigParam.getZookeeperProperties();
+            discoveryProperties = discoveryConfigParam.getDiscoveryProperties();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("LOCK----").append(dscrId);
+        synchronized (sb.toString().intern()) {
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = buildServiceDiscovery(zookeeperProperties, discoveryProperties);
+            if (serviceDiscovery == null) {
+                logger.warn("service discovery for {} can not be created", dscrId);
+                return;
+            }
+            ServiceDiscovery<ZookeeperInstance> old = discoveryMap.get(mark);
+            discoveryMap.put(mark, serviceDiscovery);
+            for (ServiceDiscoveryWrapper wrapper : discoveryWrapperMap.values()) {
+                if(mark.equals(wrapper.getDscrMapKey())){
+                    wrapper.reloadCache();
                 }
-                return;
             }
-            serviceDiscovery = buildServiceDiscovery(zookeeperProperties, discoveryProperties);
-            if (serviceDiscovery == null)
-                return;
-            discoveryMap.putIfAbsent(mark, serviceDiscovery);
-            ServiceDiscovery<ZookeeperInstance> old = discoveryMap.putIfAbsent(serviceId, serviceDiscovery);
-            if (old == null) {
-                buildServiceCache(serviceId, serviceDiscovery);
+            if (old != null) {
+                old.close();
             }
         }
     }
 
     @Override
     public void delete(String serviceId) {
-
+        ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryWrapperMap.get(serviceId);
+        if (serviceDiscoveryWrapper == null)
+            return;
+        synchronized (discoveryWrapperMap) {
+            //double check
+            ServiceDiscoveryWrapper wrapper = discoveryWrapperMap.get(serviceId);
+            if (wrapper == null)
+                return;
+            wrapper.clear();
+            discoveryWrapperMap.remove(serviceId);
+        }
     }
 }
