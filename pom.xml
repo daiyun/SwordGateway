@@ -18,6 +18,7 @@
         <module>gateway-server/dal</module>
         <module>gateway-server/core</module>
         <module>gateway-server/boot</module>
+        <module>gateway-server/discovery</module>
         <module>gateway-server/loadbalance</module>
     </modules>
 

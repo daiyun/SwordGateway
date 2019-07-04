@@ -41,7 +41,7 @@ public class RespositoryManagerApi implements IRespositoryManagerApi {
     }
 
     @Override
-    public void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository) {
+    public void connectionLoad(String registryId) {
         executors.submit(new Runnable() {
             @Override
             public void run() {

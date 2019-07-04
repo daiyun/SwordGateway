@@ -68,8 +68,7 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
         try {
             old = connectionWrapperMap.get(registryId);
             connectionWrapperMap.put(registryId, connectionWrapper);
-            if (old != null)
-                discoveryRepository.loadRegistry(registryId);
+            discoveryRepository.loadRegistry(registryId);
         } catch (Exception e) {
             logger.info("error happened while connectionLoad regitry for {}", registryId, e);
         } finally {

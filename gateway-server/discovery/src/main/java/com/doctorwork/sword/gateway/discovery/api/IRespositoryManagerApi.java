@@ -1,6 +1,5 @@
 package com.doctorwork.sword.gateway.discovery.api;
 
-import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 
@@ -11,7 +10,7 @@ import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper
  * @Modified By:
  */
 public interface IRespositoryManagerApi {
-    void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository);
+    void connectionLoad(String registryId);
 
     void connectionClose(String registryId);
 
