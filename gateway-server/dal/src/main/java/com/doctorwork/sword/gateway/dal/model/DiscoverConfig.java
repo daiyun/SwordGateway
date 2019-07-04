@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-02
+ * @since 2019-07-04
  */
 public class DiscoverConfig implements Serializable {
     /**
@@ -51,11 +51,11 @@ public class DiscoverConfig implements Serializable {
 
     /**
      * <pre>
-     * 注册中心配置
-     * This field corresponds to the database column <tt>discover_config.dscr_regitry_config<tt>
+     * 注册中心配置标识
+     * This field corresponds to the database column <tt>discover_config.dscr_regitry_id<tt>
      * </pre>
      */
-    private String dscrRegitryConfig;
+    private String dscrRegitryId;
 
     /**
      * <pre>
@@ -182,24 +182,24 @@ public class DiscoverConfig implements Serializable {
 
     /**
      * <pre>
-     * This field corresponds to the database column <tt>discover_config.dscr_regitry_config<tt>
+     * This field corresponds to the database column <tt>discover_config.dscr_regitry_id<tt>
      * </pre>
      *
-     * @return 注册中心配置
+     * @return 注册中心配置标识
      */
-    public String getDscrRegitryConfig() {
-        return dscrRegitryConfig;
+    public String getDscrRegitryId() {
+        return dscrRegitryId;
     }
 
     /**
      * <pre>
-     * This field corresponds to the database column <tt>discover_config.dscr_regitry_config<tt>
+     * This field corresponds to the database column <tt>discover_config.dscr_regitry_id<tt>
      * </pre>
      *
-     * @param dscrRegitryConfig 注册中心配置
+     * @param dscrRegitryId 注册中心配置标识
      */
-    public void setDscrRegitryConfig(String dscrRegitryConfig) {
-        this.dscrRegitryConfig = dscrRegitryConfig == null ? null : dscrRegitryConfig.trim();
+    public void setDscrRegitryId(String dscrRegitryId) {
+        this.dscrRegitryId = dscrRegitryId == null ? null : dscrRegitryId.trim();
     }
 
     /**
@@ -303,7 +303,7 @@ public class DiscoverConfig implements Serializable {
         sb.append(", dscrId=").append(dscrId);
         sb.append(", dscrType=").append(dscrType);
         sb.append(", dscrConfig=").append(dscrConfig);
-        sb.append(", dscrRegitryConfig=").append(dscrRegitryConfig);
+        sb.append(", dscrRegitryId=").append(dscrRegitryId);
         sb.append(", dscrPreloadEnable=").append(dscrPreloadEnable);
         sb.append(", isDelete=").append(isDelete);
         sb.append(", gmtCreate=").append(gmtCreate);
@@ -332,7 +332,7 @@ public class DiscoverConfig implements Serializable {
             && (this.getDscrId() == null ? other.getDscrId() == null : this.getDscrId().equals(other.getDscrId()))
             && (this.getDscrType() == null ? other.getDscrType() == null : this.getDscrType().equals(other.getDscrType()))
             && (this.getDscrConfig() == null ? other.getDscrConfig() == null : this.getDscrConfig().equals(other.getDscrConfig()))
-            && (this.getDscrRegitryConfig() == null ? other.getDscrRegitryConfig() == null : this.getDscrRegitryConfig().equals(other.getDscrRegitryConfig()))
+            && (this.getDscrRegitryId() == null ? other.getDscrRegitryId() == null : this.getDscrRegitryId().equals(other.getDscrRegitryId()))
             && (this.getDscrPreloadEnable() == null ? other.getDscrPreloadEnable() == null : this.getDscrPreloadEnable().equals(other.getDscrPreloadEnable()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
             && (this.getGmtCreate() == null ? other.getGmtCreate() == null : this.getGmtCreate().equals(other.getGmtCreate()))
@@ -350,7 +350,7 @@ public class DiscoverConfig implements Serializable {
         result = prime * result + ((getDscrId() == null) ? 0 : getDscrId().hashCode());
         result = prime * result + ((getDscrType() == null) ? 0 : getDscrType().hashCode());
         result = prime * result + ((getDscrConfig() == null) ? 0 : getDscrConfig().hashCode());
-        result = prime * result + ((getDscrRegitryConfig() == null) ? 0 : getDscrRegitryConfig().hashCode());
+        result = prime * result + ((getDscrRegitryId() == null) ? 0 : getDscrRegitryId().hashCode());
         result = prime * result + ((getDscrPreloadEnable() == null) ? 0 : getDscrPreloadEnable().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getGmtCreate() == null) ? 0 : getGmtCreate().hashCode());

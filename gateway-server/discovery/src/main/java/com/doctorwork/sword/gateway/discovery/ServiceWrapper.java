@@ -1,7 +1,8 @@
-package com.doctorwork.sword.gateway.loadbalance;
+package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
+import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.x.discovery.ServiceCache;
@@ -16,16 +17,16 @@ import java.io.IOException;
  * @author chenzhiqiang
  * @date 2019/7/3
  */
-public class ServiceDiscoveryWrapper {
+public class ServiceWrapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServiceDiscoveryWrapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceWrapper.class);
 
     private String serviceId;
     private String dscrMapKey;
     private ServiceCache<ZookeeperInstance> serviceCache;
     private IDiscoveryRepository iDiscoveryRepository;
 
-    public ServiceDiscoveryWrapper(String serviceId, String dscrMapKey, IDiscoveryRepository iDiscoveryRepository) {
+    public ServiceWrapper(String serviceId, String dscrMapKey, IDiscoveryRepository iDiscoveryRepository) {
         if (StringUtils.isEmpty(serviceId) || iDiscoveryRepository == null)
             throw new RuntimeException("serviceId or IDiscoveryRepository must not be null");
         this.serviceId = serviceId;
@@ -35,19 +36,20 @@ public class ServiceDiscoveryWrapper {
     }
 
     private void buildServiceCache() {
-        if(serviceCache != null){
+        if (serviceCache != null) {
             try {
                 serviceCache.close();
             } catch (IOException e) {
                 logger.error("error close servicecache for {}", serviceId, e);
             }
         }
-        ServiceDiscovery<ZookeeperInstance> serviceDiscovery = serviceDiscovery();
-        if (serviceDiscovery == null) {
+        ServiceDiscoveryWrapper serviceDiscoveryWrapper = serviceDiscovery();
+        if (serviceDiscoveryWrapper == null) {
             logger.error("service[{}] discovery cache build failed,because the service discovery is null", this.serviceId);
             return;
         }
         try {
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = (ServiceDiscovery<ZookeeperInstance>) serviceDiscoveryWrapper.getServiceDiscovery();
             ServiceCache<ZookeeperInstance> serviceCache = serviceDiscovery.serviceCacheBuilder().name(serviceId).build();
             serviceCache.start();
             serviceCache.addListener(new ServiceCacheListener() {
@@ -68,11 +70,14 @@ public class ServiceDiscoveryWrapper {
     }
 
     public void reload(String dscrMapKey) {
+        String oldMapKey = this.dscrMapKey;
+        logger.info("reload servicewrapper from {} to {}", oldMapKey, dscrMapKey);
         this.dscrMapKey = dscrMapKey;
         this.buildServiceCache();
     }
 
     public void reloadCache() {
+        logger.info("reload servicewrapper cache for {}", dscrMapKey);
         this.buildServiceCache();
     }
 
@@ -80,8 +85,8 @@ public class ServiceDiscoveryWrapper {
         return dscrMapKey;
     }
 
-    public ServiceDiscovery<ZookeeperInstance> serviceDiscovery() {
-        return iDiscoveryRepository.serviceDisovery(this.serviceId);
+    public ServiceDiscoveryWrapper serviceDiscovery() {
+        return iDiscoveryRepository.serviceDisovery(this);
     }
 
     public void clear() {

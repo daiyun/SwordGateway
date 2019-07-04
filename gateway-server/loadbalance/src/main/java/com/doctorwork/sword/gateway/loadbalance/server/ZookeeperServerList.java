@@ -1,15 +1,16 @@
 package com.doctorwork.sword.gateway.loadbalance.server;
 
 import com.doctorwork.sword.gateway.common.JacksonUtil;
+import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.common.AppStatusEnum;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
-import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
-import com.doctorwork.sword.gateway.loadbalance.ServiceDiscoveryWrapper;
+import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.StringUtils;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,11 +26,11 @@ import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
  */
 public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
-    private final ServiceDiscoveryWrapper serviceDiscoveryWrapper;
+    private final ServiceWrapper serviceWrapper;
 
-    public ZookeeperServerList(String serviceId, ServiceDiscoveryWrapper serviceDiscoveryWrapper) {
+    public ZookeeperServerList(String serviceId, ServiceWrapper serviceWrapper) {
         super(serviceId);
-        this.serviceDiscoveryWrapper = serviceDiscoveryWrapper;
+        this.serviceWrapper = serviceWrapper;
     }
 
     @Override
@@ -48,10 +49,12 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     protected List<ZookeeperServer> getServers() {
         try {
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = serviceDiscoveryWrapper.serviceDiscovery();
-            if (serviceDiscovery == null) {
+            ServiceDiscoveryWrapper serviceDiscoveryWrapper = serviceWrapper.serviceDiscovery();
+            Closeable discovery = serviceDiscoveryWrapper.getServiceDiscovery();
+            if (discovery == null) {
                 return Collections.emptyList();
             }
+            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = (ServiceDiscovery<ZookeeperInstance>) discovery;
             Collection<ServiceInstance<ZookeeperInstance>> instances = serviceDiscovery
                     .queryForInstances(getServiceId());
             if (instances == null || instances.isEmpty()) {

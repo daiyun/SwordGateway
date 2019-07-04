@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>com.doctorwork.sword</groupId>
-            <artifactId>gateway-discovery-common</artifactId>
+            <artifactId>gateway-server-discovery</artifactId>
         </dependency>
     </dependencies>
 </project>

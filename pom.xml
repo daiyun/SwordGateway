@@ -86,6 +86,11 @@
                 <artifactId>gateway-discovery-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.doctorwork.sword</groupId>
+                <artifactId>gateway-server-discovery</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!--redis-->
             <!--<dependency>-->
                 <!--<groupId>org.springframework.data</groupId>-->
