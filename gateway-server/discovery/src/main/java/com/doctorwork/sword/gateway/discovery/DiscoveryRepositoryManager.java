@@ -29,7 +29,6 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
     private final Map<String, ServiceDiscoveryWrapper> discoveryMap = new ConcurrentHashMap<>();
     private final Map<String, ServiceWrapper> serviceWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_SERVICEDISCOVERY = "default";
-    private final AtomicBoolean updateFlag = new AtomicBoolean(false);
 
     public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IDiscoveryConnectionRepository discoveryConnectionRepository) {
         this.gatewayDiscoveryService = gatewayDiscoveryService;
@@ -103,22 +102,15 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
             return;
         }
         mark = "." + config.getDscrId();
-        if (!updateFlag.compareAndSet(false, true)) {
-            return;
-        }
-        try {
 //                synchronized (serviceWrapperMap) {
-            ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
-            if (serviceWrapper == null) {
-                ServiceWrapper saveWrapper = new ServiceWrapper(serviceId, mark, this);
-                serviceWrapperMap.put(serviceId, saveWrapper);
-            } else {
-                serviceWrapper.reload(mark);
-            }
-//                }
-        } finally {
-            updateFlag.set(false);
+        ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
+        if (serviceWrapper == null) {
+            ServiceWrapper saveWrapper = new ServiceWrapper(serviceId, mark, this);
+            serviceWrapperMap.put(serviceId, saveWrapper);
+        } else {
+            serviceWrapper.reload(mark);
         }
+//                }
     }
 
     @Override
@@ -139,31 +131,23 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
         mark = ".".concat(dscrId);
         if (discoveryConfig == null)
             discoveryConfig = DiscoveryConfig.build(config);
-        if (!updateFlag.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            synchronized (("LOCK----" + dscrId).intern()) {
-                ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryConfig.buildServiceDiscovery(discoveryConnectionRepository);
-                if (serviceDiscoveryWrapper == null) {
-                    logger.warn("service discovery for {} can not be created", dscrId);
-                    return;
-                }
-                ServiceDiscoveryWrapper old = discoveryMap.get(mark);
-                discoveryMap.put(mark, serviceDiscoveryWrapper);
-                for (ServiceWrapper wrapper : serviceWrapperMap.values()) {
-                    if (mark.equals(wrapper.getDscrMapKey())) {
-                        wrapper.reloadCache();
-                    }
-                }
-                if (old != null) {
-                    old.close();
+        synchronized (("LOCK----" + dscrId).intern()) {
+            ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryConfig.buildServiceDiscovery(discoveryConnectionRepository);
+            if (serviceDiscoveryWrapper == null) {
+                logger.warn("service discovery for {} can not be created", dscrId);
+                return;
+            }
+            ServiceDiscoveryWrapper old = discoveryMap.get(mark);
+            discoveryMap.put(mark, serviceDiscoveryWrapper);
+            for (ServiceWrapper wrapper : serviceWrapperMap.values()) {
+                if (mark.equals(wrapper.getDscrMapKey())) {
+                    wrapper.reloadCache();
                 }
             }
-        } finally {
-            updateFlag.set(false);
+            if (old != null) {
+                old.close();
+            }
         }
-
 
     }
 
@@ -172,17 +156,10 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
     public void loadRegistry(String registryId) throws Exception {
         if (StringUtils.isEmpty(registryId))
             return;
-        if (!updateFlag.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            for (ServiceDiscoveryWrapper discoveryWrapper : discoveryMap.values()) {
-                if (registryId.equals(discoveryWrapper.getConnectionId())) {
-                    this.loadDiscovery(discoveryWrapper.getId(), null);
-                }
+        for (ServiceDiscoveryWrapper discoveryWrapper : discoveryMap.values()) {
+            if (registryId.equals(discoveryWrapper.getConnectionId())) {
+                this.loadDiscovery(discoveryWrapper.getId(), null);
             }
-        } finally {
-            updateFlag.set(false);
         }
     }
 
@@ -191,20 +168,13 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
         ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
         if (serviceWrapper == null)
             return;
-        if (!updateFlag.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            synchronized (serviceWrapperMap) {
-                //double check
-                ServiceWrapper wrapper = serviceWrapperMap.get(serviceId);
-                if (wrapper == null)
-                    return;
-                wrapper.clear();
-                serviceWrapperMap.remove(serviceId);
-            }
-        } finally {
-            updateFlag.set(false);
+        synchronized (serviceWrapperMap) {
+            //double check
+            ServiceWrapper wrapper = serviceWrapperMap.get(serviceId);
+            if (wrapper == null)
+                return;
+            wrapper.clear();
+            serviceWrapperMap.remove(serviceId);
         }
     }
 }
