@@ -13,7 +13,7 @@ import java.io.IOException;
 public interface IDiscoveryConnectionRepository {
     DiscoveryConnectionWrapper connection(String registryId);
 
-    void load(String registryId, IDiscoveryRepository discoveryRepository) throws IOException;
+    void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository) throws IOException;
 
-    void close(String registryId) throws IOException;
+    void connectionClose(String registryId) throws IOException;
 }

@@ -40,13 +40,21 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
 
     @Override
     //重载此处 需要将对应的发现进行重载 然后进行关闭操作
-    public void load(String registryId, IDiscoveryRepository discoveryRepository) throws IOException {
+    public void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository) throws IOException {
         DiscoveryRegistryConfig registryConfig;
-        DiscoverRegistryConfig discoverRegistryConfig = gatewayDiscoveryConnectionService.get(registryId);
-        if ((discoverRegistryConfig == null || (registryConfig = DiscoveryRegistryConfig.build(discoverRegistryConfig)) == null)
-                || (registryId.equals(DEFAULT_ZOOKEEPER) && (registryConfig = defaultDiscoveryRegistryConfig) == null)) {
-            logger.error("no service discovery connection config for {}", registryId);
-            return;
+        if (registryId.equals(DEFAULT_ZOOKEEPER)) {
+            registryConfig = defaultDiscoveryRegistryConfig;
+            if (registryConfig == null) {
+                logger.error("no service discovery connection config for {}", registryId);
+                return;
+            }
+        } else {
+            DiscoverRegistryConfig discoverRegistryConfig = gatewayDiscoveryConnectionService.get(registryId);
+            if (discoverRegistryConfig == null) {
+                logger.error("no service discovery connection config for {}", registryId);
+                return;
+            }
+            registryConfig = DiscoveryRegistryConfig.build(discoverRegistryConfig);
         }
         DiscoveryConnectionWrapper connectionWrapper = registryConfig.buidRegistry();
         if (connectionWrapper == null) {
@@ -54,15 +62,16 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
             return;
         }
         DiscoveryConnectionWrapper old = null;
+        if (!updateFlag.compareAndSet(false, true)) {
+            return;
+        }
         try {
-            if (updateFlag.compareAndSet(false, true)) {
-                old = connectionWrapperMap.get(registryId);
-                connectionWrapperMap.put(registryId, connectionWrapper);
-                if (old != null)
-                    discoveryRepository.loadRegistry(registryId);
-            }
+            old = connectionWrapperMap.get(registryId);
+            connectionWrapperMap.put(registryId, connectionWrapper);
+            if (old != null)
+                discoveryRepository.loadRegistry(registryId);
         } catch (Exception e) {
-            logger.info("error happened while load regitry for {}", registryId, e);
+            logger.info("error happened while connectionLoad regitry for {}", registryId, e);
         } finally {
             if (old != null) {
                 old.close();
@@ -72,7 +81,7 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
     }
 
     @Override
-    public void close(String registryId) throws IOException {
+    public void connectionClose(String registryId) throws IOException {
         DiscoveryConnectionWrapper wrapper = connectionWrapperMap.get(registryId);
         connectionWrapperMap.remove(registryId);
         wrapper.close();

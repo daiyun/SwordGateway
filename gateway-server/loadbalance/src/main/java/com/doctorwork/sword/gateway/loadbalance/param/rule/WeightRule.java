@@ -34,7 +34,7 @@ public class WeightRule extends RoundRobinRule {
 
     public Server choose(ILoadBalancer lb, Object key) {
         if (lb == null) {
-            logger.warn("no load balancer");
+            logger.warn("no connectionLoad balancer");
             return null;
         }
         if (lb.getAllServers().size() == 0) {

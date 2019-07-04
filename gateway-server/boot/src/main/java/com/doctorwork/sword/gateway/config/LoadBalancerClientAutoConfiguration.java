@@ -4,6 +4,8 @@ import com.doctorwork.sword.gateway.discovery.DiscoveryConnectionRepositoryManag
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryConnectionRepository;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
+import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
+import com.doctorwork.sword.gateway.discovery.api.RespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
@@ -58,6 +60,11 @@ public class LoadBalancerClientAutoConfiguration {
         DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(gatewayDiscoveryService, discoveryConfig, discoveryConnectionRepository);
         discoveryRepositoryManager.preLoadDiscovery();
         return discoveryRepositoryManager;
+    }
+
+    @Bean
+    public IRespositoryManagerApi respositoryManagerApi(IDiscoveryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
+        return new RespositoryManagerApi(discoveryConnectionRepository, discoveryRepository);
     }
 
     @Bean

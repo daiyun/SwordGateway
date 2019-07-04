@@ -22,5 +22,5 @@ public interface IDiscoveryRepository {
 
     void loadRegistry(String registryId) throws Exception;
 
-    void delete(String serviceId);
+    void serviceDelete(String serviceId);
 }
