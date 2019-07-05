@@ -101,7 +101,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
         if (config == null) {
             return;
         }
-        mark = "." + config.getDscrId();
+        mark = config.getDscrId();
 //                synchronized (serviceWrapperMap) {
         ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
         if (serviceWrapper == null) {
@@ -128,7 +128,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
         if (config == null && discoveryConfig == null) {
             return;
         }
-        mark = ".".concat(dscrId);
+        mark = dscrId;
         if (discoveryConfig == null)
             discoveryConfig = DiscoveryConfig.build(config);
         synchronized (("LOCK----" + dscrId).intern()) {
