@@ -7,7 +7,13 @@ package com.doctorwork.sword.gateway.loadbalance;
  * @Modified By:
  */
 public interface ILoadBalanceClientManagerApi {
-    void start(String serviceId);
+    void loadBalanceInit(String serviceId);
 
-    void shutdown(String serviceId);
+    void loadBalanceDelete(String serviceId);
+
+    void loadBalancePingLoad(String serviceId);
+
+    void loadBalanceRuleLoad(String serviceId);
+
+    void loadBalanceDiscoveryLoad(String serviceId);
 }

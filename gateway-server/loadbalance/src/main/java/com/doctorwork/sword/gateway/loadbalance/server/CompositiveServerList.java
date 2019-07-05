@@ -1,6 +1,5 @@
 package com.doctorwork.sword.gateway.loadbalance.server;
 
-import com.netflix.loadbalancer.Server;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -19,9 +18,20 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
 
     private DataBaseServerList dataBaseServerList;
     private ZookeeperServerList zookeeperServerList;
+    private Boolean dscrEnable;
 
-    public CompositiveServerList(String serviceId, DataBaseServerList dataBaseServerList, ZookeeperServerList zookeeperServerList) {
+    public CompositiveServerList(String serviceId) {
         super(serviceId);
+    }
+
+    public CompositiveServerList(String serviceId, DataBaseServerList dataBaseServerList) {
+        super(serviceId);
+        this.dataBaseServerList = dataBaseServerList;
+    }
+
+    public CompositiveServerList(String serviceId, Boolean dscrEnable, DataBaseServerList dataBaseServerList, ZookeeperServerList zookeeperServerList) {
+        super(serviceId);
+        this.dscrEnable = dscrEnable;
         if (!dataBaseServerList.getServiceId().equals(zookeeperServerList.getServiceId()))
             throw new RuntimeException("different type");
         this.dataBaseServerList = dataBaseServerList;
@@ -43,55 +53,53 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
             List<AbstractServer> servers = new ArrayList<>();
             List<DataBaseServer> dataBaseServers = null;
             List<ZookeeperServer> zookeeperServers = null;
+
             if (dataBaseServerList != null) {
                 dataBaseServers = dataBaseServerList.getInitialListOfServers();
             }
-            if (zookeeperServerList != null) {
+
+            if (dscrEnable != null && dscrEnable) {
+                if (zookeeperServerList == null)
+                    return Collections.emptyList();
                 zookeeperServers = zookeeperServerList.getInitialListOfServers();
-            }
-            //如果都配置了则以服务发现列表为准
-            if (CollectionUtils.isEmpty(dataBaseServers)) {
-                if (!CollectionUtils.isEmpty(zookeeperServers)) {
-                    servers.addAll(zookeeperServers);
-                    return servers;
-                }
-            }
-            else if (CollectionUtils.isEmpty(zookeeperServers)) {
-//                if (!CollectionUtils.isEmpty(dataBaseServers)) {
-//                    servers.addAll(dataBaseServers);
-//                    return servers;
-//                }
-                return Collections.emptyList();
-            } else {
-//                for (DataBaseServer dataBaseServer : dataBaseServers) {
-//                    boolean flag = true;
-//                    for (ZookeeperServer zookeeperServer : zookeeperServers) {
-//                        if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
-//                            flag = false;
-//                            CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
-//                            servers.add(compositiveServer);
-//                        }
-//                    }
-//                    if (flag)
-//                        servers.add(dataBaseServer);
-//                }
-                for (ZookeeperServer zookeeperServer : zookeeperServers) {
-                    boolean flag = true;
-                    for (DataBaseServer dataBaseServer : dataBaseServers) {
-                        if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
-                            flag = false;
-                            CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
-                            servers.add(compositiveServer);
-                        }
+                if (CollectionUtils.isEmpty(dataBaseServers)) {
+                    if (!CollectionUtils.isEmpty(zookeeperServers)) {
+                        servers.addAll(zookeeperServers);
+                        return servers;
                     }
-                    if (flag)
-                        servers.add(zookeeperServer);
+                } else if (CollectionUtils.isEmpty(zookeeperServers)) {
+                    return Collections.emptyList();
+                } else {
+                    for (ZookeeperServer zookeeperServer : zookeeperServers) {
+                        boolean flag = true;
+                        for (DataBaseServer dataBaseServer : dataBaseServers) {
+                            if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
+                                flag = false;
+                                CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
+                                servers.add(compositiveServer);
+                            }
+                        }
+                        if (flag)
+                            servers.add(zookeeperServer);
+                    }
                 }
+                return servers;
+            }
+            if (!CollectionUtils.isEmpty(dataBaseServers)) {
+                servers.addAll(dataBaseServers);
             }
             return servers;
         } catch (Exception e) {
             rethrowRuntimeException(e);
         }
         return Collections.emptyList();
+    }
+
+    public Boolean getDscrEnable() {
+        return dscrEnable;
+    }
+
+    public void setDscrEnable(Boolean dscrEnable) {
+        this.dscrEnable = dscrEnable;
     }
 }

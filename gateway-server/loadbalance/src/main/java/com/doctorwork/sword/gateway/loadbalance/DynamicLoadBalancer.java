@@ -1,6 +1,7 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
 import com.google.common.annotations.VisibleForTesting;
@@ -81,6 +82,25 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         serverListUpdateConfig(this.ribbonLoadBalanceConfig);
         setServersList(serverListImpl.getInitialListOfServers());
 
+    }
+
+    public void reloadPing(LoadbalanceInfo loadbalanceInfo) {
+        RibbonPingParam<IPing> pingParam = PingParam.build(loadbalanceInfo);
+        IPing iPing = null;
+        if (pingParam != null) {
+            iPing = pingParam.ping();
+            logger.info("加载负载器{} PING策略{}", name, iPing);
+            Integer pingIntervalTime;
+            Integer maxTotalPingTime;
+            if ((maxTotalPingTime = pingParam.getMaxTotalPingTime()) != null)
+                setMaxTotalPingTime(maxTotalPingTime);
+            if ((pingIntervalTime = pingParam.getPingIntervalTime()) != null)
+                setPingInterval(pingIntervalTime);
+        }
+        if (iPing != null)
+            setPing(iPing);
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadbalanceInfo.getPingParam());
+        this.ribbonLoadBalanceConfig.setPingParam(pingParam);
     }
 
     public void serverListUpdateConfig(RibbonLoadBalanceConfig ribbonLoadBalanceConfig) {

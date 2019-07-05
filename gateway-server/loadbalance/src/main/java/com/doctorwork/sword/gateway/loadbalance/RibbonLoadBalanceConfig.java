@@ -16,13 +16,13 @@ import org.springframework.util.StringUtils;
  * @date 2019/6/21
  */
 public class RibbonLoadBalanceConfig {
-    private final RibbonPingParam<IPing> pingParam;
+    private RibbonPingParam<IPing> pingParam;
 
-    private final LoadbalanceParam loadbalanceParam;
+    private LoadbalanceParam loadbalanceParam;
 
-    private final RuleParam ruleParam;
+    private RuleParam ruleParam;
 
-    private final LoadbalanceInfo loadbalanceInfo;
+    private LoadbalanceInfo loadbalanceInfo;
 
     public RibbonLoadBalanceConfig(LoadbalanceInfo loadbalanceInfo) {
         this.loadbalanceInfo = loadbalanceInfo;
@@ -35,6 +35,22 @@ public class RibbonLoadBalanceConfig {
         if (pingParam == null)
             return null;
         return pingParam.ping();
+    }
+
+    public void setPingParam(RibbonPingParam<IPing> pingParam) {
+        this.pingParam = pingParam;
+    }
+
+    public void setLoadbalanceParam(LoadbalanceParam loadbalanceParam) {
+        this.loadbalanceParam = loadbalanceParam;
+    }
+
+    public void setRuleParam(RuleParam ruleParam) {
+        this.ruleParam = ruleParam;
+    }
+
+    public void setLoadbalanceInfo(LoadbalanceInfo loadbalanceInfo) {
+        this.loadbalanceInfo = loadbalanceInfo;
     }
 
     public RibbonPingParam pingParam() {
