@@ -2,6 +2,7 @@ package com.doctorwork.sword.gateway.loadbalance.param.rule;
 
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.loadbalance.param.Param;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -16,7 +17,10 @@ public abstract class RuleParam implements Param {
     private String lbRule;
 
     public static RuleParam build(LoadbalanceInfo loadbalanceInfo) {
-        return JacksonUtil.toSubTypeObject(loadbalanceInfo.getRuleParam(), RuleParam.class);
+        if (!StringUtils.isEmpty(loadbalanceInfo.getRuleParam())) {
+            return JacksonUtil.toSubTypeObject(loadbalanceInfo.getRuleParam(), RuleParam.class);
+        }
+        return null;
     }
 
     public RuleParam(String lbRule) {

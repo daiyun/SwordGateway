@@ -2,9 +2,9 @@ package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.common.Constants;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
-import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.rule.RuleParam;
 import com.doctorwork.sword.gateway.loadbalance.param.rule.WeightRule;
@@ -61,8 +61,10 @@ public class RibbonLoadBalanceConfig {
         return loadbalanceParam instanceof RibbonLoadBalanceParam ? null : (RibbonLoadBalanceParam) loadbalanceParam;
     }
 
-    public IRule rule() {
-        String rule = this.ruleParam.getLbRule();
+    public static IRule rule(RuleParam ruleParam) {
+        if (ruleParam == null)
+            return null;
+        String rule = ruleParam.getLbRule();
         if (StringUtils.isEmpty(rule))
             return null;
         if (Constants.LBRULE_RANDOM.equalsIgnoreCase(rule)) {
@@ -83,6 +85,10 @@ public class RibbonLoadBalanceConfig {
             return new WeightRule();
         }
         return null;
+    }
+
+    public IRule rule() {
+        return this.rule(this.ruleParam);
     }
 
     public LoadbalanceInfo getLoadbalanceInfo() {

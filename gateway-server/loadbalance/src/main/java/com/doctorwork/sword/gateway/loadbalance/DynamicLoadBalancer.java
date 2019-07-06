@@ -2,8 +2,10 @@ package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
+import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
+import com.doctorwork.sword.gateway.loadbalance.param.rule.RuleParam;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.loadbalancer.*;
 import org.slf4j.Logger;
@@ -103,11 +105,39 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         this.ribbonLoadBalanceConfig.setPingParam(pingParam);
     }
 
-    public void serverListUpdateConfig(RibbonLoadBalanceConfig ribbonLoadBalanceConfig) {
+    public void reloadRule(LoadbalanceInfo loadbalanceInfo) {
+        RuleParam ruleParam = RuleParam.build(loadbalanceInfo);
+        IRule iRule = null;
+        if (ruleParam != null) {
+            iRule = RibbonLoadBalanceConfig.rule(ruleParam);
+            logger.info("加载负载器{} RULE策略{}", name, iRule);
+        }
+        if (iRule != null) {
+            iRule.setLoadBalancer(this);
+            setRule(iRule);
+        }
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadbalanceInfo.getPingParam());
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setRuleParam(loadbalanceInfo.getRuleParam());
+        this.ribbonLoadBalanceConfig.setRuleParam(ruleParam);
+    }
+
+    public void reloadAutoRefresh(LoadbalanceInfo loadbalanceInfo) {
+        LoadbalanceParam loadbalanceParam = LoadbalanceParam.build(loadbalanceInfo);
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setLbExtParam(loadbalanceInfo.getLbExtParam());
+        this.ribbonLoadBalanceConfig.setLoadbalanceParam(loadbalanceParam);
+        if (loadbalanceParam == null) {
+            stopServerListRefreshing();
+            return;
+        }
+        serverListUpdateConfig(this.ribbonLoadBalanceConfig);
+    }
+
+    private void serverListUpdateConfig(RibbonLoadBalanceConfig ribbonLoadBalanceConfig) {
         RibbonLoadBalanceParam param = null;
         if (ribbonLoadBalanceConfig != null && (param = ribbonLoadBalanceConfig.extParam()) != null) {
             if (param.getAutoRefresh() != null && !param.getAutoRefresh()) {
                 logger.info("禁止负载器{} 服务自动刷新策略", this.name);
+                stopServerListRefreshing();
                 return;
             }
         }
@@ -203,7 +233,7 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         return this.name;
     }
 
-    private void stopServerListRefreshing() {
+    public void stopServerListRefreshing() {
         if (serverListUpdater != null) {
             serverListUpdater.stop();
         }

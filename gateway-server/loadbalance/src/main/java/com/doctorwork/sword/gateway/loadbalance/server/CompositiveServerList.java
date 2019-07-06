@@ -5,6 +5,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.StampedLock;
 
 import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
 
@@ -19,6 +20,7 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
     private DataBaseServerList dataBaseServerList;
     private ZookeeperServerList zookeeperServerList;
     private Boolean dscrEnable;
+    private StampedLock stampedLock = new StampedLock();
 
     public CompositiveServerList(String serviceId) {
         super(serviceId);
@@ -50,56 +52,74 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
 
     protected List<AbstractServer> getServers() {
         try {
+            long stamp = stampedLock.tryOptimisticRead();
             List<AbstractServer> servers = new ArrayList<>();
-            List<DataBaseServer> dataBaseServers = null;
-            List<ZookeeperServer> zookeeperServers = null;
-
-            if (dataBaseServerList != null) {
-                dataBaseServers = dataBaseServerList.getInitialListOfServers();
-            }
-
-            if (dscrEnable != null && dscrEnable) {
-                if (zookeeperServerList == null)
-                    return Collections.emptyList();
-                zookeeperServers = zookeeperServerList.getInitialListOfServers();
-                if (CollectionUtils.isEmpty(dataBaseServers)) {
-                    if (!CollectionUtils.isEmpty(zookeeperServers)) {
-                        servers.addAll(zookeeperServers);
-                        return servers;
-                    }
-                } else if (CollectionUtils.isEmpty(zookeeperServers)) {
-                    return Collections.emptyList();
-                } else {
-                    for (ZookeeperServer zookeeperServer : zookeeperServers) {
-                        boolean flag = true;
-                        for (DataBaseServer dataBaseServer : dataBaseServers) {
-                            if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
-                                flag = false;
-                                CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
-                                servers.add(compositiveServer);
-                            }
-                        }
-                        if (flag)
-                            servers.add(zookeeperServer);
-                    }
+            compsitiveServerList(servers);
+            if (!stampedLock.validate(stamp)) {
+                stampedLock.readLock();
+                try {
+                    servers.clear();
+                    compsitiveServerList(servers);
+                } finally {
+                    stampedLock.unlockRead(stamp);
                 }
-                return servers;
             }
-            if (!CollectionUtils.isEmpty(dataBaseServers)) {
-                servers.addAll(dataBaseServers);
-            }
-            return servers;
         } catch (Exception e) {
             rethrowRuntimeException(e);
         }
         return Collections.emptyList();
     }
 
+    private void compsitiveServerList(List<AbstractServer> servers) {
+        List<DataBaseServer> dataBaseServers = null;
+        List<ZookeeperServer> zookeeperServers;
+        if (dataBaseServerList != null) {
+            dataBaseServers = dataBaseServerList.getInitialListOfServers();
+        }
+        if (dscrEnable != null && dscrEnable) {
+            if (zookeeperServerList == null)
+                return;
+            zookeeperServers = zookeeperServerList.getInitialListOfServers();
+            if (CollectionUtils.isEmpty(zookeeperServers)) {
+                return;
+            }
+            if (CollectionUtils.isEmpty(dataBaseServers)) {
+                servers.addAll(zookeeperServers);
+                return;
+            }
+            for (ZookeeperServer zookeeperServer : zookeeperServers) {
+                boolean flag = true;
+                for (DataBaseServer dataBaseServer : dataBaseServers) {
+                    if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
+                        flag = false;
+                        CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
+                        servers.add(compositiveServer);
+                    }
+                }
+                if (flag)
+                    servers.add(zookeeperServer);
+            }
+            return;
+        }
+        if (!CollectionUtils.isEmpty(dataBaseServers)) {
+            servers.addAll(dataBaseServers);
+        }
+    }
+
     public Boolean getDscrEnable() {
         return dscrEnable;
     }
 
-    public void setDscrEnable(Boolean dscrEnable) {
-        this.dscrEnable = dscrEnable;
+    public void discoveryReload(Boolean dscrEnable, DataBaseServerList dataBaseServerList, ZookeeperServerList zookeeperServerList) {
+        long stamp = stampedLock.writeLock();
+        try {
+            this.dataBaseServerList = dataBaseServerList;
+            this.dscrEnable = true;
+            if (dscrEnable != null && dscrEnable) {
+                this.zookeeperServerList = zookeeperServerList;
+            }
+        } finally {
+            stampedLock.unlockWrite(stamp);
+        }
     }
 }
