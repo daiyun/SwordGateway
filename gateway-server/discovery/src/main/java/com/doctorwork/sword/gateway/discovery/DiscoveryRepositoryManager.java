@@ -1,12 +1,15 @@
 package com.doctorwork.sword.gateway.discovery;
 
+import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
 import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
+import com.doctorwork.sword.gateway.discovery.event.EventPost;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
+import com.google.common.eventbus.EventBus;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ import java.util.stream.Collectors;
  * @Date: 10:10 2019/7/4
  * @Modified By:
  */
-public class DiscoveryRepositoryManager implements IDiscoveryRepository {
+public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPost {
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryRepositoryManager.class);
     private GatewayDiscoveryService gatewayDiscoveryService;
     private DiscoveryConfig defaultDiscoveryConfig;
@@ -32,11 +35,13 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
     private final Map<String, ServiceDiscoveryWrapper> discoveryMap = new ConcurrentHashMap<>();
     private final Map<String, ServiceWrapper> serviceWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_SERVICEDISCOVERY = "default";
+    private EventBus eventBus;
 
-    public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IDiscoveryConnectionRepository discoveryConnectionRepository) {
+    public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IDiscoveryConnectionRepository discoveryConnectionRepository, EventBus eventBus) {
         this.gatewayDiscoveryService = gatewayDiscoveryService;
         this.defaultDiscoveryConfig = defaultDiscoveryConfig;
         this.discoveryConnectionRepository = discoveryConnectionRepository;
+        this.eventBus = eventBus;
     }
 
     public void preLoadDiscovery() throws Exception {
@@ -81,7 +86,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
                 logger.error("no discover config for {}", serviceId);
                 return null;
             }
-            ServiceWrapper wrapper = new ServiceWrapper(serviceId, discoverConfig.getDscrId(), this);
+            ServiceWrapper wrapper = new ServiceWrapper(serviceId, discoverConfig.getDscrId(), this, this);
             serviceWrapperMap.put(serviceId, wrapper);
             return wrapper;
         }
@@ -90,11 +95,6 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
     @Override
     public ServiceDiscoveryWrapper serviceDisovery(ServiceWrapper serviceWrapper) {
         return discoveryMap.get(serviceWrapper.getDscrMapKey());
-    }
-
-    @Override
-    public void reload() {
-        //is necessary?
     }
 
     @Override
@@ -110,7 +110,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
 //                synchronized (serviceWrapperMap) {
         ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
         if (serviceWrapper == null) {
-            ServiceWrapper saveWrapper = new ServiceWrapper(serviceId, mark, this);
+            ServiceWrapper saveWrapper = new ServiceWrapper(serviceId, mark, this, this);
             serviceWrapperMap.put(serviceId, saveWrapper);
         } else {
             serviceWrapper.reload(mark);
@@ -196,5 +196,11 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
             return null;
         }
         return queryService.getInstances(serviceId);
+    }
+
+    @Override
+    public void eventPost(AbstractEvent event) {
+        if (eventBus != null)
+            eventBus.post(event);
     }
 }

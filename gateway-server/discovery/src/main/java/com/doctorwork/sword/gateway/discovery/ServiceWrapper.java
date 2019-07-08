@@ -4,10 +4,9 @@ import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.state.ConnectionState;
+import com.doctorwork.sword.gateway.discovery.event.EventPost;
+import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
 import org.apache.curator.x.discovery.ServiceCache;
-import org.apache.curator.x.discovery.details.ServiceCacheListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author chenzhiqiang
  * @date 2019/7/3
  */
-public class ServiceWrapper {
+public class ServiceWrapper extends CacheListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceWrapper.class);
 
@@ -23,13 +22,15 @@ public class ServiceWrapper {
     private String dscrMapKey;
     private ServiceCache<ZookeeperInstance> serviceCache;
     private IDiscoveryRepository iDiscoveryRepository;
+    private EventPost eventPost;
 
-    public ServiceWrapper(String serviceId, String dscrMapKey, IDiscoveryRepository iDiscoveryRepository) {
+    public ServiceWrapper(String serviceId, String dscrMapKey, IDiscoveryRepository iDiscoveryRepository, EventPost eventPost) {
         if (StringUtils.isEmpty(serviceId) || iDiscoveryRepository == null)
             throw new RuntimeException("serviceId or IDiscoveryRepository must not be null");
         this.serviceId = serviceId;
         this.dscrMapKey = dscrMapKey;
         this.iDiscoveryRepository = iDiscoveryRepository;
+        this.eventPost = eventPost;
         this.buildServiceCache();
     }
 
@@ -43,6 +44,7 @@ public class ServiceWrapper {
         try {
             ServiceCache<ZookeeperInstance> serviceCache = serviceDiscoveryWrapper.serviceCache(serviceId);
             serviceCache.start();
+            serviceCache.addListener(this);
             this.serviceCache = serviceCache;
         } catch (Exception e) {
             logger.error("error create servicecache for {}", serviceId, e);
@@ -54,10 +56,6 @@ public class ServiceWrapper {
         logger.info("reload servicewrapper from {} to {}", oldMapKey, dscrMapKey);
         this.dscrMapKey = dscrMapKey;
         this.buildServiceCache();
-    }
-
-    public void addListener(ServerCacheListener serverCacheListener) {
-        this.serviceCache.addListener(serverCacheListener);
     }
 
     public void reloadCache() {
@@ -86,6 +84,7 @@ public class ServiceWrapper {
 
     private void closeCache() {
         if (serviceCache != null) {
+            serviceCache.removeListener(this);
             try {
                 serviceCache.close();
             } catch (Exception e) {
@@ -93,6 +92,13 @@ public class ServiceWrapper {
             } finally {
                 serviceCache = null;
             }
+
         }
+    }
+
+    @Override
+    public void serviceReload() {
+        String serviceId = this.serviceId;
+        eventPost.eventPost(new ServiceCacheChangeEvent(serviceId));
     }
 }

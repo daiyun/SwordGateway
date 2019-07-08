@@ -1,5 +1,8 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
+import com.doctorwork.sword.gateway.common.event.AbstractEvent;
+import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
+import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
@@ -7,6 +10,8 @@ import com.doctorwork.sword.gateway.loadbalance.server.CompositiveServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.ZookeeperServerList;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.netflix.loadbalancer.BaseLoadBalancer;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.Server;
@@ -22,19 +27,22 @@ import java.util.concurrent.locks.StampedLock;
  * @Date: 19:27 2019/7/2
  * @Modified By:
  */
-public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient implements ILoadBalanceClientManagerApi {
+public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient implements ILoadBalanceClientManagerApi, EventListener<AbstractEvent> {
 
     private final Map<String, BaseLoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
 
 
     private GatewayLoadBalanceService gatewayLoadBalanceService;
     private IDiscoveryRepository iDiscoveryRepository;
+    private EventBus eventBus;
 
     private final StampedLock stampedLock = new StampedLock();
 
-    public CustomerLoadBalanceClient(GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository iDiscoveryRepository) {
+    public CustomerLoadBalanceClient(GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository iDiscoveryRepository, EventBus eventBus) {
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
         this.iDiscoveryRepository = iDiscoveryRepository;
+        this.eventBus = eventBus;
+        this.register(this.eventBus);
     }
 
     @Override
@@ -272,6 +280,26 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             }
         } finally {
             stampedLock.unlockWrite(stamp);
+        }
+    }
+
+    @Override
+    @Subscribe
+    public void handleEvent(AbstractEvent event) {
+        if (event instanceof ServiceCacheChangeEvent) {
+            ServiceCacheChangeEvent cacheChangeEvent = (ServiceCacheChangeEvent) event;
+            String serviceId = cacheChangeEvent.getServiceId();
+            logger.info("接收服务提供者{}节点变更事件", serviceId);
+            BaseLoadBalancer loadBalancer = loadBalancerMap.get(cacheChangeEvent.getServiceId());
+            if (loadBalancer == null) {
+                logger.info("服务提供者[{}]并未开启负载均衡", serviceId);
+                return;
+            }
+            if (loadBalancer instanceof DynamicLoadBalancer) {
+                DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
+                logger.info("更新负载均衡器[{}]的服务列表", serviceId);
+                dynamicLoadBalancer.updateListOfServers();
+            }
         }
     }
 }

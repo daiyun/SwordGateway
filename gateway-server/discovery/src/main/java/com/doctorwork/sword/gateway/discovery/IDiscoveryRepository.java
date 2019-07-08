@@ -19,8 +19,6 @@ public interface IDiscoveryRepository {
 
     ServiceDiscoveryWrapper serviceDisovery(ServiceWrapper serviceWrapper);
 
-    void reload();
-
     void loadService(String serviceId, DiscoverConfig discoverConfig) throws Exception;
 
     void loadDiscovery(String dscrId, DiscoverConfig discoverConfig) throws Exception;

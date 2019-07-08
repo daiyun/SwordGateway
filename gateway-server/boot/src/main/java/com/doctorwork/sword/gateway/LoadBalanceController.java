@@ -1,9 +1,6 @@
 package com.doctorwork.sword.gateway;
 
-import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
-import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
-import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
+import com.doctorwork.sword.gateway.loadbalance.ILoadBalanceClientManagerApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,60 +10,58 @@ import org.springframework.web.bind.annotation.RestController;
  * @author chenzhiqiang
  * @date 2019/7/4
  */
-@RequestMapping("/discovery")
+@RequestMapping("/lb")
 @RestController
 public class LoadBalanceController {
 
     @Autowired
-    private IRespositoryManagerApi respositoryManagerApi;
+    private ILoadBalanceClientManagerApi loadBalanceClientManagerApi;
 
-    @RequestMapping("conn/load")
+    @RequestMapping("init")
     @ResponseBody
-    public void connectionLoad(String registryId) {
-        respositoryManagerApi.connectionLoad(registryId);
+    public void loadBalanceInit(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceInit(lbmark);
     }
 
-    @RequestMapping("conn/close")
+    @RequestMapping("load")
     @ResponseBody
-    public void connectionClose(String registryId) {
-        respositoryManagerApi.connectionClose(registryId);
+    public void loadBalanceLoad(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceLoad(lbmark);
     }
 
-    @RequestMapping("svc/get")
+    @RequestMapping("del")
     @ResponseBody
-    public ServiceWrapper serviceWrapper(String serviceId) {
-        ServiceWrapper serviceWrapper = respositoryManagerApi.serviceWrapper(serviceId);
-        return serviceWrapper;
+    public void loadBalanceDelete(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceDelete(lbmark);
     }
 
-    @RequestMapping("svc/discover/get")
+    @RequestMapping("autorefresh/load")
     @ResponseBody
-    public ServiceDiscoveryWrapper serviceDisovery(String serviceId) {
-        ServiceWrapper serviceWrapper = respositoryManagerApi.serviceWrapper(serviceId);
-        return respositoryManagerApi.serviceDisovery(serviceWrapper);
+    public void loadBalanceAutoRefreshLoad(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceAutoRefreshLoad(lbmark);
     }
 
-    @RequestMapping("svc/load")
+    @RequestMapping("autorefresh/shutdown")
     @ResponseBody
-    public void loadService(String serviceId) {
-        respositoryManagerApi.loadService(serviceId);
+    public void loadBalanceAutoRefreshShutdown(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceAutoRefreshShutdown(lbmark);
     }
 
-    @RequestMapping("svc/discover/load")
+    @RequestMapping("ping/load")
     @ResponseBody
-    public void loadDiscovery(String dscrId) {
-        respositoryManagerApi.loadDiscovery(dscrId);
+    public void loadBalancePingLoad(String lbmark) {
+        loadBalanceClientManagerApi.loadBalancePingLoad(lbmark);
     }
 
-    @RequestMapping("reg/load")
+    @RequestMapping("rule/load")
     @ResponseBody
-    void loadRegistry(String registryId) {
-        respositoryManagerApi.loadRegistry(registryId);
+    public void loadBalanceRuleLoad(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceRuleLoad(lbmark);
     }
 
-    @RequestMapping("svc/del")
+    @RequestMapping("discover/load")
     @ResponseBody
-    void serviceDelete(String serviceId) {
-        respositoryManagerApi.serviceDelete(serviceId);
+    public void loadBalanceDiscoveryLoad(String lbmark) {
+        loadBalanceClientManagerApi.loadBalanceDiscoveryLoad(lbmark);
     }
 }

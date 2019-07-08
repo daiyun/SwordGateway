@@ -14,6 +14,7 @@ import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
+import com.google.common.eventbus.EventBus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.gateway.filter.LoadBalancerClientFilter;
@@ -50,14 +51,15 @@ public class LoadBalancerClientAutoConfiguration {
     @Bean
     public IDiscoveryRepository discoveryRepository(GatewayDiscoveryService gatewayDiscoveryService,
                                                     DiscoveryProperties defaultDiscoveryProperties,
-                                                    IDiscoveryConnectionRepository discoveryConnectionRepository) throws Exception {
+                                                    IDiscoveryConnectionRepository discoveryConnectionRepository,
+                                                    EventBus eventBus) throws Exception {
         DiscoveryConfig<DiscoveryProperties> discoveryConfig = null;
 
         if (defaultDiscoveryProperties != null) {
             discoveryConfig = new DiscoveryConfig<>(DiscoveryRepositoryManager.DEFAULT_SERVICEDISCOVERY,
                     true, DiscoveryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties);
         }
-        DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(gatewayDiscoveryService, discoveryConfig, discoveryConnectionRepository);
+        DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(gatewayDiscoveryService, discoveryConfig, discoveryConnectionRepository, eventBus);
         discoveryRepositoryManager.preLoadDiscovery();
         return discoveryRepositoryManager;
     }
@@ -69,7 +71,7 @@ public class LoadBalancerClientAutoConfiguration {
 
     @Bean
     public LoadBalancerClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository discoveryRepository) {
-        CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository);
+        CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
         return customerLoadBalanceClient;
     }
 }

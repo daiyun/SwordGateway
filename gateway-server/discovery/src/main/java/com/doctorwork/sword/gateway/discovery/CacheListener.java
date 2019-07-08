@@ -10,14 +10,14 @@ import org.apache.curator.x.discovery.details.ServiceCacheListener;
  * @Date: 19:33 2019/7/2
  * @Modified By:
  */
-public abstract class ServerCacheListener implements ServiceCacheListener {
+public abstract class CacheListener implements ServiceCacheListener {
 
     private Boolean reload;
 
     @Override
     public void cacheChanged() {
         if (reload == null || reload)
-            serverReload();
+            serviceReload();
     }
 
     @Override
@@ -25,5 +25,5 @@ public abstract class ServerCacheListener implements ServiceCacheListener {
         reload = newState.isConnected();
     }
 
-    public abstract void serverReload();
+    public abstract void serviceReload();
 }
