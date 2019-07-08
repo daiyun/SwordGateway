@@ -11,7 +11,6 @@ import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryRegistryConfig;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
-import com.doctorwork.sword.gateway.loadbalance.LoadBalanceClientManagerProxyApi;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
@@ -69,14 +68,8 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public LoadBalancerClient loadBalancerClient(LoadBalanceClientManagerProxyApi proxyApi, GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository discoveryRepository) {
+    public LoadBalancerClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository discoveryRepository) {
         CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository);
-        proxyApi.setLoadBalanceClientManagerApi(customerLoadBalanceClient);
         return customerLoadBalanceClient;
-    }
-
-    @Bean
-    public LoadBalanceClientManagerProxyApi proxyApi() {
-        return new LoadBalanceClientManagerProxyApi();
     }
 }

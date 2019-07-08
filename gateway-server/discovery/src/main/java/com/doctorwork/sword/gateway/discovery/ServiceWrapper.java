@@ -39,7 +39,7 @@ public class ServiceWrapper {
         if (serviceCache != null) {
             try {
                 serviceCache.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("error close servicecache for {}", serviceId, e);
             }
         }
@@ -49,8 +49,7 @@ public class ServiceWrapper {
             return;
         }
         try {
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = (ServiceDiscovery<ZookeeperInstance>) serviceDiscoveryWrapper.getServiceDiscovery();
-            ServiceCache<ZookeeperInstance> serviceCache = serviceDiscovery.serviceCacheBuilder().name(serviceId).build();
+            ServiceCache<ZookeeperInstance> serviceCache = serviceDiscoveryWrapper.serviceCache(serviceId);
             serviceCache.start();
             serviceCache.addListener(new ServiceCacheListener() {
                 @Override

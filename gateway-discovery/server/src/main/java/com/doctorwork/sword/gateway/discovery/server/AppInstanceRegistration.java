@@ -39,7 +39,7 @@ public class AppInstanceRegistration implements ZookeeperRegistration {
         }
 
         public RegistrationBuilder name(String name) {
-            this.builder.name(name);
+            this.builder.name(name.concat(Constants.PROVIDES_PATH));
             return this;
         }
 

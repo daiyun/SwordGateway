@@ -64,6 +64,7 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
                     stampedLock.unlockRead(stamp);
                 }
             }
+            return servers;
         } catch (Exception e) {
             rethrowRuntimeException(e);
         }
@@ -117,6 +118,8 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
             this.dscrEnable = true;
             if (dscrEnable != null && dscrEnable) {
                 this.zookeeperServerList = zookeeperServerList;
+            } else {
+                this.zookeeperServerList = null;
             }
         } finally {
             stampedLock.unlockWrite(stamp);

@@ -9,6 +9,8 @@ package com.doctorwork.sword.gateway.loadbalance;
 public interface ILoadBalanceClientManagerApi {
     void loadBalanceInit(String lbMark);
 
+    void loadBalanceLoad(String lbMark);
+
     void loadBalanceDelete(String lbMark);
 
     void loadBalancePingLoad(String lbMark);

@@ -11,7 +11,7 @@ public class Constants {
 
     public static final String DEFAULT_ZK_IPADDR= "localhost:2181";
 
-    public static final String DEFAULT_DISCOVER_BASEPATH = "/doctorwork/discovery/app";
+    public static final String DEFAULT_DISCOVER_BASEPATH = "/doctorwork/gateway/app";
 
     public static final String DEFAULT_HOST = "localhost";
 
@@ -22,4 +22,6 @@ public class Constants {
     public static final String META_INF_APP_PROPERTIES = "META-INF/app.properties";
 
     public static final String PROPERTIES_APP_ID_KEY = "app.id";
+
+    public static final String PROVIDES_PATH = "/provides";
 }

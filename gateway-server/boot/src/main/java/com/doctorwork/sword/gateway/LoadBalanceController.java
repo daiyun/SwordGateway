@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequestMapping("/discovery")
 @RestController
-public class TestController {
+public class LoadBalanceController {
 
     @Autowired
     private IRespositoryManagerApi respositoryManagerApi;

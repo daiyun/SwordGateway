@@ -25,7 +25,7 @@ import java.util.concurrent.locks.StampedLock;
  */
 public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient implements ILoadBalanceClientManagerApi {
 
-    private final Map<String, ILoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
+    private final Map<String, BaseLoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
 
 
     private GatewayLoadBalanceService gatewayLoadBalanceService;
@@ -68,18 +68,22 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
+        String logPrex = "【初始化负载均衡器】[" + lbMark + "]";
         long stamp = stampedLock.writeLock();
         try {
             LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-            if (loadbalanceInfo == null)
+            if (loadbalanceInfo == null) {
+                logger.info(logPrex + "无需初始化");
                 return;
+            }
             ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
             if (loadBalancer != null) {
+                logger.info(logPrex + "负载已载入，无需初始化");
                 return;
             }
             ServerList serverList;
             Boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
-            if (dscrEnable) {
+            if (!dscrEnable) {
                 serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
             } else {
                 ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
@@ -89,6 +93,47 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
             dynamicLoadBalancer.init(loadbalanceInfo);
             loadBalancerMap.putIfAbsent(lbMark, dynamicLoadBalancer);
+            logger.info(logPrex + "Done");
+        } finally {
+            stampedLock.unlockWrite(stamp);
+        }
+    }
+
+    @Override
+    public void loadBalanceLoad(String lbMark) {
+        if (StringUtils.isEmpty(lbMark)) {
+            return;
+        }
+        String logPrex = "【重载负载均衡器】[" + lbMark + "]";
+        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
+
+        long stamp = stampedLock.writeLock();
+        try {
+            ServerList serverList;
+            BaseLoadBalancer old = loadBalancerMap.get(lbMark);
+            if (loadbalanceInfo == null && old == null) {
+                logger.info(logPrex + "无需载入");
+                return;
+            }
+            if (loadbalanceInfo == null) {
+                old.shutdown();
+                loadBalancerMap.remove(lbMark);
+                logger.info(logPrex + "关闭负载器");
+                return;
+            }
+            boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
+            if (!dscrEnable) {
+                serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
+            } else {
+                ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
+                serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
+                        new ZookeeperServerList(lbMark, wrapper));
+            }
+            DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
+            dynamicLoadBalancer.init(loadbalanceInfo);
+            loadBalancerMap.put(lbMark, dynamicLoadBalancer);
+            old.shutdown();
+            logger.info(logPrex + "Done");
         } finally {
             stampedLock.unlockWrite(stamp);
         }
@@ -99,15 +144,15 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        String logPrex = "【关闭负载均衡器】[" + lbMark + "]";
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "无需关闭");
             return;
         }
-        if (loadBalancer instanceof BaseLoadBalancer) {
-            BaseLoadBalancer baseLoadBalancer = (BaseLoadBalancer) loadBalancer;
-            baseLoadBalancer.shutdown();
-        }
+        loadBalancer.shutdown();
         loadBalancerMap.remove(lbMark);
+        logger.info(logPrex + "Done");
     }
 
     @Override
@@ -115,17 +160,22 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        String logPrex = "【负载均衡器PING策略重载】[" + lbMark + "]";
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
         LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null)
+        if (loadbalanceInfo == null) {
+            logger.info(logPrex + "策略未找到");
             return;
-        if (loadBalancer instanceof BaseLoadBalancer) {
+        }
+        if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
             dynamicLoadBalancer.reloadPing(loadbalanceInfo);
         }
+        logger.info(logPrex + "Done");
     }
 
     @Override
@@ -133,17 +183,22 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        String logPrex = "【负载均衡器RULE策略重载】[" + lbMark + "]";
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
         LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null)
+        if (loadbalanceInfo == null) {
+            logger.info(logPrex + "策略未找到");
             return;
-        if (loadBalancer instanceof BaseLoadBalancer) {
+        }
+        if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
             dynamicLoadBalancer.reloadRule(loadbalanceInfo);
         }
+        logger.info(logPrex + "Done");
     }
 
     @Override
@@ -151,17 +206,22 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        String logPrex = "【负载均衡器自动刷新策略重载】[" + lbMark + "]";
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
         LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null)
+        if (loadbalanceInfo == null) {
+            logger.info(logPrex + "策略未找到");
             return;
+        }
         if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
             dynamicLoadBalancer.reloadAutoRefresh(loadbalanceInfo);
         }
+        logger.info(logPrex + "Done");
     }
 
     @Override
@@ -169,14 +229,17 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        String logPrex = "【负载均衡器自动刷新策略关闭】[" + lbMark + "]";
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
         if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
             dynamicLoadBalancer.stopServerListRefreshing();
         }
+        logger.info(logPrex + "Done");
     }
 
     @Override
@@ -184,11 +247,15 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
+        String logPrex = "【负载均衡器服务发现模块重载】[" + lbMark + "]";
         LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null)
+        if (loadbalanceInfo == null) {
+            logger.info(logPrex + "负载器信息未找到");
             return;
-        ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+        }
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
         if (loadBalancer == null) {
+            logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
         long stamp = stampedLock.writeLock();
@@ -196,19 +263,19 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             if (loadBalancer instanceof DynamicLoadBalancer) {
                 DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
                 ServerList oldServerList = dynamicLoadBalancer.getServerListImpl();
-                Boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
+                boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
                 if (oldServerList == null) {
-                    logger.error("no serverlist for {}", lbMark);
+                    logger.info(logPrex + "负载器服务列表异常");
                     return;
-                } else {
-                    CompositiveServerList serverList = (CompositiveServerList) oldServerList;
-                    if (!dscrEnable) {
-                        serverList.discoveryReload(false, new DataBaseServerList(lbMark, gatewayLoadBalanceService), null);
-                    } else {
-                        ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
-                        serverList.discoveryReload(true, new DataBaseServerList(lbMark, gatewayLoadBalanceService), new ZookeeperServerList(lbMark, wrapper));
-                    }
                 }
+                CompositiveServerList serverList = (CompositiveServerList) oldServerList;
+                if (!dscrEnable) {
+                    serverList.discoveryReload(false, new DataBaseServerList(lbMark, gatewayLoadBalanceService), null);
+                } else {
+                    ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
+                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, gatewayLoadBalanceService), new ZookeeperServerList(lbMark, wrapper));
+                }
+                logger.info(logPrex + "Done");
             }
         } finally {
             stampedLock.unlockWrite(stamp);

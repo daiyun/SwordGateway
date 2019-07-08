@@ -5,12 +5,9 @@ import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.common.AppStatusEnum;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
-import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
-import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.StringUtils;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,17 +46,7 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     protected List<ZookeeperServer> getServers() {
         try {
-            ServiceDiscoveryWrapper serviceDiscoveryWrapper = serviceWrapper.serviceDiscovery();
-            Closeable discovery = serviceDiscoveryWrapper.getServiceDiscovery();
-            if (discovery == null) {
-                return Collections.emptyList();
-            }
-            ServiceDiscovery<ZookeeperInstance> serviceDiscovery = (ServiceDiscovery<ZookeeperInstance>) discovery;
-            Collection<ServiceInstance<ZookeeperInstance>> instances = serviceDiscovery
-                    .queryForInstances(getServiceId());
-            if (instances == null || instances.isEmpty()) {
-                return Collections.emptyList();
-            }
+            Collection<ServiceInstance<ZookeeperInstance>> instances = serviceWrapper.serviceDiscovery().getInstances(getServiceId());
             List<ZookeeperServer> servers = new ArrayList<>();
             for (ServiceInstance<ZookeeperInstance> instance : instances) {
                 String instanceStatus = null;

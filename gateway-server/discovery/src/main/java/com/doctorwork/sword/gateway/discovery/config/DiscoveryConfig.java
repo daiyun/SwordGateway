@@ -68,7 +68,7 @@ public class DiscoveryConfig<T> {
             DiscoveryBuilder discoveryBuilder = new DiscoveryBuilder(curatorFramework, discoveryProperties.getZkRoot());
             ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryBuilder.build();
             serviceDiscovery.start();
-            return new ServiceDiscoveryWrapper<>(serviceDiscovery, dscrId, mapperRegistryKey);
+            return new ServiceDiscoveryWrapper(serviceDiscovery, dscrId, mapperRegistryKey);
         }
         return null;
     }
