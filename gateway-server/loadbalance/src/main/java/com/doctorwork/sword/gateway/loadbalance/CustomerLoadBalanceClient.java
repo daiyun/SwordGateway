@@ -48,7 +48,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
     @Override
     protected ILoadBalancer getLoadBalancer(String serviceId) {
         long stamp = stampedLock.tryOptimisticRead();
-        ILoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
+        BaseLoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
         if (loadBalancer == null) {
             this.loadBalanceInit(serviceId);
         }
@@ -76,27 +76,32 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 logger.info(logPrex + "无需初始化");
                 return;
             }
-            ILoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
+            BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
             if (loadBalancer != null) {
                 logger.info(logPrex + "负载已载入，无需初始化");
                 return;
             }
-            ServerList serverList;
-            Boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
-            if (!dscrEnable) {
-                serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
-            } else {
-                ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
-                serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
-                        new ZookeeperServerList(lbMark, wrapper));
-            }
-            DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
-            dynamicLoadBalancer.init(loadbalanceInfo);
-            loadBalancerMap.putIfAbsent(lbMark, dynamicLoadBalancer);
+            BaseLoadBalancer baseLoadBalancer = loadBalancer(lbMark, loadbalanceInfo);
+            loadBalancerMap.putIfAbsent(lbMark, baseLoadBalancer);
             logger.info(logPrex + "Done");
         } finally {
             stampedLock.unlockWrite(stamp);
         }
+    }
+
+    private BaseLoadBalancer loadBalancer(String lbMark, LoadbalanceInfo loadbalanceInfo) {
+        ServerList serverList;
+        boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
+        if (!dscrEnable) {
+            serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
+        } else {
+            ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
+            serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
+                    new ZookeeperServerList(lbMark, wrapper));
+        }
+        DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
+        dynamicLoadBalancer.init(loadbalanceInfo);
+        return dynamicLoadBalancer;
     }
 
     @Override
@@ -109,7 +114,6 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
 
         long stamp = stampedLock.writeLock();
         try {
-            ServerList serverList;
             BaseLoadBalancer old = loadBalancerMap.get(lbMark);
             if (loadbalanceInfo == null && old == null) {
                 logger.info(logPrex + "无需载入");
@@ -121,17 +125,8 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 logger.info(logPrex + "关闭负载器");
                 return;
             }
-            boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
-            if (!dscrEnable) {
-                serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
-            } else {
-                ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
-                serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
-                        new ZookeeperServerList(lbMark, wrapper));
-            }
-            DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
-            dynamicLoadBalancer.init(loadbalanceInfo);
-            loadBalancerMap.put(lbMark, dynamicLoadBalancer);
+            BaseLoadBalancer baseLoadBalancer = loadBalancer(lbMark, loadbalanceInfo);
+            loadBalancerMap.put(lbMark, baseLoadBalancer);
             old.shutdown();
             logger.info(logPrex + "Done");
         } finally {

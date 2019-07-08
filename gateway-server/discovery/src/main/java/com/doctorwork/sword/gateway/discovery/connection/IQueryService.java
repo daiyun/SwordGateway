@@ -11,6 +11,6 @@ import java.util.Collection;
  * @Date: 15:05 2019/7/8
  * @Modified By:
  */
-public interface IQueryServiceInstancecs {
+public interface IQueryService {
     Collection<ServiceInstance<ZookeeperInstance>> getInstances(String name) throws Exception;
 }

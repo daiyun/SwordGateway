@@ -17,7 +17,7 @@ import java.util.Collections;
  * @Date: 12:36 2019/7/4
  * @Modified By:
  */
-public class ServiceDiscoveryWrapper implements Closeable, IQueryServiceInstancecs {
+public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
     private final ServiceDiscovery serviceDiscovery;
     private final String id;
     private final String connectionId;

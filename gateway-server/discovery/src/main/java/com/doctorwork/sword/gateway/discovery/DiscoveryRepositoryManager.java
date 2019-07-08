@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -74,8 +73,10 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
                 return serviceWrapper;
             //此处会有高并发情况
             DiscoverConfig discoverConfig = gatewayDiscoveryService.discoverConfig(serviceId);
-            if (discoverConfig == null)
+            if (discoverConfig == null) {
+                logger.error("no discover config for {}", serviceId);
                 return null;
+            }
             ServiceWrapper wrapper = new ServiceWrapper(serviceId, discoverConfig.getDscrId(), this);
             serviceWrapperMap.put(serviceId, wrapper);
             return wrapper;

@@ -5,6 +5,7 @@ import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.common.AppStatusEnum;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
+import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.StringUtils;
 
@@ -23,11 +24,11 @@ import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
  */
 public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
-    private final ServiceWrapper serviceWrapper;
+    private final IQueryService queryService;
 
     public ZookeeperServerList(String serviceId, ServiceWrapper serviceWrapper) {
         super(serviceId);
-        this.serviceWrapper = serviceWrapper;
+        this.queryService = serviceWrapper == null ? null : serviceWrapper.queryService();
     }
 
     @Override
@@ -46,7 +47,9 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     protected List<ZookeeperServer> getServers() {
         try {
-            Collection<ServiceInstance<ZookeeperInstance>> instances = serviceWrapper.serviceDiscovery().getInstances(getServiceId());
+            if (queryService == null)
+                return Collections.emptyList();
+            Collection<ServiceInstance<ZookeeperInstance>> instances = queryService.getInstances(getServiceId());
             List<ZookeeperServer> servers = new ArrayList<>();
             for (ServiceInstance<ZookeeperInstance> instance : instances) {
                 String instanceStatus = null;

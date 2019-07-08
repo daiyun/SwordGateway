@@ -2,16 +2,14 @@ package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
+import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.x.discovery.ServiceCache;
-import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.details.ServiceCacheListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * @author chenzhiqiang
@@ -84,8 +82,12 @@ public class ServiceWrapper {
         return dscrMapKey;
     }
 
-    public ServiceDiscoveryWrapper serviceDiscovery() {
+    private ServiceDiscoveryWrapper serviceDiscovery() {
         return iDiscoveryRepository.serviceDisovery(this);
+    }
+
+    public IQueryService queryService() {
+        return this.serviceDiscovery();
     }
 
     public void clear() {
