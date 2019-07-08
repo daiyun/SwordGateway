@@ -298,7 +298,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             if (loadBalancer instanceof DynamicLoadBalancer) {
                 DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
                 logger.info("更新负载均衡器[{}]的服务列表", serviceId);
-                dynamicLoadBalancer.updateListOfServers();
+                dynamicLoadBalancer.updateListOfServers(true);
             }
         }
     }

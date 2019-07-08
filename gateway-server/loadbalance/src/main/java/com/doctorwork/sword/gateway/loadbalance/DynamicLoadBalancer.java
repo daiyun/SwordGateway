@@ -6,7 +6,6 @@ import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.rule.RuleParam;
-import com.google.common.annotations.VisibleForTesting;
 import com.netflix.loadbalancer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +36,12 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
 
     private volatile LongAdder count = new LongAdder();
 
+    private volatile long lastUpdated = System.currentTimeMillis();
+
     protected final ServerListUpdater.UpdateAction updateAction = new ServerListUpdater.UpdateAction() {
         @Override
         public void doUpdate() {
-            updateListOfServers();
+            updateListOfServers(false);
         }
     };
 
@@ -238,8 +239,11 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         }
     }
 
-    @VisibleForTesting
-    public void updateListOfServers() {
+    public void updateListOfServers(boolean force) {
+        //avoid to concurrent update service list
+        if (!force && (System.currentTimeMillis() - lastUpdated) <= 5000) {
+            return;
+        }
         List<T> servers = new ArrayList<T>();
         if (serverListImpl != null) {
             servers = serverListImpl.getUpdatedListOfServers();
@@ -253,9 +257,10 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
             }
         }
         updateAllServerList(servers);
+        lastUpdated = System.currentTimeMillis();
     }
 
-    protected void updateAllServerList(List<T> ls) {
+    private void updateAllServerList(List<T> ls) {
         if (serverListUpdateInProgress.compareAndSet(false, true)) {
             try {
                 for (T s : ls) {
