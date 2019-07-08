@@ -34,13 +34,7 @@ public class ServiceWrapper {
     }
 
     private void buildServiceCache() {
-        if (serviceCache != null) {
-            try {
-                serviceCache.close();
-            } catch (Exception e) {
-                logger.error("error close servicecache for {}", serviceId, e);
-            }
-        }
+        closeCache();
         ServiceDiscoveryWrapper serviceDiscoveryWrapper = serviceDiscovery();
         if (serviceDiscoveryWrapper == null) {
             logger.error("service[{}] discovery cache build failed,because the service discovery is null", this.serviceId);
@@ -49,17 +43,6 @@ public class ServiceWrapper {
         try {
             ServiceCache<ZookeeperInstance> serviceCache = serviceDiscoveryWrapper.serviceCache(serviceId);
             serviceCache.start();
-            serviceCache.addListener(new ServiceCacheListener() {
-                @Override
-                public void cacheChanged() {
-                    logger.warn("节点配置变更");
-                }
-
-                @Override
-                public void stateChanged(CuratorFramework client, ConnectionState newState) {
-                    logger.warn("节点连接状态变更");
-                }
-            });
             this.serviceCache = serviceCache;
         } catch (Exception e) {
             logger.error("error create servicecache for {}", serviceId, e);
@@ -71,6 +54,10 @@ public class ServiceWrapper {
         logger.info("reload servicewrapper from {} to {}", oldMapKey, dscrMapKey);
         this.dscrMapKey = dscrMapKey;
         this.buildServiceCache();
+    }
+
+    public void addListener(ServerCacheListener serverCacheListener) {
+        this.serviceCache.addListener(serverCacheListener);
     }
 
     public void reloadCache() {
@@ -91,9 +78,21 @@ public class ServiceWrapper {
     }
 
     public void clear() {
-        this.serviceCache = null;
         this.iDiscoveryRepository = null;
         this.dscrMapKey = null;
         this.serviceId = null;
+        closeCache();
+    }
+
+    private void closeCache() {
+        if (serviceCache != null) {
+            try {
+                serviceCache.close();
+            } catch (Exception e) {
+                logger.error("error close servicecache for {}", serviceId, e);
+            } finally {
+                serviceCache = null;
+            }
+        }
     }
 }

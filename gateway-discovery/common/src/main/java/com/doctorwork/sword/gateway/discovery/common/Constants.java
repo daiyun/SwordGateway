@@ -24,4 +24,6 @@ public class Constants {
     public static final String PROPERTIES_APP_ID_KEY = "app.id";
 
     public static final String PROVIDES_PATH = "/provides";
+
+    public static final String CONFIGURATION_PATH = "/configuration";
 }

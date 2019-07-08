@@ -2,7 +2,6 @@ package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
-import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.loadbalance.server.CompositiveServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServerList;
@@ -95,9 +94,8 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (!dscrEnable) {
             serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
         } else {
-            ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
             serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
-                    new ZookeeperServerList(lbMark, wrapper));
+                    new ZookeeperServerList(lbMark, iDiscoveryRepository));
         }
         DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
         dynamicLoadBalancer.init(loadbalanceInfo);
@@ -267,8 +265,8 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 if (!dscrEnable) {
                     serverList.discoveryReload(false, new DataBaseServerList(lbMark, gatewayLoadBalanceService), null);
                 } else {
-                    ServiceWrapper wrapper = iDiscoveryRepository.serviceWrapper(lbMark);
-                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, gatewayLoadBalanceService), new ZookeeperServerList(lbMark, wrapper));
+                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
+                            new ZookeeperServerList(lbMark, iDiscoveryRepository));
                 }
                 logger.info(logPrex + "Done");
             }

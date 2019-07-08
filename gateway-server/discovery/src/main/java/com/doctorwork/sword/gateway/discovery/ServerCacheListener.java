@@ -10,15 +10,20 @@ import org.apache.curator.x.discovery.details.ServiceCacheListener;
  * @Date: 19:33 2019/7/2
  * @Modified By:
  */
-public class LoadBalanceServerCacheListener implements ServiceCacheListener {
+public abstract class ServerCacheListener implements ServiceCacheListener {
 
+    private Boolean reload;
 
     @Override
     public void cacheChanged() {
+        if (reload == null || reload)
+            serverReload();
     }
 
     @Override
     public void stateChanged(CuratorFramework client, ConnectionState newState) {
-
+        reload = newState.isConnected();
     }
+
+    public abstract void serverReload();
 }

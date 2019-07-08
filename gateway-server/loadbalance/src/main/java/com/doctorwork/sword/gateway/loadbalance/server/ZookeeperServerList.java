@@ -1,12 +1,12 @@
 package com.doctorwork.sword.gateway.loadbalance.server;
 
 import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
+import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.common.AppStatusEnum;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
-import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import org.apache.curator.x.discovery.ServiceInstance;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
  */
 public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
-    private final IQueryService queryService;
+    private IDiscoveryRepository iDiscoveryRepository;
 
-    public ZookeeperServerList(String serviceId, ServiceWrapper serviceWrapper) {
+    public ZookeeperServerList(String serviceId, IDiscoveryRepository iDiscoveryRepository) {
         super(serviceId);
-        this.queryService = serviceWrapper == null ? null : serviceWrapper.queryService();
+        this.iDiscoveryRepository = iDiscoveryRepository;
     }
 
     @Override
@@ -47,9 +47,9 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     protected List<ZookeeperServer> getServers() {
         try {
-            if (queryService == null)
+            Collection<ServiceInstance<ZookeeperInstance>> instances = iDiscoveryRepository.queryServices(getServiceId());
+            if (CollectionUtils.isEmpty(instances))
                 return Collections.emptyList();
-            Collection<ServiceInstance<ZookeeperInstance>> instances = queryService.getInstances(getServiceId());
             List<ZookeeperServer> servers = new ArrayList<>();
             for (ServiceInstance<ZookeeperInstance> instance : instances) {
                 String instanceStatus = null;

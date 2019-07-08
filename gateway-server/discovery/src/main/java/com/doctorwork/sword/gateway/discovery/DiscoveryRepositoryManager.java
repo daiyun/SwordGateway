@@ -1,13 +1,17 @@
 package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
+import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
+import org.apache.curator.x.discovery.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -177,5 +181,20 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository {
             wrapper.clear();
             serviceWrapperMap.remove(serviceId);
         }
+    }
+
+    @Override
+    public Collection<ServiceInstance<ZookeeperInstance>> queryServices(String serviceId) throws Exception {
+        ServiceWrapper serviceWrapper = this.serviceWrapper(serviceId);
+        if (serviceWrapper == null) {
+            logger.error("could not find service wrapper for {}", serviceId);
+            return null;
+        }
+        IQueryService queryService = serviceWrapper.queryService();
+        if (queryService == null) {
+            logger.error("could not find query service for {}", serviceId);
+            return null;
+        }
+        return queryService.getInstances(serviceId);
     }
 }

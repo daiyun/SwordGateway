@@ -1,7 +1,12 @@
 package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
+import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
+import org.apache.curator.x.discovery.ServiceInstance;
+
+import java.util.Collection;
 
 /**
  * @Author:czq
@@ -23,4 +28,6 @@ public interface IDiscoveryRepository {
     void loadRegistry(String registryId) throws Exception;
 
     void serviceDelete(String serviceId);
+
+    Collection<ServiceInstance<ZookeeperInstance>> queryServices(String serviceId) throws Exception;
 }

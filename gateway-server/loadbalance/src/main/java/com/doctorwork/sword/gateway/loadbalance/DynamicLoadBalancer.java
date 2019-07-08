@@ -54,8 +54,7 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
     public void init(LoadbalanceInfo loadbalanceInfo) {
         if (loadbalanceInfo == null)
             throw new RuntimeException("loadbalance info must not be null");
-        String serviceId = loadbalanceInfo.getLbMark();
-        this.name = serviceId;
+        this.name = loadbalanceInfo.getLbMark();
         this.ribbonLoadBalanceConfig = new RibbonLoadBalanceConfig(loadbalanceInfo);
         RibbonPingParam<IPing> pingParam;
         IPing iPing = null;
