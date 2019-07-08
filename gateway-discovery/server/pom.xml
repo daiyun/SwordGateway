@@ -3,20 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>sword-gateway</artifactId>
+        <artifactId>gateway-discovery</artifactId>
         <groupId>com.doctorwork.sword</groupId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>gateway-discovery-common</artifactId>
+    <packaging>jar</packaging>
+    <artifactId>gateway-discovery-server</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-x-discovery</artifactId>
-            <scope>compile</scope>
+            <groupId>com.doctorwork.sword</groupId>
+            <artifactId>gateway-discovery-common</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -5,31 +5,24 @@
 
     <groupId>com.doctorwork.sword</groupId>
     <artifactId>sword-gateway</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <name>gateway</name>
 
     <modules>
-        <module>discovery/common</module>
-        <module>discovery/server</module>
-        <module>discovery/server-spring</module>
-        <module>gateway-server/common</module>
-        <module>gateway-server/dal</module>
-        <module>gateway-server/core</module>
-        <module>gateway-server/boot</module>
-        <module>gateway-server/discovery</module>
-        <module>gateway-server/loadbalance</module>
+        <module>gateway-discovery</module>
+        <module>gateway-server</module>
     </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.0.1.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <properties>
+        <revision>0.0.1-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -47,51 +40,15 @@
         <!-- discovery -->
         <curator.version>4.0.1</curator.version>
     </properties>
-
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-server-dal</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-server-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-server-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-server-loadbalance</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-discovery-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-discovery-server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.doctorwork.sword</groupId>
-                <artifactId>gateway-server-discovery</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <!--redis-->
             <!--<dependency>-->
                 <!--<groupId>org.springframework.data</groupId>-->
@@ -104,69 +61,7 @@
                 <!--<artifactId>jedis</artifactId>-->
                 <!--<version>2.9.0</version>-->
             <!--</dependency>-->
-            <dependency>
-                <groupId>com.ctrip.framework.apollo</groupId>
-                <artifactId>apollo-client</artifactId>
-                <version>${apollo.client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>${reflections.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-configuration</groupId>
-                <artifactId>commons-configuration</artifactId>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.netflix.netflix-commons</groupId>
-                <artifactId>netflix-commons-util</artifactId>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid</artifactId>
-                <version>${druid.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!-- mybatis start -->
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis-spring.version}</version>
-            </dependency>
-            <!-- mybatis end -->
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.curator</groupId>
-                <artifactId>curator-x-discovery</artifactId>
-                <version>${curator.version}</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
