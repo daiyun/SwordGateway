@@ -1,9 +1,13 @@
-package com.doctorwork.sword.gateway.discovery;
+package com.doctorwork.com.sword.gateway.registry;
 
+import com.doctorwork.com.sword.gateway.registry.config.DiscoveryRegistryConfig;
+import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.sword.gateway.common.event.AbstractEvent;
+import com.doctorwork.sword.gateway.common.event.EventPost;
+import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.discovery.config.DiscoveryRegistryConfig;
-import com.doctorwork.sword.gateway.discovery.connection.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
+import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Date: 11:03 2019/7/4
  * @Modified By:
  */
-public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectionRepository {
+public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectionRepository, EventPost {
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryConnectionRepositoryManager.class);
 
     private final Map<String, DiscoveryConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
@@ -27,6 +31,7 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
 
     private GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService;
     private DiscoveryRegistryConfig defaultDiscoveryRegistryConfig;
+    private EventBus eventBus;
 
     public DiscoveryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig) {
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
@@ -40,7 +45,7 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
 
     @Override
     //重载此处 需要将对应的发现进行重载 然后进行关闭操作
-    public void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository) throws IOException {
+    public void connectionLoad(String registryId) throws IOException {
         DiscoveryRegistryConfig registryConfig;
         if (registryId.equals(DEFAULT_ZOOKEEPER)) {
             registryConfig = defaultDiscoveryRegistryConfig;
@@ -68,13 +73,14 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
         try {
             old = connectionWrapperMap.get(registryId);
             connectionWrapperMap.put(registryId, connectionWrapper);
-            discoveryRepository.loadRegistry(registryId);
+            Boolean isolde = old != null;
+            eventPost(new RegistryLoadEvent(registryId, isolde));
+            if (isolde) {
+                old.close();
+            }
         } catch (Exception e) {
             logger.info("error happened while connectionLoad regitry for {}", registryId, e);
         } finally {
-            if (old != null) {
-                old.close();
-            }
             updateFlag.set(false);
         }
     }
@@ -84,5 +90,11 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
         DiscoveryConnectionWrapper wrapper = connectionWrapperMap.get(registryId);
         connectionWrapperMap.remove(registryId);
         wrapper.close();
+    }
+
+    @Override
+    public void eventPost(AbstractEvent event) {
+        if (eventBus != null)
+            eventBus.post(event);
     }
 }

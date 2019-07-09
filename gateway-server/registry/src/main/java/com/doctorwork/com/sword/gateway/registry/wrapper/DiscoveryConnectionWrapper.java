@@ -1,4 +1,4 @@
-package com.doctorwork.sword.gateway.discovery.connection;
+package com.doctorwork.com.sword.gateway.registry.wrapper;
 
 import java.io.Closeable;
 import java.io.IOException;

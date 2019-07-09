@@ -1,4 +1,4 @@
-package com.doctorwork.sword.gateway.discovery.event;
+package com.doctorwork.sword.gateway.common.event;
 
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 

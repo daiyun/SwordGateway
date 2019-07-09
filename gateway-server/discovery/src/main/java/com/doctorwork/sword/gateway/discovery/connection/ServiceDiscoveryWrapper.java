@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.discovery.connection;
 
+import com.doctorwork.sword.gateway.discovery.IQueryService;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import org.apache.curator.x.discovery.ServiceCache;

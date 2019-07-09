@@ -1,6 +1,6 @@
-package com.doctorwork.sword.gateway.discovery;
+package com.doctorwork.com.sword.gateway.registry;
 
-import com.doctorwork.sword.gateway.discovery.connection.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 public interface IDiscoveryConnectionRepository {
     DiscoveryConnectionWrapper connection(String registryId);
 
-    void connectionLoad(String registryId, IDiscoveryRepository discoveryRepository) throws IOException;
+    void connectionLoad(String registryId) throws IOException;
 
     void connectionClose(String registryId) throws IOException;
 }

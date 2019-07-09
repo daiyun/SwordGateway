@@ -1,13 +1,15 @@
 package com.doctorwork.sword.gateway.discovery;
 
+import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
+import com.doctorwork.sword.gateway.common.event.EventPost;
+import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
+import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
-import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
-import com.doctorwork.sword.gateway.discovery.event.EventPost;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.google.common.eventbus.EventBus;
 import org.apache.curator.x.discovery.ServiceInstance;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
  * @Date: 10:10 2019/7/4
  * @Modified By:
  */
-public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPost {
+public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPost, EventListener<AbstractEvent> {
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryRepositoryManager.class);
     private GatewayDiscoveryService gatewayDiscoveryService;
     private DiscoveryConfig defaultDiscoveryConfig;
@@ -42,6 +44,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
         this.defaultDiscoveryConfig = defaultDiscoveryConfig;
         this.discoveryConnectionRepository = discoveryConnectionRepository;
         this.eventBus = eventBus;
+        register(this.eventBus);
     }
 
     public void preLoadDiscovery() throws Exception {
@@ -50,14 +53,14 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (defaultDiscoveryConfig != null && defaultDiscoveryConfig.isPreLoad() != null
                     && defaultDiscoveryConfig.isPreLoad()) {
                 logger.info("pre connectionLoad service discovery config for local");
-                discoveryConnectionRepository.connectionLoad("default", this);
+                discoveryConnectionRepository.connectionLoad("default");
                 this.loadDiscovery("default", null);
             }
         }
         List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
         Set<String> regisryIdSet = preLoadList.stream().map(DiscoverConfig::getDscrRegitryId).collect(Collectors.toSet());
         for (String registryId : regisryIdSet) {
-            discoveryConnectionRepository.connectionLoad(registryId, this);
+            discoveryConnectionRepository.connectionLoad(registryId);
         }
         for (DiscoverConfig discoverConfig : preLoadList) {
             this.loadDiscovery(discoverConfig.getDscrId(), discoverConfig);
@@ -202,5 +205,20 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     public void eventPost(AbstractEvent event) {
         if (eventBus != null)
             eventBus.post(event);
+    }
+
+    @Override
+    public void handleEvent(AbstractEvent event) {
+        if (event instanceof RegistryLoadEvent) {
+            RegistryLoadEvent registryLoadEvent = (RegistryLoadEvent) event;
+            String registryId = registryLoadEvent.getRegistryId();
+            if (registryLoadEvent.getReload()) {
+                try {
+                    this.loadRegistry(registryId);
+                } catch (Exception e) {
+                    logger.error("handle event RegistryLoadEvent,but error happened", e);
+                }
+            }
+        }
     }
 }

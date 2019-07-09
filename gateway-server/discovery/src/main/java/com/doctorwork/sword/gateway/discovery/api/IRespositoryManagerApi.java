@@ -1,7 +1,6 @@
 package com.doctorwork.sword.gateway.discovery.api;
 
 import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
-import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 
 /**

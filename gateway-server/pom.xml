@@ -19,6 +19,7 @@
         <module>discovery</module>
         <module>loadbalance</module>
         <module>config</module>
+        <module>registry</module>
     </modules>
 
     <dependencyManagement>
@@ -58,6 +59,11 @@
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
                 <artifactId>gateway-discovery-common</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.doctorwork.sword</groupId>
+                <artifactId>gateway-server-registry</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>

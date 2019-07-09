@@ -2,9 +2,8 @@ package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
-import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
-import com.doctorwork.sword.gateway.discovery.event.EventPost;
+import com.doctorwork.sword.gateway.common.event.EventPost;
 import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
 import org.apache.curator.x.discovery.ServiceCache;
 import org.slf4j.Logger;

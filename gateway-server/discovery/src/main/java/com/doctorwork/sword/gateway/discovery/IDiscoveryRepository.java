@@ -2,7 +2,6 @@ package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
-import com.doctorwork.sword.gateway.discovery.connection.IQueryService;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.x.discovery.ServiceInstance;
 

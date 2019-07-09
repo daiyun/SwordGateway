@@ -1,4 +1,4 @@
-package com.doctorwork.sword.gateway.discovery.connection;
+package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import org.apache.curator.x.discovery.ServiceInstance;

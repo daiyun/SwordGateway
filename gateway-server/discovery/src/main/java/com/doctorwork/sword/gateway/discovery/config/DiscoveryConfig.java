@@ -1,14 +1,14 @@
 package com.doctorwork.sword.gateway.discovery.config;
 
+import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
-import com.doctorwork.sword.gateway.discovery.IDiscoveryConnectionRepository;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.builder.DiscoveryBuilder;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
-import com.doctorwork.sword.gateway.discovery.connection.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.x.discovery.ServiceDiscovery;

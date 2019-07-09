@@ -1,9 +1,9 @@
 package com.doctorwork.sword.gateway.discovery.api;
 
-import com.doctorwork.sword.gateway.discovery.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
-import com.doctorwork.sword.gateway.discovery.connection.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class RespositoryManagerApi implements IRespositoryManagerApi {
             @Override
             public void run() {
                 try {
-                    discoveryConnectionRepository.connectionLoad(registryId, discoveryRepository);
+                    discoveryConnectionRepository.connectionLoad(registryId);
                 } catch (IOException e) {
                     logger.error("error happened while load connection for {}", registryId, e);
                 }

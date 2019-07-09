@@ -1,15 +1,15 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.discovery.DiscoveryConnectionRepositoryManager;
+import com.doctorwork.com.sword.gateway.registry.DiscoveryConnectionRepositoryManager;
+import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
-import com.doctorwork.sword.gateway.discovery.IDiscoveryConnectionRepository;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.api.RespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
-import com.doctorwork.sword.gateway.discovery.config.DiscoveryRegistryConfig;
+import com.doctorwork.com.sword.gateway.registry.config.DiscoveryRegistryConfig;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;

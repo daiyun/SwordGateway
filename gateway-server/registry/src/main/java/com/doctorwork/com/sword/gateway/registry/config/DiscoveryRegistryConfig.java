@@ -1,10 +1,10 @@
-package com.doctorwork.sword.gateway.discovery.config;
+package com.doctorwork.com.sword.gateway.registry.config;
 
+import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.doctorwork.sword.gateway.discovery.common.builder.CuratorBuilder;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
-import com.doctorwork.sword.gateway.discovery.connection.DiscoveryConnectionWrapper;
 import org.apache.curator.framework.CuratorFramework;
 
 /**
