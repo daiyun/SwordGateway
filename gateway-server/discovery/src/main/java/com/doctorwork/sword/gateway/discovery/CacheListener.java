@@ -12,7 +12,7 @@ import org.apache.curator.x.discovery.details.ServiceCacheListener;
  */
 public abstract class CacheListener implements ServiceCacheListener {
 
-    private Boolean reload;
+    private volatile Boolean reload;
 
     @Override
     public void cacheChanged() {

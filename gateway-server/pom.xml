@@ -18,6 +18,7 @@
         <module>boot</module>
         <module>discovery</module>
         <module>loadbalance</module>
+        <module>config</module>
     </modules>
 
     <dependencyManagement>

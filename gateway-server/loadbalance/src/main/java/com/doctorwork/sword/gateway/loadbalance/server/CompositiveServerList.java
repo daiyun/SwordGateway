@@ -42,24 +42,24 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
 
     @Override
     public List<AbstractServer> getInitialListOfServers() {
-        return getServers();
+        return getServers(false);
     }
 
     @Override
     public List<AbstractServer> getUpdatedListOfServers() {
-        return getServers();
+        return getServers(true);
     }
 
-    protected List<AbstractServer> getServers() {
+    protected List<AbstractServer> getServers(boolean update) {
         try {
             long stamp = stampedLock.tryOptimisticRead();
             List<AbstractServer> servers = new ArrayList<>();
-            compsitiveServerList(servers);
+            compsitiveServerList(update, servers);
             if (!stampedLock.validate(stamp)) {
                 stampedLock.readLock();
                 try {
                     servers.clear();
-                    compsitiveServerList(servers);
+                    compsitiveServerList(update, servers);
                 } finally {
                     stampedLock.unlockRead(stamp);
                 }
@@ -71,16 +71,16 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
         return Collections.emptyList();
     }
 
-    private void compsitiveServerList(List<AbstractServer> servers) {
+    private void compsitiveServerList(boolean update, List<AbstractServer> servers) {
         List<DataBaseServer> dataBaseServers = null;
         List<ZookeeperServer> zookeeperServers;
         if (dataBaseServerList != null) {
-            dataBaseServers = dataBaseServerList.getInitialListOfServers();
+            dataBaseServers = update ? dataBaseServerList.getUpdatedListOfServers() : dataBaseServerList.getInitialListOfServers();
         }
         if (dscrEnable != null && dscrEnable) {
             if (zookeeperServerList == null)
                 return;
-            zookeeperServers = zookeeperServerList.getInitialListOfServers();
+            zookeeperServers = update ? zookeeperServerList.getUpdatedListOfServers() : zookeeperServerList.getInitialListOfServers();
             if (CollectionUtils.isEmpty(zookeeperServers)) {
                 return;
             }
