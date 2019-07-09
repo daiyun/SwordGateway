@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.discovery.api;
 
-import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
@@ -22,10 +22,10 @@ public class RespositoryManagerApi implements IRespositoryManagerApi {
     private static final Logger logger = LoggerFactory.getLogger(RespositoryManagerApi.class);
     private static ExecutorService executors = Executors.newSingleThreadExecutor();
 
-    private IDiscoveryConnectionRepository discoveryConnectionRepository;
+    private IRegistryConnectionRepository discoveryConnectionRepository;
     private IDiscoveryRepository discoveryRepository;
 
-    public RespositoryManagerApi(IDiscoveryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
+    public RespositoryManagerApi(IRegistryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
         if (discoveryConnectionRepository == null || discoveryRepository == null)
             throw new RuntimeException("discoveryConnectionRepository and discoveryRepository must not be null");
         this.discoveryConnectionRepository = discoveryConnectionRepository;

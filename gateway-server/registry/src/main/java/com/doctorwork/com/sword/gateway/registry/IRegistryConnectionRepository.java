@@ -10,7 +10,7 @@ import java.io.IOException;
  * @Date: 10:25 2019/7/4
  * @Modified By:
  */
-public interface IDiscoveryConnectionRepository {
+public interface IRegistryConnectionRepository {
     DiscoveryConnectionWrapper connection(String registryId);
 
     void connectionLoad(String registryId) throws IOException;

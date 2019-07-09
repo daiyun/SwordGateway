@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Date: 11:03 2019/7/4
  * @Modified By:
  */
-public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectionRepository, EventPost {
-    protected static final Logger logger = LoggerFactory.getLogger(DiscoveryConnectionRepositoryManager.class);
+public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost {
+    protected static final Logger logger = LoggerFactory.getLogger(RegistryConnectionRepositoryManager.class);
 
     private final Map<String, DiscoveryConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_ZOOKEEPER = "default";
@@ -33,7 +33,7 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
     private DiscoveryRegistryConfig defaultDiscoveryRegistryConfig;
     private EventBus eventBus;
 
-    public DiscoveryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig, EventBus eventBus) {
+    public RegistryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig, EventBus eventBus) {
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
         this.defaultDiscoveryRegistryConfig = defaultDiscoveryRegistryConfig;
         this.eventBus = eventBus;

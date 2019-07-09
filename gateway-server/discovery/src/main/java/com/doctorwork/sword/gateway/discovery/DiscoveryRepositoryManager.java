@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.discovery;
 
-import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.common.event.EventPost;
 import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
@@ -34,13 +34,13 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryRepositoryManager.class);
     private GatewayDiscoveryService gatewayDiscoveryService;
     private DiscoveryConfig defaultDiscoveryConfig;
-    private IDiscoveryConnectionRepository discoveryConnectionRepository;
+    private IRegistryConnectionRepository discoveryConnectionRepository;
     private final Map<String, ServiceDiscoveryWrapper> discoveryMap = new ConcurrentHashMap<>();
     private final Map<String, ServiceWrapper> serviceWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_SERVICEDISCOVERY = "default";
     private EventBus eventBus;
 
-    public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IDiscoveryConnectionRepository discoveryConnectionRepository, EventBus eventBus) {
+    public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IRegistryConnectionRepository discoveryConnectionRepository, EventBus eventBus) {
         this.gatewayDiscoveryService = gatewayDiscoveryService;
         this.defaultDiscoveryConfig = defaultDiscoveryConfig;
         this.discoveryConnectionRepository = discoveryConnectionRepository;

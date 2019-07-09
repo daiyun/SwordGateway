@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>com.doctorwork.sword</groupId>
-            <artifactId>gateway-server-core</artifactId>
+            <artifactId>gateway-server-registry</artifactId>
         </dependency>
     </dependencies>
 

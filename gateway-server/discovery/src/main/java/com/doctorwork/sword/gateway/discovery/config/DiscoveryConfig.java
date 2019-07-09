@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.discovery.config;
 
-import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
@@ -56,7 +56,7 @@ public class DiscoveryConfig<T> {
         return mapperRegistryKey;
     }
 
-    public ServiceDiscoveryWrapper buildServiceDiscovery(IDiscoveryConnectionRepository discoveryConnectionRepository) throws Exception {
+    public ServiceDiscoveryWrapper buildServiceDiscovery(IRegistryConnectionRepository discoveryConnectionRepository) throws Exception {
         if (properties instanceof DiscoveryProperties) {
             if (StringUtils.isEmpty(mapperRegistryKey))
                 return null;

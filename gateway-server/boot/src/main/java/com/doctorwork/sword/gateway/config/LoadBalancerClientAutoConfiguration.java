@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.com.sword.gateway.registry.DiscoveryConnectionRepositoryManager;
-import com.doctorwork.com.sword.gateway.registry.IDiscoveryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
+import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
@@ -38,28 +38,28 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public IDiscoveryConnectionRepository discoveryConnectionRepository(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
-                                                                        ZookeeperProperties defaultZookeeperProperties,
-                                                                        EventBus eventBus) {
+    public IRegistryConnectionRepository discoveryConnectionRepository(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
+                                                                       ZookeeperProperties defaultZookeeperProperties,
+                                                                       EventBus eventBus) {
         DiscoveryRegistryConfig<ZookeeperProperties> discoveryRegistryConfig = null;
         if (defaultZookeeperProperties != null) {
             discoveryRegistryConfig = new DiscoveryRegistryConfig<>();
             discoveryRegistryConfig.setProperties(defaultZookeeperProperties);
-            discoveryRegistryConfig.setRegistryKey(DiscoveryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
+            discoveryRegistryConfig.setRegistryKey(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         }
-        return new DiscoveryConnectionRepositoryManager(gatewayDiscoveryConnectionService, discoveryRegistryConfig, eventBus);
+        return new RegistryConnectionRepositoryManager(gatewayDiscoveryConnectionService, discoveryRegistryConfig, eventBus);
     }
 
     @Bean
     public IDiscoveryRepository discoveryRepository(GatewayDiscoveryService gatewayDiscoveryService,
                                                     DiscoveryProperties defaultDiscoveryProperties,
-                                                    IDiscoveryConnectionRepository discoveryConnectionRepository,
+                                                    IRegistryConnectionRepository discoveryConnectionRepository,
                                                     @Autowired(required = false) EventBus eventBus) throws Exception {
         DiscoveryConfig<DiscoveryProperties> discoveryConfig = null;
 
         if (defaultDiscoveryProperties != null) {
             discoveryConfig = new DiscoveryConfig<>(DiscoveryRepositoryManager.DEFAULT_SERVICEDISCOVERY,
-                    true, DiscoveryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties);
+                    true, RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties);
         }
         DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(gatewayDiscoveryService, discoveryConfig,
                 discoveryConnectionRepository, eventBus);
@@ -68,7 +68,7 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public IRespositoryManagerApi respositoryManagerApi(IDiscoveryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
+    public IRespositoryManagerApi respositoryManagerApi(IRegistryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
         return new RespositoryManagerApi(discoveryConnectionRepository, discoveryRepository);
     }
 
