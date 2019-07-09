@@ -12,6 +12,7 @@ import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,10 +209,12 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     }
 
     @Override
+    @Subscribe
     public void handleEvent(AbstractEvent event) {
         if (event instanceof RegistryLoadEvent) {
             RegistryLoadEvent registryLoadEvent = (RegistryLoadEvent) event;
             String registryId = registryLoadEvent.getRegistryId();
+            logger.info("handle event registry load[{}] for {}", registryLoadEvent.getReload(), registryId);
             if (registryLoadEvent.getReload()) {
                 try {
                     this.loadRegistry(registryId);

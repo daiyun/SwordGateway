@@ -33,9 +33,10 @@ public class DiscoveryConnectionRepositoryManager implements IDiscoveryConnectio
     private DiscoveryRegistryConfig defaultDiscoveryRegistryConfig;
     private EventBus eventBus;
 
-    public DiscoveryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig) {
+    public DiscoveryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig, EventBus eventBus) {
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
         this.defaultDiscoveryRegistryConfig = defaultDiscoveryRegistryConfig;
+        this.eventBus = eventBus;
     }
 
     @Override

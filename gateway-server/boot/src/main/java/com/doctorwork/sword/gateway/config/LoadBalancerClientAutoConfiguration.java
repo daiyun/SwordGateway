@@ -39,14 +39,15 @@ public class LoadBalancerClientAutoConfiguration {
 
     @Bean
     public IDiscoveryConnectionRepository discoveryConnectionRepository(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
-                                                                        ZookeeperProperties defaultZookeeperProperties) {
+                                                                        ZookeeperProperties defaultZookeeperProperties,
+                                                                        EventBus eventBus) {
         DiscoveryRegistryConfig<ZookeeperProperties> discoveryRegistryConfig = null;
         if (defaultZookeeperProperties != null) {
             discoveryRegistryConfig = new DiscoveryRegistryConfig<>();
             discoveryRegistryConfig.setProperties(defaultZookeeperProperties);
             discoveryRegistryConfig.setRegistryKey(DiscoveryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         }
-        return new DiscoveryConnectionRepositoryManager(gatewayDiscoveryConnectionService, discoveryRegistryConfig);
+        return new DiscoveryConnectionRepositoryManager(gatewayDiscoveryConnectionService, discoveryRegistryConfig, eventBus);
     }
 
     @Bean
@@ -74,7 +75,7 @@ public class LoadBalancerClientAutoConfiguration {
     @Bean
     public LoadBalancerClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService,
                                                  IDiscoveryRepository discoveryRepository,
-                                                 @Autowired(required = false) EventBus eventBus) {
+                                                 EventBus eventBus) {
         CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
         return customerLoadBalanceClient;
     }
