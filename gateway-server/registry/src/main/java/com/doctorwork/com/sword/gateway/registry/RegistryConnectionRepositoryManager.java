@@ -1,7 +1,7 @@
 package com.doctorwork.com.sword.gateway.registry;
 
-import com.doctorwork.com.sword.gateway.registry.config.DiscoveryRegistryConfig;
-import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
+import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.common.event.EventPost;
 import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
@@ -25,31 +25,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost {
     protected static final Logger logger = LoggerFactory.getLogger(RegistryConnectionRepositoryManager.class);
 
-    private final Map<String, DiscoveryConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
+    private final Map<String, ConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_ZOOKEEPER = "default";
     private AtomicBoolean updateFlag = new AtomicBoolean(false);
 
     private GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService;
-    private DiscoveryRegistryConfig defaultDiscoveryRegistryConfig;
+    private RegistryConfig defaultRegistryConfig;
     private EventBus eventBus;
 
-    public RegistryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, DiscoveryRegistryConfig defaultDiscoveryRegistryConfig, EventBus eventBus) {
+    public RegistryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, RegistryConfig defaultRegistryConfig, EventBus eventBus) {
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
-        this.defaultDiscoveryRegistryConfig = defaultDiscoveryRegistryConfig;
+        this.defaultRegistryConfig = defaultRegistryConfig;
         this.eventBus = eventBus;
     }
 
     @Override
-    public DiscoveryConnectionWrapper connection(String registryId) {
+    public ConnectionWrapper connection(String registryId) {
         return connectionWrapperMap.get(registryId);
     }
 
     @Override
     //重载此处 需要将对应的发现进行重载 然后进行关闭操作
     public void connectionLoad(String registryId) throws IOException {
-        DiscoveryRegistryConfig registryConfig;
+        RegistryConfig registryConfig;
         if (registryId.equals(DEFAULT_ZOOKEEPER)) {
-            registryConfig = defaultDiscoveryRegistryConfig;
+            registryConfig = defaultRegistryConfig;
             if (registryConfig == null) {
                 logger.error("no service discovery connection config for {}", registryId);
                 return;
@@ -60,14 +60,14 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
                 logger.error("no service discovery connection config for {}", registryId);
                 return;
             }
-            registryConfig = DiscoveryRegistryConfig.build(discoverRegistryConfig);
+            registryConfig = RegistryConfig.build(discoverRegistryConfig);
         }
-        DiscoveryConnectionWrapper connectionWrapper = registryConfig.buidRegistry();
+        ConnectionWrapper connectionWrapper = registryConfig.buidRegistry();
         if (connectionWrapper == null) {
             logger.error("service discovery connection create faild for {}", registryId);
             return;
         }
-        DiscoveryConnectionWrapper old = null;
+        ConnectionWrapper old = null;
         if (!updateFlag.compareAndSet(false, true)) {
             return;
         }
@@ -88,7 +88,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
 
     @Override
     public void connectionClose(String registryId) throws IOException {
-        DiscoveryConnectionWrapper wrapper = connectionWrapperMap.get(registryId);
+        ConnectionWrapper wrapper = connectionWrapperMap.get(registryId);
         connectionWrapperMap.remove(registryId);
         wrapper.close();
     }

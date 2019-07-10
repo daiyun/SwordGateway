@@ -9,13 +9,13 @@ import java.io.IOException;
  * @Date: 10:35 2019/7/4
  * @Modified By:
  */
-public class DiscoveryConnectionWrapper<T extends Closeable> implements Closeable {
+public class ConnectionWrapper<T extends Closeable> implements Closeable {
 
     private final String id;
 
     private final T t;
 
-    public DiscoveryConnectionWrapper(String id, T t) {
+    public ConnectionWrapper(String id, T t) {
         this.id = id;
         if (t == null)
             throw new RuntimeException("discovery connection must not be null");

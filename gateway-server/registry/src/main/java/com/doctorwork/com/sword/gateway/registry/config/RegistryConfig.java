@@ -1,6 +1,6 @@
 package com.doctorwork.com.sword.gateway.registry.config;
 
-import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.doctorwork.sword.gateway.discovery.common.builder.CuratorBuilder;
@@ -13,16 +13,16 @@ import org.apache.curator.framework.CuratorFramework;
  * @Date: 10:54 2019/7/4
  * @Modified By:
  */
-public class DiscoveryRegistryConfig<T> {
+public class RegistryConfig<T> {
     private String registryKey;
     private T properties;
 
-    public static DiscoveryRegistryConfig build(DiscoverRegistryConfig discoverRegistryConfig) {
+    public static RegistryConfig build(DiscoverRegistryConfig discoverRegistryConfig) {
         ZookeeperProperties zookeeperProperties = JacksonUtil.toObject(discoverRegistryConfig.getDscrRegistryConfig(), ZookeeperProperties.class);
-        DiscoveryRegistryConfig<ZookeeperProperties> discoveryRegistryConfig = new DiscoveryRegistryConfig<>();
-        discoveryRegistryConfig.setRegistryKey(discoverRegistryConfig.getDscrRegistryId());
-        discoveryRegistryConfig.setProperties(zookeeperProperties);
-        return discoveryRegistryConfig;
+        RegistryConfig<ZookeeperProperties> registryConfig = new RegistryConfig<>();
+        registryConfig.setRegistryKey(discoverRegistryConfig.getDscrRegistryId());
+        registryConfig.setProperties(zookeeperProperties);
+        return registryConfig;
     }
 
     public String getRegistryKey() {
@@ -41,12 +41,12 @@ public class DiscoveryRegistryConfig<T> {
         this.properties = properties;
     }
 
-    public DiscoveryConnectionWrapper buidRegistry() {
+    public ConnectionWrapper buidRegistry() {
         if (properties instanceof ZookeeperProperties) {
             ZookeeperProperties castProperties = (ZookeeperProperties) properties;
             CuratorBuilder curatorBuilder = new CuratorBuilder(castProperties);
             CuratorFramework curatorFramework = curatorBuilder.build();
-            DiscoveryConnectionWrapper<CuratorFramework> connectionWrapper = new DiscoveryConnectionWrapper<>(registryKey, curatorFramework);
+            ConnectionWrapper<CuratorFramework> connectionWrapper = new ConnectionWrapper<>(registryKey, curatorFramework);
             return connectionWrapper;
         }
         return null;

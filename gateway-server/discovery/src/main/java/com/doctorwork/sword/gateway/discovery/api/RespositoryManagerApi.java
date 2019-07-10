@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.discovery.api;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
-import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.ServiceWrapper;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
@@ -36,7 +36,7 @@ public class RespositoryManagerApi implements IRespositoryManagerApi {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> executors.shutdown()));
     }
 
-    public DiscoveryConnectionWrapper connection(String registryId) {
+    public ConnectionWrapper connection(String registryId) {
         return discoveryConnectionRepository.connection(registryId);
     }
 

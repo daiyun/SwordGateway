@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.discovery.config;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
-import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
@@ -60,7 +60,7 @@ public class DiscoveryConfig<T> {
         if (properties instanceof DiscoveryProperties) {
             if (StringUtils.isEmpty(mapperRegistryKey))
                 return null;
-            DiscoveryConnectionWrapper connectionWrapper = discoveryConnectionRepository.connection(mapperRegistryKey);
+            ConnectionWrapper connectionWrapper = discoveryConnectionRepository.connection(mapperRegistryKey);
             if (connectionWrapper == null)
                 return null;
             CuratorFramework curatorFramework = (CuratorFramework) connectionWrapper.getConnection();

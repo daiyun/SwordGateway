@@ -9,7 +9,7 @@ import com.doctorwork.sword.gateway.discovery.api.RespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
-import com.doctorwork.com.sword.gateway.registry.config.DiscoveryRegistryConfig;
+import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
@@ -41,13 +41,13 @@ public class LoadBalancerClientAutoConfiguration {
     public IRegistryConnectionRepository discoveryConnectionRepository(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
                                                                        ZookeeperProperties defaultZookeeperProperties,
                                                                        EventBus eventBus) {
-        DiscoveryRegistryConfig<ZookeeperProperties> discoveryRegistryConfig = null;
+        RegistryConfig<ZookeeperProperties> registryConfig = null;
         if (defaultZookeeperProperties != null) {
-            discoveryRegistryConfig = new DiscoveryRegistryConfig<>();
-            discoveryRegistryConfig.setProperties(defaultZookeeperProperties);
-            discoveryRegistryConfig.setRegistryKey(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
+            registryConfig = new RegistryConfig<>();
+            registryConfig.setProperties(defaultZookeeperProperties);
+            registryConfig.setRegistryKey(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         }
-        return new RegistryConnectionRepositoryManager(gatewayDiscoveryConnectionService, discoveryRegistryConfig, eventBus);
+        return new RegistryConnectionRepositoryManager(gatewayDiscoveryConnectionService, registryConfig, eventBus);
     }
 
     @Bean

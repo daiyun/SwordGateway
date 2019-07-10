@@ -1,6 +1,6 @@
 package com.doctorwork.com.sword.gateway.registry;
 
-import com.doctorwork.com.sword.gateway.registry.wrapper.DiscoveryConnectionWrapper;
+import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  * @Modified By:
  */
 public interface IRegistryConnectionRepository {
-    DiscoveryConnectionWrapper connection(String registryId);
+    ConnectionWrapper connection(String registryId);
 
     void connectionLoad(String registryId) throws IOException;
 

@@ -6,17 +6,13 @@ package com.doctorwork.sword.gateway.common.event;
  * @Date: 18:31 2019/7/9
  * @Modified By:
  */
-public class RegistryLoadEvent extends AbstractEvent {
-    private String registryId;
+public class RegistryLoadEvent extends RegistryEvent {
+
     private Boolean reload;
 
     public RegistryLoadEvent(String registryId, Boolean reload) {
-        this.registryId = registryId;
+        super(registryId);
         this.reload = reload;
-    }
-
-    public String getRegistryId() {
-        return registryId;
     }
 
     public Boolean getReload() {
