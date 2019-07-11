@@ -7,13 +7,13 @@ package com.doctorwork.sword.gateway.common.event;
  * @Modified By:
  */
 public abstract class DiscoveryEvent extends AbstractEvent {
-    private final String serviceId;
+    private final String dscrId;
 
-    public DiscoveryEvent(String serviceId) {
-        this.serviceId = serviceId;
+    public DiscoveryEvent(String dscrId) {
+        this.dscrId = dscrId;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public String getDscrId() {
+        return dscrId;
     }
 }

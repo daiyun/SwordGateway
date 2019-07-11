@@ -290,7 +290,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             ServiceCacheChangeEvent cacheChangeEvent = (ServiceCacheChangeEvent) event;
             String serviceId = cacheChangeEvent.getServiceId();
             logger.info("接收服务提供者{}节点变更事件", serviceId);
-            BaseLoadBalancer loadBalancer = loadBalancerMap.get(cacheChangeEvent.getServiceId());
+            BaseLoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
             if (loadBalancer == null) {
                 logger.info("服务提供者[{}]并未开启负载均衡", serviceId);
                 return;

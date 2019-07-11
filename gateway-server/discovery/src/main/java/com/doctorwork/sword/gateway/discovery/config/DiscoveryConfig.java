@@ -63,7 +63,7 @@ public class DiscoveryConfig<T> {
             ConnectionWrapper connectionWrapper = discoveryConnectionRepository.connection(mapperRegistryKey);
             if (connectionWrapper == null)
                 return null;
-            CuratorFramework curatorFramework = (CuratorFramework) connectionWrapper.getConnection();
+            CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
             DiscoveryProperties discoveryProperties = (DiscoveryProperties) properties;
             DiscoveryBuilder discoveryBuilder = new DiscoveryBuilder(curatorFramework, discoveryProperties.getZkRoot());
             ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryBuilder.build();

@@ -1,16 +1,17 @@
 package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.common.event.EventPost;
 import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
+import com.doctorwork.sword.gateway.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
-import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.apache.curator.x.discovery.ServiceInstance;
@@ -18,11 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * @Author:czq
@@ -32,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPost, EventListener<AbstractEvent> {
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryRepositoryManager.class);
-    private GatewayDiscoveryService gatewayDiscoveryService;
+    private IDiscoveryConfigRepository discoveryConfigRepository;
     private DiscoveryConfig defaultDiscoveryConfig;
     private IRegistryConnectionRepository discoveryConnectionRepository;
     private final Map<String, ServiceDiscoveryWrapper> discoveryMap = new ConcurrentHashMap<>();
@@ -40,38 +38,39 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     public static final String DEFAULT_SERVICEDISCOVERY = "default";
     private EventBus eventBus;
 
-    public DiscoveryRepositoryManager(GatewayDiscoveryService gatewayDiscoveryService, DiscoveryConfig defaultDiscoveryConfig, IRegistryConnectionRepository discoveryConnectionRepository, EventBus eventBus) {
-        this.gatewayDiscoveryService = gatewayDiscoveryService;
+    public DiscoveryRepositoryManager(IDiscoveryConfigRepository discoveryConfigRepository, DiscoveryConfig defaultDiscoveryConfig, IRegistryConnectionRepository discoveryConnectionRepository, EventBus eventBus) throws Exception {
+        this.discoveryConfigRepository = discoveryConfigRepository;
         this.defaultDiscoveryConfig = defaultDiscoveryConfig;
         this.discoveryConnectionRepository = discoveryConnectionRepository;
         this.eventBus = eventBus;
         register(this.eventBus);
+        preLoadDiscovery();
     }
 
-    public void preLoadDiscovery() throws Exception {
+    private void preLoadDiscovery() throws Exception {
         //local preload
         synchronized (discoveryMap) {
             if (defaultDiscoveryConfig != null && defaultDiscoveryConfig.isPreLoad() != null
                     && defaultDiscoveryConfig.isPreLoad()) {
                 logger.info("pre connectionLoad service discovery config for local");
-                discoveryConnectionRepository.connectionLoad("default");
+                discoveryConnectionRepository.connectionLoad(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
                 this.loadDiscovery("default", null);
             }
         }
-        List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
-        Set<String> regisryIdSet = preLoadList.stream().map(DiscoverConfig::getDscrRegitryId).collect(Collectors.toSet());
-        for (String registryId : regisryIdSet) {
-            discoveryConnectionRepository.connectionLoad(registryId);
-        }
-        for (DiscoverConfig discoverConfig : preLoadList) {
-            this.loadDiscovery(discoverConfig.getDscrId(), discoverConfig);
-        }
-        //pre connectionLoad
-        Map<String, DiscoverConfig> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
-        for (Map.Entry<String, DiscoverConfig> entry : poolMap.entrySet()) {
-            logger.info("pre connectionLoad service discovery config for {}", entry.getKey());
-            loadService(entry.getKey(), entry.getValue());
-        }
+//        List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
+//        Set<String> regisryIdSet = preLoadList.stream().map(DiscoverConfig::getDscrRegitryId).collect(Collectors.toSet());
+//        for (String registryId : regisryIdSet) {
+//            discoveryConnectionRepository.connectionLoad(registryId);
+//        }
+//        for (DiscoverConfig discoverConfig : preLoadList) {
+//            this.loadDiscovery(discoverConfig.getDscrId(), discoverConfig);
+//        }
+//        //pre connectionLoad
+//        Map<String, DiscoverConfig> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
+//        for (Map.Entry<String, DiscoverConfig> entry : poolMap.entrySet()) {
+//            logger.info("pre connectionLoad service discovery config for {}", entry.getKey());
+//            loadService(entry.getKey(), entry.getValue());
+//        }
     }
 
     @Override
@@ -85,7 +84,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (serviceWrapper != null)
                 return serviceWrapper;
             //此处会有高并发情况
-            DiscoverConfig discoverConfig = gatewayDiscoveryService.discoverConfig(serviceId);
+            DiscoverConfig discoverConfig = discoveryConfigRepository.discoveryConfig(serviceId);
             if (discoverConfig == null) {
                 logger.error("no discover config for {}", serviceId);
                 return null;
@@ -105,7 +104,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     public void loadService(String serviceId, DiscoverConfig discoverConfig) throws Exception {
         DiscoverConfig config = discoverConfig;
         if (discoverConfig == null)
-            config = gatewayDiscoveryService.serviceTodiscoverConfig(serviceId);
+            config = discoveryConfigRepository.discoveryConfigFromLoadBalance(serviceId);
         String mark;
         if (config == null) {
             return;
@@ -126,7 +125,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     public void loadDiscovery(String dscrId, DiscoverConfig discoverConfig) throws Exception {
         DiscoverConfig config = discoverConfig;
         if (discoverConfig == null)
-            config = gatewayDiscoveryService.discoverConfig(dscrId);
+            config = discoveryConfigRepository.discoveryConfig(dscrId);
         String mark;
         DiscoveryConfig discoveryConfig = null;
         if (DEFAULT_SERVICEDISCOVERY.equals(dscrId)) {

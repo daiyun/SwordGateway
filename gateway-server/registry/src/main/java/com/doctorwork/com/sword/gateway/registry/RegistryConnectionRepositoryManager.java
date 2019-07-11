@@ -5,8 +5,8 @@ import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.common.event.EventPost;
 import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
+import com.doctorwork.sword.gateway.config.IConnectionConfigRepository;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +29,12 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
     public static final String DEFAULT_ZOOKEEPER = "default";
     private AtomicBoolean updateFlag = new AtomicBoolean(false);
 
-    private GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService;
+    private IConnectionConfigRepository connectionConfigRepository;
     private RegistryConfig defaultRegistryConfig;
     private EventBus eventBus;
 
-    public RegistryConnectionRepositoryManager(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, RegistryConfig defaultRegistryConfig, EventBus eventBus) {
-        this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
+    public RegistryConnectionRepositoryManager(IConnectionConfigRepository connectionConfigRepository, RegistryConfig defaultRegistryConfig, EventBus eventBus) {
+        this.connectionConfigRepository = connectionConfigRepository;
         this.defaultRegistryConfig = defaultRegistryConfig;
         this.eventBus = eventBus;
     }
@@ -46,7 +46,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
 
     @Override
     //重载此处 需要将对应的发现进行重载 然后进行关闭操作
-    public void connectionLoad(String registryId) throws IOException {
+    public void connectionLoad(String registryId) {
         RegistryConfig registryConfig;
         if (registryId.equals(DEFAULT_ZOOKEEPER)) {
             registryConfig = defaultRegistryConfig;
@@ -55,7 +55,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
                 return;
             }
         } else {
-            DiscoverRegistryConfig discoverRegistryConfig = gatewayDiscoveryConnectionService.get(registryId);
+            DiscoverRegistryConfig discoverRegistryConfig = connectionConfigRepository.connectionConfig(registryId);
             if (discoverRegistryConfig == null) {
                 logger.error("no service discovery connection config for {}", registryId);
                 return;

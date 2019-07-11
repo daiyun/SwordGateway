@@ -67,6 +67,11 @@
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.doctorwork.sword</groupId>
+                <artifactId>gateway-server-config</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.ctrip.framework.apollo</groupId>
                 <artifactId>apollo-client</artifactId>
                 <version>${apollo.client.version}</version>

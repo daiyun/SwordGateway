@@ -9,5 +9,5 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
  * @Modified By:
  */
 public interface IConnectionConfigRepository {
-    DiscoverRegistryConfig connectionConfigGet(String registryId);
+    DiscoverRegistryConfig connectionConfig(String registryId);
 }

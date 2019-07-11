@@ -46,7 +46,7 @@ public class RegistryConfig<T> {
             ZookeeperProperties castProperties = (ZookeeperProperties) properties;
             CuratorBuilder curatorBuilder = new CuratorBuilder(castProperties);
             CuratorFramework curatorFramework = curatorBuilder.build();
-            ConnectionWrapper<CuratorFramework> connectionWrapper = new ConnectionWrapper<>(registryKey, curatorFramework);
+            ConnectionWrapper connectionWrapper = new ConnectionWrapper(registryKey, curatorFramework);
             return connectionWrapper;
         }
         return null;

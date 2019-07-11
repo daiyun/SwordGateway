@@ -6,7 +6,14 @@ package com.doctorwork.sword.gateway.common.event;
  */
 public class ServiceCacheChangeEvent extends DiscoveryEvent {
 
-    public ServiceCacheChangeEvent(String serviceId) {
+    private final String serviceId;
+
+    public ServiceCacheChangeEvent(String serviceId, String serviceId1) {
         super(serviceId);
+        this.serviceId = serviceId1;
+    }
+
+    public String getServiceId() {
+        return serviceId;
     }
 }

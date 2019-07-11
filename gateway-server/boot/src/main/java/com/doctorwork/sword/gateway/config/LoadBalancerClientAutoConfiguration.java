@@ -15,7 +15,6 @@ import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
 import com.google.common.eventbus.EventBus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.gateway.config.LoadBalancerProperties;
@@ -47,7 +46,17 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public IRegistryConnectionRepository discoveryConnectionRepository(GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
+    public ConfigManager configManager(GatewayConfig gatewayConfig, GatewayDiscoveryService gatewayDiscoveryService,
+                                       GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
+                                       GatewayLoadBalanceService gatewayLoadBalanceService, IRegistryConnectionRepository registryConnectionRepository,
+                                       EventBus eventBus) {
+        DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig);
+        RegistryConfigRepository registryConfigRepository = new RegistryConfigRepository(registryConnectionRepository, eventBus, gatewayConfig);
+        return new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
+    }
+
+    @Bean
+    public IRegistryConnectionRepository discoveryConnectionRepository(IConnectionConfigRepository connectionConfigRepository,
                                                                        ZookeeperProperties defaultZookeeperProperties,
                                                                        EventBus eventBus) {
         RegistryConfig<ZookeeperProperties> registryConfig = null;
@@ -56,11 +65,11 @@ public class LoadBalancerClientAutoConfiguration {
             registryConfig.setProperties(defaultZookeeperProperties);
             registryConfig.setRegistryKey(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         }
-        return new RegistryConnectionRepositoryManager(gatewayDiscoveryConnectionService, registryConfig, eventBus);
+        return new RegistryConnectionRepositoryManager(connectionConfigRepository, registryConfig, eventBus);
     }
 
     @Bean
-    public IDiscoveryRepository discoveryRepository(GatewayDiscoveryService gatewayDiscoveryService,
+    public IDiscoveryRepository discoveryRepository(IDiscoveryConfigRepository discoveryConfigRepository,
                                                     DiscoveryProperties defaultDiscoveryProperties,
                                                     IRegistryConnectionRepository discoveryConnectionRepository,
                                                     EventBus eventBus) throws Exception {
@@ -70,9 +79,8 @@ public class LoadBalancerClientAutoConfiguration {
             discoveryConfig = new DiscoveryConfig<>(DiscoveryRepositoryManager.DEFAULT_SERVICEDISCOVERY,
                     true, RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties);
         }
-        DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(gatewayDiscoveryService, discoveryConfig,
+        DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(discoveryConfigRepository, discoveryConfig,
                 discoveryConnectionRepository, eventBus);
-        discoveryRepositoryManager.preLoadDiscovery();
         return discoveryRepositoryManager;
     }
 
@@ -83,8 +91,8 @@ public class LoadBalancerClientAutoConfiguration {
 
     @Bean
     public CustomerLoadBalanceClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService,
-                                                 IDiscoveryRepository discoveryRepository,
-                                                 EventBus eventBus) {
+                                                        IDiscoveryRepository discoveryRepository,
+                                                        EventBus eventBus) {
         return new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
     }
 }

@@ -1,5 +1,7 @@
 package com.doctorwork.sword.gateway.config;
 
+import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+
 /**
  * @Author:czq
  * @Description:
@@ -7,5 +9,5 @@ package com.doctorwork.sword.gateway.config;
  * @Modified By:
  */
 public interface ILoadBalancerConfigRepository {
-
+    LoadbalanceInfo loadbalanceConfig(String lbMark);
 }

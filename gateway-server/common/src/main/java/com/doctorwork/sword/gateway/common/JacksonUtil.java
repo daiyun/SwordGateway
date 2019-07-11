@@ -47,6 +47,17 @@ public class JacksonUtil {
         return null;
     }
 
+    public static <T> T toObject(byte[] bytes, Class<T> clazz) {
+        if (bytes == null)
+            return null;
+        try {
+            return getInstance().readValue(bytes, clazz);
+        } catch (IOException e) {
+            logger.error("json 解析异常", e);
+        }
+        return null;
+    }
+
     public static <T> T toSubTypeObject(String json, Class<T> clazz) {
         if (StringUtils.isEmpty(json))
             return null;
@@ -73,4 +84,14 @@ public class JacksonUtil {
         return null;
     }
 
+    public static <T> byte[] toBytes(T t) {
+        if (t == null)
+            return null;
+        try {
+            return getInstance().writeValueAsBytes(t);
+        } catch (JsonProcessingException e) {
+            logger.error("json 序列化异常", e);
+        }
+        return null;
+    }
 }

@@ -98,6 +98,7 @@ public class ServiceWrapper extends CacheListener {
     @Override
     public void serviceReload() {
         String serviceId = this.serviceId;
-        eventPost.eventPost(new ServiceCacheChangeEvent(serviceId));
+        String dscrMapKey = this.dscrMapKey;
+        eventPost.eventPost(new ServiceCacheChangeEvent(serviceId, dscrMapKey));
     }
 }

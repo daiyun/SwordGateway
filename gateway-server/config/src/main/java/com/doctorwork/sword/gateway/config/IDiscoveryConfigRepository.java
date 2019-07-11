@@ -9,5 +9,7 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
  * @Modified By:
  */
 public interface IDiscoveryConfigRepository {
-    DiscoverConfig discoveryConfig(String serviceId);
+    DiscoverConfig discoveryConfig(String dscrId);
+
+    DiscoverConfig discoveryConfigFromLoadBalance(String lbMark);
 }

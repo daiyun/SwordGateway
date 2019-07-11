@@ -15,7 +15,7 @@ public interface GatewayDiscoveryService {
 
     DiscoverConfig serviceTodiscoverConfig(String serviceId);
 
-    DiscoverConfig discoverConfig(String serviceId);
+    DiscoverConfig discoverConfig(String dscrId);
 
     List<DiscoverConfig> preLoadList();
 
