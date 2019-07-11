@@ -2,12 +2,12 @@ package com.doctorwork.com.sword.gateway.registry;
 
 import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
-import com.doctorwork.sword.gateway.common.event.AbstractEvent;
-import com.doctorwork.sword.gateway.common.event.EventPost;
-import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
+import com.doctorwork.sword.gateway.common.event.*;
+import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.config.IConnectionConfigRepository;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Date: 11:03 2019/7/4
  * @Modified By:
  */
-public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost {
+public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost, EventListener<AbstractEvent> {
     protected static final Logger logger = LoggerFactory.getLogger(RegistryConnectionRepositoryManager.class);
 
     private final Map<String, ConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
@@ -37,6 +37,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
         this.connectionConfigRepository = connectionConfigRepository;
         this.defaultRegistryConfig = defaultRegistryConfig;
         this.eventBus = eventBus;
+        register(this.eventBus);
     }
 
     @Override
@@ -97,5 +98,18 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
     public void eventPost(AbstractEvent event) {
         if (eventBus != null)
             eventBus.post(event);
+    }
+
+    @Override
+    @Subscribe
+    public void handleEvent(AbstractEvent event) {
+        if (event instanceof RegistryConfigLoadEvent) {
+            RegistryConfigLoadEvent loadEvent = (RegistryConfigLoadEvent) event;
+            logger.info("handle event RegistryConfigLoadEvent for {}", loadEvent.getRegistryId());
+            this.connectionLoad(loadEvent.getRegistryId());
+        } else if (event instanceof RegistryConfigDeleteEvent) {
+            RegistryConfigDeleteEvent deleteEvent = (RegistryConfigDeleteEvent) event;
+            logger.info("handle event RegistryConfigDeleteEvent for {}, but do nothing", deleteEvent.getRegistryId());
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
+import com.doctorwork.sword.gateway.common.event.LoadBalanceConfigDeleteEvent;
+import com.doctorwork.sword.gateway.common.event.LoadBalanceConfigLoadEvent;
 import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
@@ -300,6 +302,16 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 logger.info("更新负载均衡器[{}]的服务列表", serviceId);
                 dynamicLoadBalancer.updateListOfServers(true);
             }
+        } else if (event instanceof LoadBalanceConfigDeleteEvent) {
+            LoadBalanceConfigDeleteEvent configLoadEvent = (LoadBalanceConfigDeleteEvent) event;
+            String lbMark = configLoadEvent.getLbMark();
+            logger.info("handle event LoadBalanceConfigDeleteEvent for {}", lbMark);
+            this.loadBalanceLoad(lbMark);
+        } else if (event instanceof LoadBalanceConfigLoadEvent) {
+            LoadBalanceConfigLoadEvent configLoadEvent = (LoadBalanceConfigLoadEvent) event;
+            String lbMark = configLoadEvent.getLbMark();
+            logger.info("handle event LoadBalanceConfigLoadEvent for {}", lbMark);
+            this.loadBalanceDelete(lbMark);
         }
     }
 }

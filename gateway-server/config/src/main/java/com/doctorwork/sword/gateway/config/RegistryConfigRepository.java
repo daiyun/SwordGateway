@@ -11,6 +11,7 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
@@ -19,22 +20,24 @@ import org.apache.zookeeper.data.Stat;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * @author chenzhiqiang
  * @date 2019/7/8
  */
-public class RegistryConfigRepository extends AbstractConfiguration implements EventPost, EventListener {
+public class RegistryConfigRepository extends AbstractConfiguration implements EventPost, EventListener<AbstractEvent> {
     private IRegistryConnectionRepository registryConnectionRepository;
     private EventBus eventBus;
     private static final String REGISTRY_PATH = "/doctorwork/gateway/configuration";
-    private final Map<String, NodeCache> discoveryCacheMap = new ConcurrentHashMap<>();
-    private final Map<String, NodeCache> registryCacheMap = new ConcurrentHashMap<>();
-    private Map<String, NodeCache> loadbalanceCacheMap = new ConcurrentHashMap<>();
+    private final Map<String, NodeCache> discoveryCacheMap = new HashMap<>();
+    private final Map<String, NodeCache> registryCacheMap = new HashMap<>();
+    private Map<String, NodeCache> loadbalanceCacheMap = new HashMap<>();
     private final AtomicBoolean init = new AtomicBoolean(false);
+    private StampedLock stampedLock = new StampedLock();
 
 
     public RegistryConfigRepository(IRegistryConnectionRepository registryConnectionRepository, EventBus eventBus, GatewayConfig gatewayConfig) {
@@ -65,106 +68,230 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     }
 
     @Override
+    @Subscribe
     public void handleEvent(AbstractEvent event) {
+        if (event instanceof RegistryLoadEvent) {
+            logger.info("handle event RegistryLoadEvent");
+            RegistryLoadEvent registryLoadEvent = (RegistryLoadEvent) event;
+            String registryId = registryLoadEvent.getRegistryId();
+            if (RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER.equals(registryId) && init.get()) {
+                long stamp = stampedLock.writeLock();
+                try {
+                    //reload default zookeeper,reload node
+                    for (Map.Entry<String, NodeCache> registryCacheEntry : registryCacheMap.entrySet()) {
+                        String cacheEntryKey = registryCacheEntry.getKey();
+                        loadRegistryConfig(cacheEntryKey, true);
+                    }
+                    for (Map.Entry<String, NodeCache> discoveryCacheEntry : discoveryCacheMap.entrySet()) {
+                        String cacheEntryKey = discoveryCacheEntry.getKey();
+                        loadDiscoveryConfig(cacheEntryKey, true);
+                    }
+                    for (Map.Entry<String, NodeCache> loadbalanceCacheEntry : loadbalanceCacheMap.entrySet()) {
+                        String cacheEntryKey = loadbalanceCacheEntry.getKey();
+                        loadLoadbalanceConfig(cacheEntryKey, true);
+                    }
+                } finally {
+                    stampedLock.unlockWrite(stamp);
+                }
 
+            }
+        } else if (event instanceof RegistryConfigDeleteEvent) {
+            logger.info("handle event RegistryConfigDeleteEvent");
+            RegistryConfigDeleteEvent deleteEvent = (RegistryConfigDeleteEvent) event;
+            long stamp = stampedLock.writeLock();
+            try {
+                String registryId = deleteEvent.getRegistryId();
+                NodeCache nodeCache = registryCacheMap.remove(registryId);
+                if (nodeCache != null)
+                    nodeCache.close();
+            } catch (IOException e) {
+                logger.error("error happened while handle RegistryConfigDeleteEvent for {}", deleteEvent.getRegistryId(), e);
+            } finally {
+                stampedLock.unlockWrite(stamp);
+            }
+        } else if (event instanceof DiscoverConfigDeleteEvent) {
+            logger.info("handle event DiscoverConfigDeleteEvent");
+            DiscoverConfigDeleteEvent deleteEvent = (DiscoverConfigDeleteEvent) event;
+            long stamp = stampedLock.writeLock();
+            try {
+                String dscrId = deleteEvent.getDscrId();
+                NodeCache nodeCache = discoveryCacheMap.remove(dscrId);
+                if (nodeCache != null)
+                    nodeCache.close();
+            } catch (IOException e) {
+                logger.error("error happened while handle DiscoverConfigDeleteEvent for {}", deleteEvent.getDscrId(), e);
+            } finally {
+                stampedLock.unlockWrite(stamp);
+            }
+        } else if (event instanceof LoadBalanceConfigDeleteEvent) {
+            logger.info("handle event LoadBalanceConfigDeleteEvent");
+            LoadBalanceConfigDeleteEvent deleteEvent = (LoadBalanceConfigDeleteEvent) event;
+            long stamp = stampedLock.writeLock();
+            try {
+                String lbMark = deleteEvent.getLbMark();
+                NodeCache nodeCache = loadbalanceCacheMap.remove(lbMark);
+                if (nodeCache != null)
+                    nodeCache.close();
+            } catch (IOException e) {
+                logger.error("error happened while handle LoadBalanceConfigDeleteEvent for {}", deleteEvent.getLbMark(), e);
+            } finally {
+                stampedLock.unlockWrite(stamp);
+            }
+        }
     }
 
     @Override
     public DiscoverRegistryConfig connectionConfig(String registryId) {
+        long stamp = stampedLock.tryOptimisticRead();
+        byte[] datas = null;
+        NodeCache nodeCache = registryCacheMap.get(registryId);
+        if (nodeCache != null) {
+            ChildData nodeData = nodeCache.getCurrentData();
+            datas = nodeData.getData();
+        } else {
+            if (loadRegistryConfig(registryId, false)) {
+                nodeCache = registryCacheMap.get(registryId);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+            }
+        }
+        if (!stampedLock.validate(stamp)) {
+            stampedLock.readLock();
+            try {
+                nodeCache = registryCacheMap.get(registryId);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+                return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        }
+        if (datas != null) {
+            return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+        }
+        return null;
+    }
+
+    private synchronized boolean loadRegistryConfig(String registryId, boolean loadForce) {
         ConnectionWrapper connectionWrapper = registryConnectionRepository.connection(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         if (connectionWrapper == null) {
             logger.warn("no registry connection");
-            return null;
+            return false;
         }
         String nodePath = REGISTRY_PATH.concat("/registry/").concat(registryId);
         NodeCache oldCache = registryCacheMap.get(registryId);
-        if (oldCache != null) {
-            ChildData nodeData = oldCache.getCurrentData();
-            byte[] datas = nodeData.getData();
-            return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+        if (oldCache != null && !loadForce) {
+            return true;
         }
-        synchronized (registryCacheMap) {
-            oldCache = registryCacheMap.get(registryId);
-            if (oldCache != null) {
-                ChildData nodeData = oldCache.getCurrentData();
-                byte[] datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+        CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
+        try {
+            Stat stat = curatorFramework.checkExists().forPath(nodePath);
+            if (stat == null) {
+                logger.error("could not get node {} stat", nodePath);
+                return false;
             }
-            CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
-            try {
-                Stat stat = curatorFramework.checkExists().forPath(nodePath);
-                if (stat == null) {
-                    logger.error("could not get node {} stat", nodePath);
-                    return null;
-                }
-                NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-                nodeCache.start();
-                registryCacheMap.putIfAbsent(registryId, nodeCache);
-                NodeCacheListener listener = new NodeCacheListener() {
-                    public void nodeChanged() {
-                        if (nodeCache.getCurrentData() != null) {
-                            eventPost(new RegistryConfigLoadEvent(registryId));
-                        } else {
-                            eventPost(new RegistryConfigDeleteEvent(registryId));
-                        }
+            NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
+            nodeCache.start();
+            NodeCacheListener listener = new NodeCacheListener() {
+                public void nodeChanged() {
+                    if (nodeCache.getCurrentData() != null) {
+                        eventPost(new RegistryConfigLoadEvent(registryId));
+                    } else {
+                        eventPost(new RegistryConfigDeleteEvent(registryId));
                     }
-                };
-                nodeCache.getListenable().addListener(listener);
-                return JacksonUtil.toObject(nodeCache.getCurrentData().getData(), DiscoverRegistryConfig.class);
-            } catch (Exception e) {
-                logger.error("{} config get error", nodePath, e);
+                }
+            };
+            nodeCache.getListenable().addListener(listener);
+            registryCacheMap.put(registryId, nodeCache);
+            if (oldCache != null) {
+                oldCache.close();
             }
-            return null;
+            return true;
+        } catch (Exception e) {
+            logger.error("{} config get error", nodePath, e);
         }
+        return false;
     }
 
     @Override
     public DiscoverConfig discoveryConfig(String dscrId) {
+        long stamp = stampedLock.tryOptimisticRead();
+        byte[] datas = null;
+        NodeCache nodeCache = discoveryCacheMap.get(dscrId);
+        if (nodeCache != null) {
+            ChildData nodeData = nodeCache.getCurrentData();
+            datas = nodeData.getData();
+        } else {
+            if (loadDiscoveryConfig(dscrId, false)) {
+                nodeCache = discoveryCacheMap.get(dscrId);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+            }
+        }
+        if (!stampedLock.validate(stamp)) {
+            stampedLock.readLock();
+            try {
+                nodeCache = discoveryCacheMap.get(dscrId);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+                return JacksonUtil.toObject(datas, DiscoverConfig.class);
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        }
+        if (datas != null) {
+            return JacksonUtil.toObject(datas, DiscoverConfig.class);
+        }
+        return null;
+    }
+
+    private synchronized boolean loadDiscoveryConfig(String dscrId, boolean loadForce) {
         ConnectionWrapper connectionWrapper = registryConnectionRepository.connection(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         if (connectionWrapper == null) {
             logger.warn("no registry connection");
-            return null;
+            return false;
         }
         String nodePath = REGISTRY_PATH.concat("/discovery/").concat(dscrId);
         NodeCache oldCache = discoveryCacheMap.get(dscrId);
-        if (oldCache != null) {
-            ChildData nodeData = oldCache.getCurrentData();
-            byte[] datas = nodeData.getData();
-            return JacksonUtil.toObject(datas, DiscoverConfig.class);
+        if (oldCache != null && !loadForce) {
+            return true;
         }
-        synchronized (discoveryCacheMap) {
-            oldCache = discoveryCacheMap.get(dscrId);
-            if (oldCache != null) {
-                ChildData nodeData = oldCache.getCurrentData();
-                byte[] datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, DiscoverConfig.class);
+        CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
+        try {
+            Stat stat = curatorFramework.checkExists().forPath(nodePath);
+            if (stat == null) {
+                logger.error("could not get node {} stat", nodePath);
+                return false;
             }
-            CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
-            try {
-                Stat stat = curatorFramework.checkExists().forPath(nodePath);
-                if (stat == null) {
-                    logger.error("could not get node {} stat", nodePath);
-                    return null;
-                }
-                NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-                nodeCache.start();
-                discoveryCacheMap.putIfAbsent(dscrId, nodeCache);
-                NodeCacheListener listener = new NodeCacheListener() {
-                    public void nodeChanged() {
-                        if (nodeCache.getCurrentData() != null) {
-                            eventPost(new DiscoverConfigLoadEvent(dscrId));
-                        } else {
-                            eventPost(new DiscoverConfigDeleteEvent(dscrId));
-                        }
+            NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
+            nodeCache.start();
+            NodeCacheListener listener = new NodeCacheListener() {
+                public void nodeChanged() {
+                    if (nodeCache.getCurrentData() != null) {
+                        eventPost(new DiscoverConfigLoadEvent(dscrId));
+                    } else {
+                        eventPost(new DiscoverConfigDeleteEvent(dscrId));
                     }
-                };
-                nodeCache.getListenable().addListener(listener);
-                return JacksonUtil.toObject(nodeCache.getCurrentData().getData(), DiscoverConfig.class);
-            } catch (Exception e) {
-                logger.error("{} config get error", nodePath, e);
+                }
+            };
+            nodeCache.getListenable().addListener(listener);
+            discoveryCacheMap.put(dscrId, nodeCache);
+            if (oldCache != null) {
+                oldCache.close();
             }
-            return null;
+            return true;
+        } catch (Exception e) {
+            logger.error("{} config get error", nodePath, e);
         }
+        return false;
     }
 
     @Override
@@ -177,51 +304,79 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
 
     @Override
     public LoadbalanceInfo loadbalanceConfig(String lbMark) {
+        long stamp = stampedLock.tryOptimisticRead();
+        byte[] datas = null;
+        NodeCache nodeCache = loadbalanceCacheMap.get(lbMark);
+        if (nodeCache != null) {
+            ChildData nodeData = nodeCache.getCurrentData();
+            datas = nodeData.getData();
+        } else {
+            if (loadLoadbalanceConfig(lbMark, false)) {
+                nodeCache = loadbalanceCacheMap.get(lbMark);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+            }
+        }
+        if (!stampedLock.validate(stamp)) {
+            stampedLock.readLock();
+            try {
+                nodeCache = loadbalanceCacheMap.get(lbMark);
+                if (nodeCache == null)
+                    return null;
+                ChildData nodeData = nodeCache.getCurrentData();
+                datas = nodeData.getData();
+                return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        }
+        if (datas != null) {
+            return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+        }
+        return null;
+    }
+
+    private synchronized boolean loadLoadbalanceConfig(String lbMark, boolean loadForce) {
         ConnectionWrapper connectionWrapper = registryConnectionRepository.connection(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         if (connectionWrapper == null) {
             logger.warn("no registry connection");
-            return null;
+            return false;
         }
         String nodePath = REGISTRY_PATH.concat("/loadbalance/").concat(lbMark);
         NodeCache oldCache = loadbalanceCacheMap.get(lbMark);
-        if (oldCache != null) {
-            ChildData nodeData = oldCache.getCurrentData();
-            byte[] datas = nodeData.getData();
-            return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+        if (oldCache != null && !loadForce) {
+            return true;
         }
-        synchronized (loadbalanceCacheMap) {
-            oldCache = loadbalanceCacheMap.get(lbMark);
-            if (oldCache != null) {
-                ChildData nodeData = oldCache.getCurrentData();
-                byte[] datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+        CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
+        try {
+            Stat stat = curatorFramework.checkExists().forPath(nodePath);
+            if (stat == null) {
+                logger.error("could not get node {} stat", nodePath);
+                return false;
             }
-            CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
-            try {
-                Stat stat = curatorFramework.checkExists().forPath(nodePath);
-                if (stat == null) {
-                    logger.error("could not get node {} stat", nodePath);
-                    return null;
-                }
-                NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-                nodeCache.start();
-                registryCacheMap.putIfAbsent(lbMark, nodeCache);
-                NodeCacheListener listener = new NodeCacheListener() {
-                    public void nodeChanged() {
-                        if (nodeCache.getCurrentData() != null) {
-                            eventPost(new LoadBalanceConfigLoadEvent(lbMark));
-                        } else {
-                            eventPost(new LoadBalanceConfigDeleteEvent(lbMark));
-                        }
+            NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
+            nodeCache.start();
+            NodeCacheListener listener = new NodeCacheListener() {
+                public void nodeChanged() {
+                    if (nodeCache.getCurrentData() != null) {
+                        eventPost(new LoadBalanceConfigLoadEvent(lbMark));
+                    } else {
+                        eventPost(new LoadBalanceConfigDeleteEvent(lbMark));
                     }
-                };
-                nodeCache.getListenable().addListener(listener);
-                return JacksonUtil.toObject(nodeCache.getCurrentData().getData(), LoadbalanceInfo.class);
-            } catch (Exception e) {
-                logger.error("{} config get error", nodePath, e);
+                }
+            };
+            nodeCache.getListenable().addListener(listener);
+            loadbalanceCacheMap.put(lbMark, nodeCache);
+            if (oldCache != null) {
+                oldCache.close();
             }
-            return null;
+            return true;
+        } catch (Exception e) {
+            logger.error("{} config get error", nodePath, e);
         }
+        return false;
     }
 
     @Override

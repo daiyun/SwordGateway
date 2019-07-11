@@ -2,9 +2,7 @@ package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
-import com.doctorwork.sword.gateway.common.event.AbstractEvent;
-import com.doctorwork.sword.gateway.common.event.EventPost;
-import com.doctorwork.sword.gateway.common.event.RegistryLoadEvent;
+import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
@@ -221,6 +219,19 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
                     logger.error("handle event RegistryLoadEvent,but error happened", e);
                 }
             }
+        } else if (event instanceof DiscoverConfigLoadEvent) {
+            DiscoverConfigLoadEvent configLoadEvent = (DiscoverConfigLoadEvent) event;
+            String dscrId = configLoadEvent.getDscrId();
+            logger.info("handle event DiscoverConfigLoadEvent for {}", dscrId);
+            try {
+                this.loadDiscovery(dscrId, null);
+            } catch (Exception e) {
+                logger.error("error happened while handle event DiscoverConfigLoadEvent for {}", dscrId, e);
+            }
+        }else if (event instanceof DiscoverConfigDeleteEvent) {
+            DiscoverConfigLoadEvent configLoadEvent = (DiscoverConfigLoadEvent) event;
+            String dscrId = configLoadEvent.getDscrId();
+            logger.info("handle event DiscoverConfigLoadEvent for {}, but do nothing", dscrId);
         }
     }
 }
