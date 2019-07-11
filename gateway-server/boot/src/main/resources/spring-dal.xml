@@ -52,7 +52,7 @@
 	</bean>
 
 	<!-- 启动注解事务 -->
-	<tx:annotation-driven/>
+	<!--<tx:annotation-driven/>-->
 
 </beans>
 

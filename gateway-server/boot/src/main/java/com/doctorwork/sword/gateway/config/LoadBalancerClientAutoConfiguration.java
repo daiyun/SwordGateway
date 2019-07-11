@@ -1,7 +1,8 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
+import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
+import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
@@ -9,7 +10,6 @@ import com.doctorwork.sword.gateway.discovery.api.RespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
-import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
@@ -18,6 +18,7 @@ import com.google.common.eventbus.EventBus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.gateway.config.LoadBalancerProperties;
 import org.springframework.cloud.gateway.filter.LoadBalancerClientFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,9 +33,17 @@ import org.springframework.context.annotation.Configuration;
 public class LoadBalancerClientAutoConfiguration {
 
     @Bean
+    public LoadBalancerProperties loadBalancerProperties() {
+        LoadBalancerProperties properties = new LoadBalancerProperties();
+        properties.setUse404(true);
+        return properties;
+    }
+
+    @Bean
     @ConditionalOnMissingBean({LoadBalancerClientFilter.class})
-    public LoadBalancerClientFilter loadBalancerClientFilter(LoadBalancerClient client) {
-        return new LoadBalancerClientFilter(client);
+    public LoadBalancerClientFilter loadBalancerClientFilter(LoadBalancerClient client, LoadBalancerProperties loadBalancerProperties) {
+
+        return new LoadBalancerClientFilter(client, loadBalancerProperties);
     }
 
     @Bean
@@ -54,7 +63,7 @@ public class LoadBalancerClientAutoConfiguration {
     public IDiscoveryRepository discoveryRepository(GatewayDiscoveryService gatewayDiscoveryService,
                                                     DiscoveryProperties defaultDiscoveryProperties,
                                                     IRegistryConnectionRepository discoveryConnectionRepository,
-                                                    @Autowired(required = false) EventBus eventBus) throws Exception {
+                                                    EventBus eventBus) throws Exception {
         DiscoveryConfig<DiscoveryProperties> discoveryConfig = null;
 
         if (defaultDiscoveryProperties != null) {
@@ -73,10 +82,9 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public LoadBalancerClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService,
+    public CustomerLoadBalanceClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService,
                                                  IDiscoveryRepository discoveryRepository,
                                                  EventBus eventBus) {
-        CustomerLoadBalanceClient customerLoadBalanceClient = new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
-        return customerLoadBalanceClient;
+        return new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
     }
 }

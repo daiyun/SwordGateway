@@ -9,6 +9,6 @@ import org.slf4j.LoggerFactory;
  * @Date: 11:46 2019/7/10
  * @Modified By:
  */
-public class AbstractConfiguration implements IDiscoveryConfigRepository, IConnectionConfigRepository, ILoadBalancerConfigRepository {
+public abstract class AbstractConfiguration implements IDiscoveryConfigRepository, IConnectionConfigRepository, ILoadBalancerConfigRepository {
     protected static Logger logger = LoggerFactory.getLogger(AbstractConfiguration.class);
 }

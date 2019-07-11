@@ -7,4 +7,5 @@ package com.doctorwork.sword.gateway.config;
  * @Modified By:
  */
 public interface ILoadBalancerConfigRepository {
+
 }
