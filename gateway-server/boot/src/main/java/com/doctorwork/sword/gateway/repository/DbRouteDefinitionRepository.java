@@ -46,7 +46,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository {
     }
 
     @EventListener(RefreshRoutesEvent.class)
-    void handleRefresh() {
+    public void handleRefresh() {
         List<RouteDefinition> routeDefinitionList = delegate.routeDefinitions();
         logger.info("路由开始重载（路由数量{}）......", routeDefinitionList.size());
         long start = System.currentTimeMillis();

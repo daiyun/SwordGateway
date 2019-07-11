@@ -52,7 +52,7 @@ public class AccessLogGatewayFilterFactory extends AbstractGatewayFilterFactory<
         private static final Logger logger = LoggerFactory.getLogger(AccessLogGatewayFilter.class);
         private Config config;
 
-        public AccessLogGatewayFilter(Config config) {
+        AccessLogGatewayFilter(Config config) {
             this.config = config;
         }
 
