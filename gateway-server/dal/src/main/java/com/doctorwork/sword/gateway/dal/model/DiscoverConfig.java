@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-11
+ * @since 2019-07-12
  */
 public class DiscoverConfig implements Serializable {
     /**
@@ -64,6 +64,14 @@ public class DiscoverConfig implements Serializable {
      * </pre>
      */
     private Integer dscrPreloadEnable;
+
+    /**
+     * <pre>
+     * 版本号
+     * This field corresponds to the database column <tt>discover_config.version<tt>
+     * </pre>
+     */
+    private String version;
 
     /**
      * <pre>
@@ -226,6 +234,28 @@ public class DiscoverConfig implements Serializable {
 
     /**
      * <pre>
+     * This field corresponds to the database column <tt>discover_config.version<tt>
+     * </pre>
+     *
+     * @return 版本号
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * <pre>
+     * This field corresponds to the database column <tt>discover_config.version<tt>
+     * </pre>
+     *
+     * @param version 版本号
+     */
+    public void setVersion(String version) {
+        this.version = version == null ? null : version.trim();
+    }
+
+    /**
+     * <pre>
      * This field corresponds to the database column <tt>discover_config.is_delete<tt>
      * </pre>
      *
@@ -305,6 +335,7 @@ public class DiscoverConfig implements Serializable {
         sb.append(", dscrConfig=").append(dscrConfig);
         sb.append(", dscrRegitryId=").append(dscrRegitryId);
         sb.append(", dscrPreloadEnable=").append(dscrPreloadEnable);
+        sb.append(", version=").append(version);
         sb.append(", isDelete=").append(isDelete);
         sb.append(", gmtCreate=").append(gmtCreate);
         sb.append(", gmtModified=").append(gmtModified);
@@ -334,6 +365,7 @@ public class DiscoverConfig implements Serializable {
             && (this.getDscrConfig() == null ? other.getDscrConfig() == null : this.getDscrConfig().equals(other.getDscrConfig()))
             && (this.getDscrRegitryId() == null ? other.getDscrRegitryId() == null : this.getDscrRegitryId().equals(other.getDscrRegitryId()))
             && (this.getDscrPreloadEnable() == null ? other.getDscrPreloadEnable() == null : this.getDscrPreloadEnable().equals(other.getDscrPreloadEnable()))
+            && (this.getVersion() == null ? other.getVersion() == null : this.getVersion().equals(other.getVersion()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
             && (this.getGmtCreate() == null ? other.getGmtCreate() == null : this.getGmtCreate().equals(other.getGmtCreate()))
             && (this.getGmtModified() == null ? other.getGmtModified() == null : this.getGmtModified().equals(other.getGmtModified()));
@@ -352,6 +384,7 @@ public class DiscoverConfig implements Serializable {
         result = prime * result + ((getDscrConfig() == null) ? 0 : getDscrConfig().hashCode());
         result = prime * result + ((getDscrRegitryId() == null) ? 0 : getDscrRegitryId().hashCode());
         result = prime * result + ((getDscrPreloadEnable() == null) ? 0 : getDscrPreloadEnable().hashCode());
+        result = prime * result + ((getVersion() == null) ? 0 : getVersion().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getGmtCreate() == null) ? 0 : getGmtCreate().hashCode());
         result = prime * result + ((getGmtModified() == null) ? 0 : getGmtModified().hashCode());

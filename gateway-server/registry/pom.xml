@@ -18,10 +18,6 @@
         </dependency>
         <dependency>
             <groupId>com.doctorwork.sword</groupId>
-            <artifactId>gateway-server-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.doctorwork.sword</groupId>
             <artifactId>gateway-discovery-common</artifactId>
         </dependency>
     </dependencies>

@@ -2,7 +2,6 @@ package com.doctorwork.sword.gateway.loadbalance.param.rule;
 
 import com.doctorwork.sword.gateway.loadbalance.DynamicLoadBalancer;
 import com.doctorwork.sword.gateway.loadbalance.server.AbstractServer;
-import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServer;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.RoundRobinRule;

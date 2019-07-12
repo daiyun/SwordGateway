@@ -4,11 +4,12 @@ import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -18,10 +19,10 @@ import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
@@ -141,7 +142,7 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     }
 
     @Override
-    public DiscoverRegistryConfig connectionConfig(String registryId) {
+    public ConnectionInfo connectionConfig(String registryId) {
         long stamp = stampedLock.tryOptimisticRead();
         byte[] datas = null;
         NodeCache nodeCache = registryCacheMap.get(registryId);
@@ -165,13 +166,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                     return null;
                 ChildData nodeData = nodeCache.getCurrentData();
                 datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+                return JacksonUtil.toObject(datas, ConnectionInfo.class);
             } finally {
                 stampedLock.unlockRead(stamp);
             }
         }
         if (datas != null) {
-            return JacksonUtil.toObject(datas, DiscoverRegistryConfig.class);
+            return JacksonUtil.toObject(datas, ConnectionInfo.class);
         }
         return null;
     }
@@ -218,7 +219,7 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     }
 
     @Override
-    public DiscoverConfig discoveryConfig(String dscrId) {
+    public DiscoveryInfo discoveryConfig(String dscrId) {
         long stamp = stampedLock.tryOptimisticRead();
         byte[] datas = null;
         NodeCache nodeCache = discoveryCacheMap.get(dscrId);
@@ -242,13 +243,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                     return null;
                 ChildData nodeData = nodeCache.getCurrentData();
                 datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, DiscoverConfig.class);
+                return JacksonUtil.toObject(datas, DiscoveryInfo.class);
             } finally {
                 stampedLock.unlockRead(stamp);
             }
         }
         if (datas != null) {
-            return JacksonUtil.toObject(datas, DiscoverConfig.class);
+            return JacksonUtil.toObject(datas, DiscoveryInfo.class);
         }
         return null;
     }
@@ -295,15 +296,15 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     }
 
     @Override
-    public DiscoverConfig discoveryConfigFromLoadBalance(String lbMark) {
-        LoadbalanceInfo loadbalanceInfo = this.loadbalanceConfig(lbMark);
-        if (loadbalanceInfo == null || loadbalanceInfo.getDscrEnable().equals(0) || StringUtils.isEmpty(loadbalanceInfo.getDscrId()))
+    public DiscoveryInfo discoveryConfigFromLoadBalance(String lbMark) {
+        LoadBalancerInfo loadbalanceInfo = this.loadbalanceConfig(lbMark);
+        if (loadbalanceInfo == null || loadbalanceInfo.getDscrEnable().equals(0) || StringUtils.isEmpty(loadbalanceInfo.getDiscoveryId()))
             return null;
-        return this.discoveryConfig(loadbalanceInfo.getDscrId());
+        return this.discoveryConfig(loadbalanceInfo.getId());
     }
 
     @Override
-    public LoadbalanceInfo loadbalanceConfig(String lbMark) {
+    public LoadBalancerInfo loadbalanceConfig(String lbMark) {
         long stamp = stampedLock.tryOptimisticRead();
         byte[] datas = null;
         NodeCache nodeCache = loadbalanceCacheMap.get(lbMark);
@@ -327,13 +328,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                     return null;
                 ChildData nodeData = nodeCache.getCurrentData();
                 datas = nodeData.getData();
-                return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+                return JacksonUtil.toObject(datas, LoadBalancerInfo.class);
             } finally {
                 stampedLock.unlockRead(stamp);
             }
         }
         if (datas != null) {
-            return JacksonUtil.toObject(datas, LoadbalanceInfo.class);
+            return JacksonUtil.toObject(datas, LoadBalancerInfo.class);
         }
         return null;
     }
@@ -377,6 +378,39 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
             logger.error("{} config get error", nodePath, e);
         }
         return false;
+    }
+
+    @Override
+    public Collection<LoadBalancerServer> loadbalanceServer(String lbMark) {
+        ConnectionWrapper connectionWrapper = registryConnectionRepository.connection(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
+        if (connectionWrapper == null) {
+            logger.warn("no registry connection");
+            return Collections.emptyList();
+        }
+        String nodePath = REGISTRY_PATH.concat("/loadbalance-server/").concat(lbMark);
+        CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
+        try {
+            Stat stat = curatorFramework.checkExists().forPath(nodePath);
+            if (stat == null) {
+                logger.error("could not get node {} stat", nodePath);
+                return Collections.emptyList();
+            }
+            List<String> nodes = curatorFramework.getChildren().forPath(nodePath);
+            if (CollectionUtils.isEmpty(nodes)) {
+                return Collections.emptyList();
+            }
+            List<LoadBalancerServer> servers = new ArrayList<>();
+            for (String child : nodes) {
+                String childPath = nodePath.concat("/").concat(child);
+                byte[] childBytes = curatorFramework.getData().forPath(childPath);
+                LoadBalancerServer server = JacksonUtil.toObject(childBytes, LoadBalancerServer.class);
+                servers.add(server);
+            }
+            return servers;
+        } catch (Exception e) {
+            logger.error("{} config get error", nodePath, e);
+        }
+        return Collections.emptyList();
     }
 
     @Override

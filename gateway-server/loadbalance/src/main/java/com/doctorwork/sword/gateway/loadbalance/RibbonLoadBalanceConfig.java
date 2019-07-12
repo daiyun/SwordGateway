@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
 import com.doctorwork.sword.gateway.common.Constants;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
 import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
@@ -22,9 +22,9 @@ public class RibbonLoadBalanceConfig {
 
     private RuleParam ruleParam;
 
-    private LoadbalanceInfo loadbalanceInfo;
+    private LoadBalancerInfo loadbalanceInfo;
 
-    public RibbonLoadBalanceConfig(LoadbalanceInfo loadbalanceInfo) {
+    public RibbonLoadBalanceConfig(LoadBalancerInfo loadbalanceInfo) {
         this.loadbalanceInfo = loadbalanceInfo;
         this.pingParam = PingParam.build(loadbalanceInfo);
         this.loadbalanceParam = LoadbalanceParam.build(loadbalanceInfo);
@@ -47,10 +47,6 @@ public class RibbonLoadBalanceConfig {
 
     public void setRuleParam(RuleParam ruleParam) {
         this.ruleParam = ruleParam;
-    }
-
-    public void setLoadbalanceInfo(LoadbalanceInfo loadbalanceInfo) {
-        this.loadbalanceInfo = loadbalanceInfo;
     }
 
     public RibbonPingParam pingParam() {
@@ -91,7 +87,7 @@ public class RibbonLoadBalanceConfig {
         return this.rule(this.ruleParam);
     }
 
-    public LoadbalanceInfo getLoadbalanceInfo() {
+    public LoadBalancerInfo getLoadbalanceInfo() {
         return loadbalanceInfo;
     }
 }

@@ -1,10 +1,12 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * @Author:czq
@@ -23,23 +25,28 @@ public class ConfigManager extends AbstractConfiguration {
     }
 
     @Override
-    public DiscoverRegistryConfig connectionConfig(String registryId) {
+    public ConnectionInfo connectionConfig(String registryId) {
         return getConfiguration().connectionConfig(registryId);
     }
 
     @Override
-    public DiscoverConfig discoveryConfig(String dscrId) {
+    public DiscoveryInfo discoveryConfig(String dscrId) {
         return getConfiguration().discoveryConfig(dscrId);
     }
 
     @Override
-    public DiscoverConfig discoveryConfigFromLoadBalance(String lbMark) {
+    public DiscoveryInfo discoveryConfigFromLoadBalance(String lbMark) {
         return getConfiguration().discoveryConfigFromLoadBalance(lbMark);
     }
 
     @Override
-    public LoadbalanceInfo loadbalanceConfig(String lbMark) {
+    public LoadBalancerInfo loadbalanceConfig(String lbMark) {
         return getConfiguration().loadbalanceConfig(lbMark);
+    }
+
+    @Override
+    public Collection<LoadBalancerServer> loadbalanceServer(String lbMark) {
+        return getConfiguration().loadbalanceServer(lbMark);
     }
 
     @Override

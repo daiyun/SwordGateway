@@ -2,7 +2,7 @@ package com.doctorwork.sword.gateway.loadbalance.param.ext;
 
 import com.doctorwork.sword.gateway.common.Constants;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
 import com.doctorwork.sword.gateway.loadbalance.param.Param;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -16,8 +16,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class LoadbalanceParam<T> implements Param {
     private String lbType;
 
-    public static LoadbalanceParam build(LoadbalanceInfo loadbalanceInfo) {
-        if (Constants.LBTYPE_RIBBON.equals(loadbalanceInfo.getLbType())) {
+    public static LoadbalanceParam build(LoadBalancerInfo loadbalanceInfo) {
+        if (Constants.LBTYPE_RIBBON.equals(loadbalanceInfo.getType())) {
             return JacksonUtil.toSubTypeObject(loadbalanceInfo.getLbExtParam(), RibbonLoadBalanceParam.class);
         }
         return null;

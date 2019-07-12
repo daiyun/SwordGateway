@@ -1,17 +1,17 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
+import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
 import com.doctorwork.sword.gateway.common.event.AbstractEvent;
 import com.doctorwork.sword.gateway.common.event.LoadBalanceConfigDeleteEvent;
 import com.doctorwork.sword.gateway.common.event.LoadBalanceConfigLoadEvent;
 import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.loadbalance.server.CompositiveServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.ZookeeperServerList;
-import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.netflix.loadbalancer.BaseLoadBalancer;
@@ -34,14 +34,14 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
     private final Map<String, BaseLoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
 
 
-    private GatewayLoadBalanceService gatewayLoadBalanceService;
+    private ILoadBalancerConfigRepository loadBalancerConfigRepository;
     private IDiscoveryRepository iDiscoveryRepository;
     private EventBus eventBus;
 
     private final StampedLock stampedLock = new StampedLock();
 
-    public CustomerLoadBalanceClient(GatewayLoadBalanceService gatewayLoadBalanceService, IDiscoveryRepository iDiscoveryRepository, EventBus eventBus) {
-        this.gatewayLoadBalanceService = gatewayLoadBalanceService;
+    public CustomerLoadBalanceClient(ILoadBalancerConfigRepository loadBalancerConfigRepository, IDiscoveryRepository iDiscoveryRepository, EventBus eventBus) {
+        this.loadBalancerConfigRepository = loadBalancerConfigRepository;
         this.iDiscoveryRepository = iDiscoveryRepository;
         this.eventBus = eventBus;
         this.register(this.eventBus);
@@ -80,7 +80,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         String logPrex = "【初始化负载均衡器】[" + lbMark + "]";
         long stamp = stampedLock.writeLock();
         try {
-            LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
+            LoadBalancerInfo loadbalanceInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
             if (loadbalanceInfo == null) {
                 logger.info(logPrex + "无需初始化");
                 return;
@@ -98,13 +98,13 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         }
     }
 
-    private BaseLoadBalancer loadBalancer(String lbMark, LoadbalanceInfo loadbalanceInfo) {
+    private BaseLoadBalancer loadBalancer(String lbMark, LoadBalancerInfo loadbalanceInfo) {
         ServerList serverList;
         boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
         if (!dscrEnable) {
-            serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, gatewayLoadBalanceService));
+            serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, loadBalancerConfigRepository));
         } else {
-            serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
+            serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, loadBalancerConfigRepository),
                     new ZookeeperServerList(lbMark, iDiscoveryRepository));
         }
         DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
@@ -118,22 +118,22 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             return;
         }
         String logPrex = "【重载负载均衡器】[" + lbMark + "]";
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
+        LoadBalancerInfo lbInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
 
         long stamp = stampedLock.writeLock();
         try {
             BaseLoadBalancer old = loadBalancerMap.get(lbMark);
-            if (loadbalanceInfo == null && old == null) {
+            if (lbInfo == null && old == null) {
                 logger.info(logPrex + "无需载入");
                 return;
             }
-            if (loadbalanceInfo == null) {
+            if (lbInfo == null) {
                 old.shutdown();
                 loadBalancerMap.remove(lbMark);
                 logger.info(logPrex + "关闭负载器");
                 return;
             }
-            BaseLoadBalancer baseLoadBalancer = loadBalancer(lbMark, loadbalanceInfo);
+            BaseLoadBalancer baseLoadBalancer = loadBalancer(lbMark, lbInfo);
             loadBalancerMap.put(lbMark, baseLoadBalancer);
             old.shutdown();
             logger.info(logPrex + "Done");
@@ -169,14 +169,14 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null) {
+        LoadBalancerInfo lbInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
+        if (lbInfo == null) {
             logger.info(logPrex + "策略未找到");
             return;
         }
         if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
-            dynamicLoadBalancer.reloadPing(loadbalanceInfo);
+            dynamicLoadBalancer.reloadPing(lbInfo);
         }
         logger.info(logPrex + "Done");
     }
@@ -192,14 +192,14 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null) {
+        LoadBalancerInfo lbInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
+        if (lbInfo == null) {
             logger.info(logPrex + "策略未找到");
             return;
         }
         if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
-            dynamicLoadBalancer.reloadRule(loadbalanceInfo);
+            dynamicLoadBalancer.reloadRule(lbInfo);
         }
         logger.info(logPrex + "Done");
     }
@@ -215,14 +215,14 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             logger.info(logPrex + "负载器未加载无法重载");
             return;
         }
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null) {
+        LoadBalancerInfo lbInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
+        if (lbInfo == null) {
             logger.info(logPrex + "策略未找到");
             return;
         }
         if (loadBalancer instanceof DynamicLoadBalancer) {
             DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
-            dynamicLoadBalancer.reloadAutoRefresh(loadbalanceInfo);
+            dynamicLoadBalancer.reloadAutoRefresh(lbInfo);
         }
         logger.info(logPrex + "Done");
     }
@@ -251,8 +251,8 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             return;
         }
         String logPrex = "【负载均衡器服务发现模块重载】[" + lbMark + "]";
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null) {
+        LoadBalancerInfo lbInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
+        if (lbInfo == null) {
             logger.info(logPrex + "负载器信息未找到");
             return;
         }
@@ -266,16 +266,16 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             if (loadBalancer instanceof DynamicLoadBalancer) {
                 DynamicLoadBalancer dynamicLoadBalancer = (DynamicLoadBalancer) loadBalancer;
                 ServerList oldServerList = dynamicLoadBalancer.getServerListImpl();
-                boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
+                boolean dscrEnable = lbInfo.getDscrEnable() != null && lbInfo.getDscrEnable().equals(1);
                 if (oldServerList == null) {
                     logger.info(logPrex + "负载器服务列表异常");
                     return;
                 }
                 CompositiveServerList serverList = (CompositiveServerList) oldServerList;
                 if (!dscrEnable) {
-                    serverList.discoveryReload(false, new DataBaseServerList(lbMark, gatewayLoadBalanceService), null);
+                    serverList.discoveryReload(false, new DataBaseServerList(lbMark, loadBalancerConfigRepository), null);
                 } else {
-                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, gatewayLoadBalanceService),
+                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, loadBalancerConfigRepository),
                             new ZookeeperServerList(lbMark, iDiscoveryRepository));
                 }
                 logger.info(logPrex + "Done");

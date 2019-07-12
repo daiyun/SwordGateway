@@ -3,6 +3,9 @@ package com.doctorwork.sword.gateway.config;
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
+import com.doctorwork.sword.gateway.common.config.IConnectionConfigRepository;
+import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
+import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
@@ -90,9 +93,9 @@ public class LoadBalancerClientAutoConfiguration {
     }
 
     @Bean
-    public CustomerLoadBalanceClient loadBalancerClient(GatewayLoadBalanceService gatewayLoadBalanceService,
+    public CustomerLoadBalanceClient loadBalancerClient(ILoadBalancerConfigRepository loadBalancerConfigRepository,
                                                         IDiscoveryRepository discoveryRepository,
                                                         EventBus eventBus) {
-        return new CustomerLoadBalanceClient(gatewayLoadBalanceService, discoveryRepository, eventBus);
+        return new CustomerLoadBalanceClient(loadBalancerConfigRepository, discoveryRepository, eventBus);
     }
 }

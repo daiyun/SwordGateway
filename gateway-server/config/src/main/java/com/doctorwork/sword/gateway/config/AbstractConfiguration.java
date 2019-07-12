@@ -1,5 +1,8 @@
 package com.doctorwork.sword.gateway.config;
 
+import com.doctorwork.sword.gateway.common.config.IConnectionConfigRepository;
+import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
+import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

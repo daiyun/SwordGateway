@@ -14,10 +14,6 @@
     <dependencies>
         <dependency>
             <groupId>com.doctorwork.sword</groupId>
-            <artifactId>gateway-server-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.doctorwork.sword</groupId>
             <artifactId>gateway-discovery-common</artifactId>
         </dependency>
         <dependency>

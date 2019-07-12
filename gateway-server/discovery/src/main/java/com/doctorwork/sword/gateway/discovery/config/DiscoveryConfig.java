@@ -3,7 +3,7 @@ package com.doctorwork.sword.gateway.discovery.config;
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.builder.DiscoveryBuilder;
@@ -25,10 +25,10 @@ public class DiscoveryConfig<T> {
     private final String mapperRegistryKey;
     private final T properties;
 
-    public static DiscoveryConfig build(DiscoverConfig discoverConfig) {
-        DiscoveryProperties discoveryProperties = JacksonUtil.toObject(discoverConfig.getDscrConfig(), DiscoveryProperties.class);
-        DiscoveryConfig<DiscoveryProperties> discoveryConfig = new DiscoveryConfig<>(discoverConfig.getDscrId(),
-                discoverConfig.getDscrPreloadEnable() == 0, discoverConfig.getDscrRegitryId(), discoveryProperties);
+    public static DiscoveryConfig build(DiscoveryInfo discoveryInfo) {
+        DiscoveryProperties discoveryProperties = JacksonUtil.toObject(discoveryInfo.getConfig(), DiscoveryProperties.class);
+        DiscoveryConfig<DiscoveryProperties> discoveryConfig = new DiscoveryConfig<>(discoveryInfo.getId(),
+                discoveryInfo.getPreload() == 0, discoveryInfo.getConectionId(), discoveryProperties);
         return discoveryConfig;
     }
 

@@ -1,5 +1,7 @@
 package com.doctorwork.sword.gateway.service.impl;
 
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 import com.doctorwork.sword.gateway.dal.mapper.ext.ExtLoadbalanceInfoMapper;
 import com.doctorwork.sword.gateway.dal.mapper.ext.ExtLoadbalanceServerMapper;
 import com.doctorwork.sword.gateway.dal.mapper.ext.ExtServerInfoMapper;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,20 +37,41 @@ public class GatewayLoadBalanceServiceImpl implements GatewayLoadBalanceService 
     private ExtLoadbalanceInfoMapper extLoadbalanceInfoMapper;
 
     @Override
-    public List<LoadbalanceServer> loadBalanceServers(String lbMark) {
+    public List<LoadBalancerServer> loadBalanceServers(String lbMark) {
         if (StringUtils.isEmpty(lbMark)) {
             logger.error("无效的负载均衡标识{}", lbMark);
             return Collections.emptyList();
         }
-        return extLoadbalanceServerMapper.get(lbMark);
+        List<LoadbalanceServer> servers = extLoadbalanceServerMapper.get(lbMark);
+        List<LoadBalancerServer> retList = new ArrayList<>(servers.size());
+        for (LoadbalanceServer server : servers) {
+            LoadBalancerServer loadBalancerServer = new LoadBalancerServer();
+            loadBalancerServer.setLbId(server.getLbMark());
+            loadBalancerServer.setSrvIp(server.getSrvIp());
+            loadBalancerServer.setSrvName(server.getSrvName());
+            loadBalancerServer.setSrvPort(server.getSrvPort());
+            loadBalancerServer.setSrvWeight(server.getSrvWeight());
+            retList.add(loadBalancerServer);
+        }
+        return retList;
     }
 
     @Override
-    public LoadbalanceInfo loadBalance(String lbMark) {
+    public LoadBalancerInfo loadBalance(String lbMark) {
         if (StringUtils.isEmpty(lbMark)) {
             logger.error("无效的负载均衡标识{}", lbMark);
             return null;
         }
-        return extLoadbalanceInfoMapper.get(lbMark);
+        LoadbalanceInfo loadbalanceInfo = extLoadbalanceInfoMapper.get(lbMark);
+        LoadBalancerInfo loadBalancerInfo = new LoadBalancerInfo();
+        loadBalancerInfo.setId(loadbalanceInfo.getLbMark());
+        loadBalancerInfo.setDiscoveryId(loadbalanceInfo.getDscrId());
+        loadBalancerInfo.setDscrEnable(loadbalanceInfo.getDscrEnable());
+        loadBalancerInfo.setLbExtParam(loadbalanceInfo.getLbExtParam());
+        loadBalancerInfo.setPingParam(loadbalanceInfo.getPingParam());
+        loadBalancerInfo.setRuleParam(loadbalanceInfo.getRuleParam());
+        loadBalancerInfo.setName(loadbalanceInfo.getLbName());
+        loadBalancerInfo.setType(loadbalanceInfo.getLbType());
+        return loadBalancerInfo;
     }
 }

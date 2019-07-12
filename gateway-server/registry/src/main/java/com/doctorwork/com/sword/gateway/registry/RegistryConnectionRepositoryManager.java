@@ -2,10 +2,10 @@ package com.doctorwork.com.sword.gateway.registry;
 
 import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
+import com.doctorwork.sword.gateway.common.config.IConnectionConfigRepository;
 import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
-import com.doctorwork.sword.gateway.config.IConnectionConfigRepository;
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
@@ -56,12 +56,12 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
                 return;
             }
         } else {
-            DiscoverRegistryConfig discoverRegistryConfig = connectionConfigRepository.connectionConfig(registryId);
-            if (discoverRegistryConfig == null) {
+            ConnectionInfo connectionInfo = connectionConfigRepository.connectionConfig(registryId);
+            if (connectionInfo == null) {
                 logger.error("no service discovery connection config for {}", registryId);
                 return;
             }
-            registryConfig = RegistryConfig.build(discoverRegistryConfig);
+            registryConfig = RegistryConfig.build(connectionInfo);
         }
         ConnectionWrapper connectionWrapper = registryConfig.buidRegistry();
         if (connectionWrapper == null) {

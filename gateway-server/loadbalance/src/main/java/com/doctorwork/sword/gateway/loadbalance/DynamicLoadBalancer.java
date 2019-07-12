@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.loadbalance;
 
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
 import com.doctorwork.sword.gateway.loadbalance.param.PingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
@@ -52,10 +52,10 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         this.serverListImpl = serverListImpl;
     }
 
-    public void init(LoadbalanceInfo loadbalanceInfo) {
+    public void init(LoadBalancerInfo loadbalanceInfo) {
         if (loadbalanceInfo == null)
             throw new RuntimeException("loadbalance info must not be null");
-        this.name = loadbalanceInfo.getLbMark();
+        this.name = loadbalanceInfo.getId();
         this.ribbonLoadBalanceConfig = new RibbonLoadBalanceConfig(loadbalanceInfo);
         RibbonPingParam<IPing> pingParam;
         IPing iPing = null;
@@ -86,8 +86,8 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
 
     }
 
-    public void reloadPing(LoadbalanceInfo loadbalanceInfo) {
-        RibbonPingParam<IPing> pingParam = PingParam.build(loadbalanceInfo);
+    public void reloadPing(LoadBalancerInfo loadBalancerInfo) {
+        RibbonPingParam<IPing> pingParam = PingParam.build(loadBalancerInfo);
         IPing iPing = null;
         if (pingParam != null) {
             iPing = pingParam.ping();
@@ -101,12 +101,12 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         }
         if (iPing != null)
             setPing(iPing);
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadbalanceInfo.getPingParam());
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadBalancerInfo.getPingParam());
         this.ribbonLoadBalanceConfig.setPingParam(pingParam);
     }
 
-    public void reloadRule(LoadbalanceInfo loadbalanceInfo) {
-        RuleParam ruleParam = RuleParam.build(loadbalanceInfo);
+    public void reloadRule(LoadBalancerInfo loadBalancerInfo) {
+        RuleParam ruleParam = RuleParam.build(loadBalancerInfo);
         IRule iRule = null;
         if (ruleParam != null) {
             iRule = RibbonLoadBalanceConfig.rule(ruleParam);
@@ -116,14 +116,14 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
             iRule.setLoadBalancer(this);
             setRule(iRule);
         }
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadbalanceInfo.getPingParam());
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setRuleParam(loadbalanceInfo.getRuleParam());
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadBalancerInfo.getPingParam());
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setRuleParam(loadBalancerInfo.getRuleParam());
         this.ribbonLoadBalanceConfig.setRuleParam(ruleParam);
     }
 
-    public void reloadAutoRefresh(LoadbalanceInfo loadbalanceInfo) {
-        LoadbalanceParam loadbalanceParam = LoadbalanceParam.build(loadbalanceInfo);
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setLbExtParam(loadbalanceInfo.getLbExtParam());
+    public void reloadAutoRefresh(LoadBalancerInfo loadBalancerInfo) {
+        LoadbalanceParam loadbalanceParam = LoadbalanceParam.build(loadBalancerInfo);
+        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setLbExtParam(loadBalancerInfo.getLbExtParam());
         this.ribbonLoadBalanceConfig.setLoadbalanceParam(loadbalanceParam);
         if (loadbalanceParam == null) {
             stopServerListRefreshing();

@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.service;
 
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface GatewayDiscoveryService {
 
     DiscoverConfig serviceTodiscoverConfig(String serviceId);
 
-    DiscoverConfig discoverConfig(String dscrId);
+    DiscoveryInfo discoverConfig(String dscrId);
 
     List<DiscoverConfig> preLoadList();
 

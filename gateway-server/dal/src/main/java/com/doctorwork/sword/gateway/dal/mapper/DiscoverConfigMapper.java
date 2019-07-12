@@ -1,6 +1,7 @@
 package com.doctorwork.sword.gateway.dal.mapper;
 
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+
 import java.util.List;
 
 public interface DiscoverConfigMapper {

@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.service.impl;
 
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
 import com.doctorwork.sword.gateway.dal.mapper.ext.ExtDiscoverRegistryConfigMapper;
 import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
@@ -22,7 +23,15 @@ public class GatewayDiscoveryConnectionServiceImpl implements GatewayDiscoveryCo
     private ExtDiscoverRegistryConfigMapper extDiscoverRegistryConfigMapper;
 
     @Override
-    public DiscoverRegistryConfig get(String registryId) {
-        return extDiscoverRegistryConfigMapper.get(registryId);
+    public ConnectionInfo get(String registryId) {
+        DiscoverRegistryConfig discoverRegistryConfig = extDiscoverRegistryConfigMapper.get(registryId);
+        if (discoverRegistryConfig == null)
+            return null;
+        ConnectionInfo connectionInfo = new ConnectionInfo();
+        connectionInfo.setId(discoverRegistryConfig.getDscrRegistryId());
+        connectionInfo.setType(discoverRegistryConfig.getDscrRegistryType());
+        connectionInfo.setConfig(discoverRegistryConfig.getDscrRegistryConfig());
+        connectionInfo.setHash(discoverRegistryConfig.getVersion());
+        return connectionInfo;
     }
 }

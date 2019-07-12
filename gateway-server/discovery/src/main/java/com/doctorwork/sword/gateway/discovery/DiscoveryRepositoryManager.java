@@ -2,10 +2,10 @@ package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
+import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
-import com.doctorwork.sword.gateway.config.IDiscoveryConfigRepository;
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
@@ -82,12 +82,12 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (serviceWrapper != null)
                 return serviceWrapper;
             //此处会有高并发情况
-            DiscoverConfig discoverConfig = discoveryConfigRepository.discoveryConfig(serviceId);
-            if (discoverConfig == null) {
-                logger.error("no discover config for {}", serviceId);
+            DiscoveryInfo discoveryInfo = discoveryConfigRepository.discoveryConfig(serviceId);
+            if (discoveryInfo == null) {
+                logger.error("no discovery config for {}", serviceId);
                 return null;
             }
-            ServiceWrapper wrapper = new ServiceWrapper(serviceId, discoverConfig.getDscrId(), this, this);
+            ServiceWrapper wrapper = new ServiceWrapper(serviceId, discoveryInfo.getId(), this, this);
             serviceWrapperMap.put(serviceId, wrapper);
             return wrapper;
         }
@@ -99,15 +99,15 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     }
 
     @Override
-    public void loadService(String serviceId, DiscoverConfig discoverConfig) throws Exception {
-        DiscoverConfig config = discoverConfig;
-        if (discoverConfig == null)
+    public void loadService(String serviceId, DiscoveryInfo discoveryInfo) throws Exception {
+        DiscoveryInfo config = discoveryInfo;
+        if (discoveryInfo == null)
             config = discoveryConfigRepository.discoveryConfigFromLoadBalance(serviceId);
         String mark;
         if (config == null) {
             return;
         }
-        mark = config.getDscrId();
+        mark = config.getId();
 //                synchronized (serviceWrapperMap) {
         ServiceWrapper serviceWrapper = serviceWrapperMap.get(serviceId);
         if (serviceWrapper == null) {
@@ -120,9 +120,9 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     }
 
     @Override
-    public void loadDiscovery(String dscrId, DiscoverConfig discoverConfig) throws Exception {
-        DiscoverConfig config = discoverConfig;
-        if (discoverConfig == null)
+    public void loadDiscovery(String dscrId, DiscoveryInfo discoveryInfo) throws Exception {
+        DiscoveryInfo config = discoveryInfo;
+        if (discoveryInfo == null)
             config = discoveryConfigRepository.discoveryConfig(dscrId);
         String mark;
         DiscoveryConfig discoveryConfig = null;

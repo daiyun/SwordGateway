@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.service;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
 
 /**
  * @Author:czq
@@ -9,5 +9,5 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
  * @Modified By:
  */
 public interface GatewayDiscoveryConnectionService {
-    DiscoverRegistryConfig get(String registryId);
+    ConnectionInfo get(String registryId);
 }

@@ -1,8 +1,6 @@
 package com.doctorwork.sword.gateway.loadbalance.server;
 
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceServer;
-
-import java.util.Objects;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 
 /**
  * @Author:czq
@@ -12,14 +10,14 @@ import java.util.Objects;
  */
 public class DataBaseServer extends AbstractServer {
 
-    private final LoadbalanceServer loadbalanceServer;
+    private final LoadBalancerServer server;
 
-    public DataBaseServer(LoadbalanceServer loadbalanceServer) {
+    public DataBaseServer(LoadBalancerServer server) {
         // TODO: ssl support
-        super(loadbalanceServer.getSrvIp(), loadbalanceServer.getSrvPort(), new MetaInfo() {
+        super(server.getSrvIp(), server.getSrvPort(), new MetaInfo() {
             @Override
             public String getAppName() {
-                return loadbalanceServer.getApolloId();
+                return server.getSrvName();
             }
 
             @Override
@@ -29,20 +27,20 @@ public class DataBaseServer extends AbstractServer {
 
             @Override
             public String getServiceIdForDiscovery() {
-                return loadbalanceServer.getApolloId();
+                return server.getLbId();
             }
 
             @Override
             public String getInstanceId() {
-                return String.valueOf(loadbalanceServer.getSrvId());
+                return server.getSrvIp() + ":" + server.getSrvPort();
             }
         });
-        this.loadbalanceServer = loadbalanceServer;
+        this.server = server;
     }
 
     @Override
     public Integer weight() {
-        Integer weight = loadbalanceServer.getSrvWeight();
+        Integer weight = server.getSrvWeight();
         return weight == null ? 0 : weight;
     }
 }

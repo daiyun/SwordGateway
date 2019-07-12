@@ -1,7 +1,7 @@
 package com.doctorwork.sword.gateway.service;
 
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceServer;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface GatewayLoadBalanceService {
 
-    List<LoadbalanceServer> loadBalanceServers(String lbMark);
+    List<LoadBalancerServer> loadBalanceServers(String lbMark);
 
-    LoadbalanceInfo loadBalance(String lbMark);
+    LoadBalancerInfo loadBalance(String lbMark);
 }

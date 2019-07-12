@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.service.impl;
 
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.dal.mapper.ext.ExtDiscoverConfigMapper;
 import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
@@ -25,11 +26,20 @@ public class GatewayDiscoveryServiceImpl implements GatewayDiscoveryService {
     }
 
     @Override
-    public DiscoverConfig discoverConfig(String dscrId) {
+    public DiscoveryInfo discoverConfig(String dscrId) {
         if (StringUtils.isEmpty(dscrId))
             return null;
         DiscoverConfig discoverConfig = extDiscoverConfigMapper.get(dscrId);
-        return discoverConfig;
+        if(discoverConfig == null)
+            return null;
+        DiscoveryInfo discoveryInfo = new DiscoveryInfo();
+        discoveryInfo.setId(discoverConfig.getDscrId());
+        discoveryInfo.setConectionId(discoverConfig.getDscrRegitryId());
+        discoveryInfo.setConfig(discoverConfig.getDscrConfig());
+        discoveryInfo.setPreload(discoverConfig.getDscrPreloadEnable());
+        discoveryInfo.setType(discoverConfig.getDscrType());
+        discoveryInfo.setHash(discoverConfig.getVersion());
+        return discoveryInfo;
     }
 
     @Override

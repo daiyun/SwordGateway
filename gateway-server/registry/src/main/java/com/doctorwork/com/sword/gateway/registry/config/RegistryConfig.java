@@ -2,7 +2,7 @@ package com.doctorwork.com.sword.gateway.registry.config;
 
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
 import com.doctorwork.sword.gateway.discovery.common.builder.CuratorBuilder;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import org.apache.curator.framework.CuratorFramework;
@@ -17,10 +17,10 @@ public class RegistryConfig<T> {
     private String registryKey;
     private T properties;
 
-    public static RegistryConfig build(DiscoverRegistryConfig discoverRegistryConfig) {
-        ZookeeperProperties zookeeperProperties = JacksonUtil.toObject(discoverRegistryConfig.getDscrRegistryConfig(), ZookeeperProperties.class);
+    public static RegistryConfig build(ConnectionInfo connectionInfo) {
+        ZookeeperProperties zookeeperProperties = JacksonUtil.toObject(connectionInfo.getConfig(), ZookeeperProperties.class);
         RegistryConfig<ZookeeperProperties> registryConfig = new RegistryConfig<>();
-        registryConfig.setRegistryKey(discoverRegistryConfig.getDscrRegistryId());
+        registryConfig.setRegistryKey(connectionInfo.getId());
         registryConfig.setProperties(zookeeperProperties);
         return registryConfig;
     }

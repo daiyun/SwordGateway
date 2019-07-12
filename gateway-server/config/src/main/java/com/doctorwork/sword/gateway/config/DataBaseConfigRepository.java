@@ -1,12 +1,15 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
+import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
+
+import java.util.Collection;
 
 /**
  * @Author:czq
@@ -27,26 +30,31 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     }
 
     @Override
-    public DiscoverRegistryConfig connectionConfig(String registryId) {
+    public ConnectionInfo connectionConfig(String registryId) {
         return gatewayDiscoveryConnectionService.get(registryId);
     }
 
     @Override
-    public DiscoverConfig discoveryConfig(String dscrId) {
+    public DiscoveryInfo discoveryConfig(String dscrId) {
         return gatewayDiscoveryService.discoverConfig(dscrId);
     }
 
     @Override
-    public DiscoverConfig discoveryConfigFromLoadBalance(String lbMark) {
-        LoadbalanceInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
-        if (loadbalanceInfo == null || loadbalanceInfo.getDscrEnable().equals(0) || StringUtils.isEmpty(loadbalanceInfo.getDscrId()))
+    public DiscoveryInfo discoveryConfigFromLoadBalance(String lbMark) {
+        LoadBalancerInfo loadbalanceInfo = gatewayLoadBalanceService.loadBalance(lbMark);
+        if (loadbalanceInfo == null || loadbalanceInfo.getDscrEnable().equals(0) || StringUtils.isEmpty(loadbalanceInfo.getDiscoveryId()))
             return null;
-        return gatewayDiscoveryService.discoverConfig(loadbalanceInfo.getDscrId());
+        return gatewayDiscoveryService.discoverConfig(loadbalanceInfo.getDiscoveryId());
     }
 
     @Override
-    public LoadbalanceInfo loadbalanceConfig(String lbMark) {
+    public LoadBalancerInfo loadbalanceConfig(String lbMark) {
         return gatewayLoadBalanceService.loadBalance(lbMark);
+    }
+
+    @Override
+    public Collection<LoadBalancerServer> loadbalanceServer(String lbMark) {
+        return gatewayLoadBalanceService.loadBalanceServers(lbMark);
     }
 
     @Override

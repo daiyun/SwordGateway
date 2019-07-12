@@ -1,6 +1,6 @@
 package com.doctorwork.sword.gateway.discovery;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.x.discovery.ServiceInstance;
@@ -18,9 +18,9 @@ public interface IDiscoveryRepository {
 
     ServiceDiscoveryWrapper serviceDisovery(ServiceWrapper serviceWrapper);
 
-    void loadService(String serviceId, DiscoverConfig discoverConfig) throws Exception;
+    void loadService(String serviceId, DiscoveryInfo discoverConfig) throws Exception;
 
-    void loadDiscovery(String dscrId, DiscoverConfig discoverConfig) throws Exception;
+    void loadDiscovery(String dscrId, DiscoveryInfo discoverConfig) throws Exception;
 
     void loadRegistry(String registryId) throws Exception;
 
