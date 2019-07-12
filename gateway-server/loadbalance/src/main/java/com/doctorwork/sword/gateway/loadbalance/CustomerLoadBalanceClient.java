@@ -82,7 +82,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         try {
             LoadBalancerInfo loadbalanceInfo = loadBalancerConfigRepository.loadbalanceConfig(lbMark);
             if (loadbalanceInfo == null) {
-                logger.info(logPrex + "无需初始化");
+                logger.info(logPrex + "无配置信息，无法初始化");
                 return;
             }
             BaseLoadBalancer loadBalancer = loadBalancerMap.get(lbMark);
@@ -291,7 +291,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         if (event instanceof ServiceCacheChangeEvent) {
             ServiceCacheChangeEvent cacheChangeEvent = (ServiceCacheChangeEvent) event;
             String serviceId = cacheChangeEvent.getServiceId();
-            logger.info("接收服务提供者{}节点变更事件", serviceId);
+            logger.info("[ServiceCacheChangeEvent]handle event for {}", serviceId);
             BaseLoadBalancer loadBalancer = loadBalancerMap.get(serviceId);
             if (loadBalancer == null) {
                 logger.info("服务提供者[{}]并未开启负载均衡", serviceId);
@@ -305,12 +305,12 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         } else if (event instanceof LoadBalanceConfigDeleteEvent) {
             LoadBalanceConfigDeleteEvent configLoadEvent = (LoadBalanceConfigDeleteEvent) event;
             String lbMark = configLoadEvent.getLbMark();
-            logger.info("handle event LoadBalanceConfigDeleteEvent for {}", lbMark);
+            logger.info("[LoadBalanceConfigDeleteEvent]handle event for {}", lbMark);
             this.loadBalanceLoad(lbMark);
         } else if (event instanceof LoadBalanceConfigLoadEvent) {
             LoadBalanceConfigLoadEvent configLoadEvent = (LoadBalanceConfigLoadEvent) event;
             String lbMark = configLoadEvent.getLbMark();
-            logger.info("handle event LoadBalanceConfigLoadEvent for {}", lbMark);
+            logger.info("[LoadBalanceConfigLoadEvent]handle event for {}", lbMark);
             this.loadBalanceDelete(lbMark);
         }
     }

@@ -16,13 +16,19 @@ import org.apache.curator.framework.CuratorFramework;
 public class RegistryConfig<T> {
     private String registryKey;
     private T properties;
+    private String hash;
 
     public static RegistryConfig build(ConnectionInfo connectionInfo) {
         ZookeeperProperties zookeeperProperties = JacksonUtil.toObject(connectionInfo.getConfig(), ZookeeperProperties.class);
         RegistryConfig<ZookeeperProperties> registryConfig = new RegistryConfig<>();
         registryConfig.setRegistryKey(connectionInfo.getId());
         registryConfig.setProperties(zookeeperProperties);
+        registryConfig.setHash(connectionInfo.getHash());
         return registryConfig;
+    }
+
+    public boolean hashValidate(String hash) {
+        return this.hash.equals(hash);
     }
 
     public String getRegistryKey() {
@@ -46,9 +52,13 @@ public class RegistryConfig<T> {
             ZookeeperProperties castProperties = (ZookeeperProperties) properties;
             CuratorBuilder curatorBuilder = new CuratorBuilder(castProperties);
             CuratorFramework curatorFramework = curatorBuilder.build();
-            ConnectionWrapper connectionWrapper = new ConnectionWrapper(registryKey, curatorFramework);
+            ConnectionWrapper connectionWrapper = new ConnectionWrapper(registryKey, curatorFramework, this);
             return connectionWrapper;
         }
         return null;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 }

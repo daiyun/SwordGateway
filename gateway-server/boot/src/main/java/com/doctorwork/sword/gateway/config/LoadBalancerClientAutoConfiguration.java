@@ -3,7 +3,6 @@ package com.doctorwork.sword.gateway.config;
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
-import com.doctorwork.sword.gateway.common.config.IConnectionConfigRepository;
 import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
@@ -55,12 +54,13 @@ public class LoadBalancerClientAutoConfiguration {
                                        EventBus eventBus) {
         DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig);
         RegistryConfigRepository registryConfigRepository = new RegistryConfigRepository(registryConnectionRepository, eventBus, gatewayConfig);
-        return new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
+        ConfigManager configManager = new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
+        registryConnectionRepository.setConnectionConfig(configManager);
+        return configManager;
     }
 
     @Bean
-    public IRegistryConnectionRepository discoveryConnectionRepository(IConnectionConfigRepository connectionConfigRepository,
-                                                                       ZookeeperProperties defaultZookeeperProperties,
+    public IRegistryConnectionRepository discoveryConnectionRepository(ZookeeperProperties defaultZookeeperProperties,
                                                                        EventBus eventBus) {
         RegistryConfig<ZookeeperProperties> registryConfig = null;
         if (defaultZookeeperProperties != null) {
@@ -68,7 +68,7 @@ public class LoadBalancerClientAutoConfiguration {
             registryConfig.setProperties(defaultZookeeperProperties);
             registryConfig.setRegistryKey(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
         }
-        return new RegistryConnectionRepositoryManager(connectionConfigRepository, registryConfig, eventBus);
+        return new RegistryConnectionRepositoryManager(registryConfig, eventBus);
     }
 
     @Bean

@@ -211,27 +211,27 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
         if (event instanceof RegistryLoadEvent) {
             RegistryLoadEvent registryLoadEvent = (RegistryLoadEvent) event;
             String registryId = registryLoadEvent.getRegistryId();
-            logger.info("handle event registry load[{}] for {}", registryLoadEvent.getReload(), registryId);
+            logger.info("[RegistryLoadEvent]handle event load[{}] for {}", registryLoadEvent.getReload(), registryId);
             if (registryLoadEvent.getReload()) {
                 try {
                     this.loadRegistry(registryId);
                 } catch (Exception e) {
-                    logger.error("handle event RegistryLoadEvent,but error happened", e);
+                    logger.error("[RegistryLoadEvent]handle event for {},but error happened", registryId, e);
                 }
             }
         } else if (event instanceof DiscoverConfigLoadEvent) {
             DiscoverConfigLoadEvent configLoadEvent = (DiscoverConfigLoadEvent) event;
             String dscrId = configLoadEvent.getDscrId();
-            logger.info("handle event DiscoverConfigLoadEvent for {}", dscrId);
+            logger.info("[DiscoverConfigLoadEvent]handle event for {}", dscrId);
             try {
                 this.loadDiscovery(dscrId, null);
             } catch (Exception e) {
-                logger.error("error happened while handle event DiscoverConfigLoadEvent for {}", dscrId, e);
+                logger.error("[DiscoverConfigLoadEvent]error happened while handle event for {}", dscrId, e);
             }
-        }else if (event instanceof DiscoverConfigDeleteEvent) {
-            DiscoverConfigLoadEvent configLoadEvent = (DiscoverConfigLoadEvent) event;
-            String dscrId = configLoadEvent.getDscrId();
-            logger.info("handle event DiscoverConfigLoadEvent for {}, but do nothing", dscrId);
+        } else if (event instanceof DiscoverConfigDeleteEvent) {
+            DiscoverConfigDeleteEvent deleteEvent = (DiscoverConfigDeleteEvent) event;
+            String dscrId = deleteEvent.getDscrId();
+            logger.info("[DiscoverConfigLoadEvent]handle event for {}, but do nothing", dscrId);
         }
     }
 }

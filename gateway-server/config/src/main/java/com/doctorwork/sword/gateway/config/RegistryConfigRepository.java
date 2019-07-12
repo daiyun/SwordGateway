@@ -199,8 +199,9 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
             nodeCache.start();
             NodeCacheListener listener = new NodeCacheListener() {
                 public void nodeChanged() {
-                    if (nodeCache.getCurrentData() != null) {
-                        eventPost(new RegistryConfigLoadEvent(registryId));
+                    ChildData nodeData = nodeCache.getCurrentData();
+                    if (nodeData != null) {
+                        eventPost(new RegistryConfigLoadEvent(registryId, JacksonUtil.toObject(nodeData.getData(), ConnectionInfo.class)));
                     } else {
                         eventPost(new RegistryConfigDeleteEvent(registryId));
                     }

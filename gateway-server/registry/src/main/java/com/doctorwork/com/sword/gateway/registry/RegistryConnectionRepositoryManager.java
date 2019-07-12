@@ -33,8 +33,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
     private RegistryConfig defaultRegistryConfig;
     private EventBus eventBus;
 
-    public RegistryConnectionRepositoryManager(IConnectionConfigRepository connectionConfigRepository, RegistryConfig defaultRegistryConfig, EventBus eventBus) {
-        this.connectionConfigRepository = connectionConfigRepository;
+    public RegistryConnectionRepositoryManager(RegistryConfig defaultRegistryConfig, EventBus eventBus) {
         this.defaultRegistryConfig = defaultRegistryConfig;
         this.eventBus = eventBus;
         register(this.eventBus);
@@ -68,7 +67,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
             logger.error("service discovery connection create faild for {}", registryId);
             return;
         }
-        ConnectionWrapper old = null;
+        ConnectionWrapper old;
         if (!updateFlag.compareAndSet(false, true)) {
             return;
         }
@@ -105,11 +104,22 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
     public void handleEvent(AbstractEvent event) {
         if (event instanceof RegistryConfigLoadEvent) {
             RegistryConfigLoadEvent loadEvent = (RegistryConfigLoadEvent) event;
-            logger.info("handle event RegistryConfigLoadEvent for {}", loadEvent.getRegistryId());
-            this.connectionLoad(loadEvent.getRegistryId());
+            String registryId = loadEvent.getRegistryId();
+            logger.info("[RegistryConfigLoadEvent]handle event for {}", registryId);
+            ConnectionWrapper connectionWrapper = connectionWrapperMap.get(registryId);
+            if (connectionWrapper != null && connectionWrapper.getRegistryConfig().hashValidate(loadEvent.getConnectionInfo().getHash())) {
+                logger.info("[RegistryConfigLoadEvent]event for {}, hash validate,no need to reload", registryId);
+                return;
+            }
+            this.connectionLoad(registryId);
         } else if (event instanceof RegistryConfigDeleteEvent) {
             RegistryConfigDeleteEvent deleteEvent = (RegistryConfigDeleteEvent) event;
-            logger.info("handle event RegistryConfigDeleteEvent for {}, but do nothing", deleteEvent.getRegistryId());
+            logger.info("[RegistryConfigDeleteEvent]handle event for {}, but do nothing", deleteEvent.getRegistryId());
         }
+    }
+
+    @Override
+    public void setConnectionConfig(IConnectionConfigRepository connectionConfigRepository) {
+        this.connectionConfigRepository = connectionConfigRepository;
     }
 }
