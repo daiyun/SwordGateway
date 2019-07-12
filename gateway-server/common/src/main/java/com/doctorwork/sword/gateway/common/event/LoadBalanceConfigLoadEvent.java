@@ -7,7 +7,14 @@ package com.doctorwork.sword.gateway.common.event;
  * @Modified By:
  */
 public class LoadBalanceConfigLoadEvent extends LoadBalanceEvent {
-    public LoadBalanceConfigLoadEvent(String lbMark) {
+    private Integer version;
+
+    public LoadBalanceConfigLoadEvent(String lbMark, int version) {
         super(lbMark);
+        this.version = version;
+    }
+
+    public Integer getVersion() {
+        return version;
     }
 }

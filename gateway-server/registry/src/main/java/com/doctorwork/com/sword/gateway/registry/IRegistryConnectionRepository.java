@@ -14,6 +14,7 @@ import java.io.IOException;
 public interface IRegistryConnectionRepository {
     ConnectionWrapper connection(String registryId);
 
+    //to do 并发
     void connectionLoad(String registryId) throws IOException;
 
     void connectionClose(String registryId) throws IOException;

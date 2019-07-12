@@ -51,14 +51,6 @@ public class DiscoverRegistryConfig implements Serializable {
 
     /**
      * <pre>
-     * 版本号
-     * This field corresponds to the database column <tt>discover_registry_config.version<tt>
-     * </pre>
-     */
-    private String version;
-
-    /**
-     * <pre>
      * 是否删除，0-未删除，1-删除，默认为0
      * This field corresponds to the database column <tt>discover_registry_config.is_delete<tt>
      * </pre>
@@ -174,28 +166,6 @@ public class DiscoverRegistryConfig implements Serializable {
 
     /**
      * <pre>
-     * This field corresponds to the database column <tt>discover_registry_config.version<tt>
-     * </pre>
-     *
-     * @return 版本号
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * <pre>
-     * This field corresponds to the database column <tt>discover_registry_config.version<tt>
-     * </pre>
-     *
-     * @param version 版本号
-     */
-    public void setVersion(String version) {
-        this.version = version == null ? null : version.trim();
-    }
-
-    /**
-     * <pre>
      * This field corresponds to the database column <tt>discover_registry_config.is_delete<tt>
      * </pre>
      *
@@ -273,7 +243,6 @@ public class DiscoverRegistryConfig implements Serializable {
         sb.append(", dscrRegistryId=").append(dscrRegistryId);
         sb.append(", dscrRegistryType=").append(dscrRegistryType);
         sb.append(", dscrRegistryConfig=").append(dscrRegistryConfig);
-        sb.append(", version=").append(version);
         sb.append(", isDelete=").append(isDelete);
         sb.append(", gmtCreate=").append(gmtCreate);
         sb.append(", gmtModified=").append(gmtModified);
@@ -301,7 +270,6 @@ public class DiscoverRegistryConfig implements Serializable {
             && (this.getDscrRegistryId() == null ? other.getDscrRegistryId() == null : this.getDscrRegistryId().equals(other.getDscrRegistryId()))
             && (this.getDscrRegistryType() == null ? other.getDscrRegistryType() == null : this.getDscrRegistryType().equals(other.getDscrRegistryType()))
             && (this.getDscrRegistryConfig() == null ? other.getDscrRegistryConfig() == null : this.getDscrRegistryConfig().equals(other.getDscrRegistryConfig()))
-            && (this.getVersion() == null ? other.getVersion() == null : this.getVersion().equals(other.getVersion()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
             && (this.getGmtCreate() == null ? other.getGmtCreate() == null : this.getGmtCreate().equals(other.getGmtCreate()))
             && (this.getGmtModified() == null ? other.getGmtModified() == null : this.getGmtModified().equals(other.getGmtModified()));
@@ -318,7 +286,6 @@ public class DiscoverRegistryConfig implements Serializable {
         result = prime * result + ((getDscrRegistryId() == null) ? 0 : getDscrRegistryId().hashCode());
         result = prime * result + ((getDscrRegistryType() == null) ? 0 : getDscrRegistryType().hashCode());
         result = prime * result + ((getDscrRegistryConfig() == null) ? 0 : getDscrRegistryConfig().hashCode());
-        result = prime * result + ((getVersion() == null) ? 0 : getVersion().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getGmtCreate() == null) ? 0 : getGmtCreate().hashCode());
         result = prime * result + ((getGmtModified() == null) ? 0 : getGmtModified().hashCode());

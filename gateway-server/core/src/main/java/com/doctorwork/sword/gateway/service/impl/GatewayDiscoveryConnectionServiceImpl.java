@@ -31,7 +31,6 @@ public class GatewayDiscoveryConnectionServiceImpl implements GatewayDiscoveryCo
         connectionInfo.setId(discoverRegistryConfig.getDscrRegistryId());
         connectionInfo.setType(discoverRegistryConfig.getDscrRegistryType());
         connectionInfo.setConfig(discoverRegistryConfig.getDscrRegistryConfig());
-        connectionInfo.setHash(discoverRegistryConfig.getVersion());
         return connectionInfo;
     }
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @Author:czq
@@ -22,12 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Date: 11:03 2019/7/4
  * @Modified By:
  */
-public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost, EventListener<AbstractEvent> {
+public class RegistryConnectionRepositoryManager implements IRegistryConnectionRepository, EventPost, EventListener<RegistryConfigEvent> {
     protected static final Logger logger = LoggerFactory.getLogger(RegistryConnectionRepositoryManager.class);
 
     private final Map<String, ConnectionWrapper> connectionWrapperMap = new ConcurrentHashMap<>();
     public static final String DEFAULT_ZOOKEEPER = "default";
-    private AtomicBoolean updateFlag = new AtomicBoolean(false);
 
     private IConnectionConfigRepository connectionConfigRepository;
     private RegistryConfig defaultRegistryConfig;
@@ -46,7 +44,7 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
 
     @Override
     //重载此处 需要将对应的发现进行重载 然后进行关闭操作
-    public void connectionLoad(String registryId) {
+    public synchronized void connectionLoad(String registryId) {
         RegistryConfig registryConfig;
         if (registryId.equals(DEFAULT_ZOOKEEPER)) {
             registryConfig = defaultRegistryConfig;
@@ -68,9 +66,6 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
             return;
         }
         ConnectionWrapper old;
-        if (!updateFlag.compareAndSet(false, true)) {
-            return;
-        }
         try {
             old = connectionWrapperMap.get(registryId);
             connectionWrapperMap.put(registryId, connectionWrapper);
@@ -81,8 +76,6 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
             }
         } catch (Exception e) {
             logger.info("error happened while connectionLoad regitry for {}", registryId, e);
-        } finally {
-            updateFlag.set(false);
         }
     }
 
@@ -101,14 +94,14 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
 
     @Override
     @Subscribe
-    public void handleEvent(AbstractEvent event) {
+    public void handleEvent(RegistryConfigEvent event) {
         if (event instanceof RegistryConfigLoadEvent) {
             RegistryConfigLoadEvent loadEvent = (RegistryConfigLoadEvent) event;
             String registryId = loadEvent.getRegistryId();
-            logger.info("[RegistryConfigLoadEvent]handle event for {}", registryId);
+            logger.info("[RegistryConfigLoadEvent]handle event for {} version {}", registryId, loadEvent.getVersion());
             ConnectionWrapper connectionWrapper = connectionWrapperMap.get(registryId);
-            if (connectionWrapper != null && connectionWrapper.getRegistryConfig().hashValidate(loadEvent.getConnectionInfo().getHash())) {
-                logger.info("[RegistryConfigLoadEvent]event for {}, hash validate,no need to reload", registryId);
+            if (connectionWrapper != null && connectionWrapper.versionValidate(loadEvent.getVersion())) {
+                logger.info("[RegistryConfigLoadEvent]event for {}, version validate,no need to reload", registryId);
                 return;
             }
             this.connectionLoad(registryId);

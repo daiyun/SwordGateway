@@ -5,6 +5,55 @@
     <title>Title</title>
 </head>
 <body>
-<a href="/loadbalance/pubish?lbmark=healthapp-mobile">click here</a>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-loadbalance"/>
+    <button id="btn-loadbalance">publish loadbalance</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-discovery"/>
+    <button id="btn-discovery">publish discovery</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-loadbalanceservers"/>
+    <button id="btn-loadbalanceservers">publish loadbalanceservers</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-registry"/>
+    <button id="btn-registry">publish registry</button>
+</div>
 </body>
+<script src="./libs/jquery/jquery.min-1.10.2.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //点击链接的时候调用
+        $("#btn-loadbalance").click(function () {
+            var value = $("#ipt-loadbalance").val();
+            $.get('/config/pubish/loadbalance', {"lbmark": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-discovery").click(function () {
+            var value = $("#ipt-discovery").val();
+            $.get('/config/pubish/discovery', {"dscrId": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-loadbalanceservers").click(function () {
+            var value = $("#ipt-loadbalanceservers").val();
+            $.get('/config/pubish/loadbalanceservers', {"lbmark": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-registry").click(function () {
+            var value = $("#ipt-registry").val();
+            $.get('/config/pubish/registry', {"registryId": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+    });
+</script>
 </html>

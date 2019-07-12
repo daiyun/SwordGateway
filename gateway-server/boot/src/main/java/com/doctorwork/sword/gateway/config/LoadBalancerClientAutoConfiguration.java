@@ -80,7 +80,7 @@ public class LoadBalancerClientAutoConfiguration {
 
         if (defaultDiscoveryProperties != null) {
             discoveryConfig = new DiscoveryConfig<>(DiscoveryRepositoryManager.DEFAULT_SERVICEDISCOVERY,
-                    true, RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties);
+                    true, RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER, defaultDiscoveryProperties, null);
         }
         DiscoveryRepositoryManager discoveryRepositoryManager = new DiscoveryRepositoryManager(discoveryConfigRepository, discoveryConfig,
                 discoveryConnectionRepository, eventBus);

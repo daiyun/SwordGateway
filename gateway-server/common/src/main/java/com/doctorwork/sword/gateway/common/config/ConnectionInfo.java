@@ -22,10 +22,7 @@ public class ConnectionInfo {
      */
     private String config;
 
-    /**
-     * 格式（标识-类型-注册中心配置hashValue-时间戳）
-     */
-    private String hash;
+    private Integer version;
 
     public String getId() {
         return id;
@@ -51,11 +48,11 @@ public class ConnectionInfo {
         this.config = config;
     }
 
-    public String getHash() {
-        return hash;
+    public Integer getVersion() {
+        return version;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

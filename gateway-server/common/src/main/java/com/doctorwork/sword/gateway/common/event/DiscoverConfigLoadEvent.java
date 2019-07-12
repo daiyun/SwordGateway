@@ -8,7 +8,14 @@ package com.doctorwork.sword.gateway.common.event;
  */
 public class DiscoverConfigLoadEvent extends DiscoveryEvent {
 
-    public DiscoverConfigLoadEvent(String dscrId) {
+    private Integer version;
+
+    public DiscoverConfigLoadEvent(String dscrId, Integer version) {
         super(dscrId);
+        this.version = version;
+    }
+
+    public Integer getVersion() {
+        return version;
     }
 }

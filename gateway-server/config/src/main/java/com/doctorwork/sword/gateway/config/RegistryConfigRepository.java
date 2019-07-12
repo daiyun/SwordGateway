@@ -64,8 +64,10 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
 
     @Override
     public void eventPost(AbstractEvent event) {
-        if (this.eventBus != null)
+        if (this.eventBus != null) {
+            logger.info("post event {}", event.getClass());
             eventBus.post(event);
+        }
     }
 
     @Override
@@ -196,12 +198,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                 return false;
             }
             NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-            nodeCache.start();
+            //不为true会另起线程处理数据，导致此次数据无法拿取到，并且会多post一个时间
+            nodeCache.start(true);
             NodeCacheListener listener = new NodeCacheListener() {
                 public void nodeChanged() {
-                    ChildData nodeData = nodeCache.getCurrentData();
-                    if (nodeData != null) {
-                        eventPost(new RegistryConfigLoadEvent(registryId, JacksonUtil.toObject(nodeData.getData(), ConnectionInfo.class)));
+                    ChildData data = nodeCache.getCurrentData();
+                    if (data != null) {
+                        eventPost(new RegistryConfigLoadEvent(registryId, data.getStat().getVersion()));
                     } else {
                         eventPost(new RegistryConfigDeleteEvent(registryId));
                     }
@@ -274,11 +277,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                 return false;
             }
             NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-            nodeCache.start();
+            //不为true会另起线程处理数据，导致此次数据无法拿取到，并且会多post一个时间
+            nodeCache.start(true);
             NodeCacheListener listener = new NodeCacheListener() {
                 public void nodeChanged() {
-                    if (nodeCache.getCurrentData() != null) {
-                        eventPost(new DiscoverConfigLoadEvent(dscrId));
+                    ChildData data = nodeCache.getCurrentData();
+                    if (data != null) {
+                        eventPost(new DiscoverConfigLoadEvent(dscrId, data.getStat().getVersion()));
                     } else {
                         eventPost(new DiscoverConfigDeleteEvent(dscrId));
                     }
@@ -301,7 +306,7 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
         LoadBalancerInfo loadbalanceInfo = this.loadbalanceConfig(lbMark);
         if (loadbalanceInfo == null || loadbalanceInfo.getDscrEnable().equals(0) || StringUtils.isEmpty(loadbalanceInfo.getDiscoveryId()))
             return null;
-        return this.discoveryConfig(loadbalanceInfo.getId());
+        return this.discoveryConfig(loadbalanceInfo.getDiscoveryId());
     }
 
     @Override
@@ -359,11 +364,13 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                 return false;
             }
             NodeCache nodeCache = new NodeCache(curatorFramework, nodePath);
-            nodeCache.start();
+            //不为true会另起线程处理数据，导致此次数据无法拿取到，并且会多post一个时间
+            nodeCache.start(true);
             NodeCacheListener listener = new NodeCacheListener() {
                 public void nodeChanged() {
-                    if (nodeCache.getCurrentData() != null) {
-                        eventPost(new LoadBalanceConfigLoadEvent(lbMark));
+                    ChildData data = nodeCache.getCurrentData();
+                    if (data != null) {
+                        eventPost(new LoadBalanceConfigLoadEvent(lbMark, data.getStat().getVersion()));
                     } else {
                         eventPost(new LoadBalanceConfigDeleteEvent(lbMark));
                     }

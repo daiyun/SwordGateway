@@ -38,7 +38,6 @@ public class GatewayDiscoveryServiceImpl implements GatewayDiscoveryService {
         discoveryInfo.setConfig(discoverConfig.getDscrConfig());
         discoveryInfo.setPreload(discoverConfig.getDscrPreloadEnable());
         discoveryInfo.setType(discoverConfig.getDscrType());
-        discoveryInfo.setHash(discoverConfig.getVersion());
         return discoveryInfo;
     }
 

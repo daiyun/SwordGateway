@@ -11,6 +11,13 @@
     <packaging>pom</packaging>
     <artifactId>gateway-admin</artifactId>
 
+    <modules>
+        <module>web</module>
+        <module>dal</module>
+        <module>common</module>
+        <module>core</module>
+    </modules>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

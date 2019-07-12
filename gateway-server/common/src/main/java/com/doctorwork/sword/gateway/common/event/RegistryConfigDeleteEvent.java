@@ -6,7 +6,7 @@ package com.doctorwork.sword.gateway.common.event;
  * @Date: 16:46 2019/7/11
  * @Modified By:
  */
-public class RegistryConfigDeleteEvent extends RegistryEvent {
+public class RegistryConfigDeleteEvent extends RegistryConfigEvent {
     public RegistryConfigDeleteEvent(String registryId) {
         super(registryId);
     }

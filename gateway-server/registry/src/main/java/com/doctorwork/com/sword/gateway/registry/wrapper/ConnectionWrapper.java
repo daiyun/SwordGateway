@@ -1,9 +1,8 @@
 package com.doctorwork.com.sword.gateway.registry.wrapper;
 
-import com.doctorwork.com.sword.gateway.registry.config.RegistryConfig;
-
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @Author:czq
@@ -17,11 +16,11 @@ public class ConnectionWrapper implements Closeable {
 
     private final Closeable t;
 
-    private final RegistryConfig registryConfig;
+    private final Integer version;
 
-    public ConnectionWrapper(String id, Object t, RegistryConfig registryConfig) {
+    public ConnectionWrapper(String id, Object t, Integer version) {
         this.id = id;
-        this.registryConfig = registryConfig;
+        this.version = version;
         if (t == null)
             throw new RuntimeException("discovery connection must not be null");
         this.t = (Closeable) t;
@@ -40,7 +39,7 @@ public class ConnectionWrapper implements Closeable {
         return id;
     }
 
-    public RegistryConfig getRegistryConfig() {
-        return registryConfig;
+    public boolean versionValidate(Integer version) {
+        return Objects.equals(this.version, version);
     }
 }

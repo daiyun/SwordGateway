@@ -32,7 +32,7 @@ public class DiscoveryInfo {
      */
     private Integer preload;
 
-    private String hash;
+    private Integer version;
 
     public String getId() {
         return id;
@@ -74,11 +74,11 @@ public class DiscoveryInfo {
         this.preload = preload;
     }
 
-    public String getHash() {
-        return hash;
+    public Integer getVersion() {
+        return version;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

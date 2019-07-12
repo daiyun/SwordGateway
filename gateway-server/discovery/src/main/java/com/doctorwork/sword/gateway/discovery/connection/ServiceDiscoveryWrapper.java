@@ -11,6 +11,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * @Author:czq
@@ -22,10 +23,12 @@ public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
     private final ServiceDiscovery serviceDiscovery;
     private final String id;
     private final String connectionId;
+    private Integer version;
 
-    public ServiceDiscoveryWrapper(ServiceDiscovery serviceDiscovery, String id, String connectionId) {
+    public ServiceDiscoveryWrapper(ServiceDiscovery serviceDiscovery, String id, String connectionId, Integer version) {
         this.id = id;
         this.connectionId = connectionId;
+        this.version = version;
         if (serviceDiscovery == null)
             throw new RuntimeException("service discovery must not be null");
         this.serviceDiscovery = serviceDiscovery;
@@ -39,12 +42,16 @@ public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
         return connectionId;
     }
 
+    public boolean versionValidate(Integer version) {
+        return Objects.equals(this.version, version);
+    }
+
     @Override
     public void close() throws IOException {
         serviceDiscovery.close();
     }
 
-    public ServiceCache<ZookeeperInstance> serviceCache(String name){
+    public ServiceCache<ZookeeperInstance> serviceCache(String name) {
         return serviceDiscovery.serviceCacheBuilder().name(name.concat(Constants.PROVIDES_PATH)).build();
     }
 

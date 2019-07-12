@@ -7,7 +7,6 @@ import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.builder.DiscoveryBuilder;
-import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
 import org.apache.curator.framework.CuratorFramework;
@@ -24,28 +23,25 @@ public class DiscoveryConfig<T> {
     private final Boolean preLoad;
     private final String mapperRegistryKey;
     private final T properties;
+    private final Integer version;
 
     public static DiscoveryConfig build(DiscoveryInfo discoveryInfo) {
         DiscoveryProperties discoveryProperties = JacksonUtil.toObject(discoveryInfo.getConfig(), DiscoveryProperties.class);
         DiscoveryConfig<DiscoveryProperties> discoveryConfig = new DiscoveryConfig<>(discoveryInfo.getId(),
-                discoveryInfo.getPreload() == 0, discoveryInfo.getConectionId(), discoveryProperties);
+                discoveryInfo.getPreload() == 0, discoveryInfo.getConectionId(), discoveryProperties, discoveryInfo.getVersion());
         return discoveryConfig;
     }
 
-    public DiscoveryConfig(String dscrId, Boolean preLoad, String mapperRegistryKey, T properties) {
+    public DiscoveryConfig(String dscrId, Boolean preLoad, String mapperRegistryKey, T properties, Integer version) {
         this.dscrId = dscrId;
         this.preLoad = preLoad;
         this.mapperRegistryKey = mapperRegistryKey;
         this.properties = properties;
+        this.version = version;
     }
 
     public T getProperties() {
         return properties;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(JacksonUtil.toJSon(new DiscoveryProperties()));
-        System.out.println(JacksonUtil.toJSon(new ZookeeperProperties()));
     }
 
     public Boolean isPreLoad() {
@@ -61,14 +57,18 @@ public class DiscoveryConfig<T> {
             if (StringUtils.isEmpty(mapperRegistryKey))
                 return null;
             ConnectionWrapper connectionWrapper = discoveryConnectionRepository.connection(mapperRegistryKey);
-            if (connectionWrapper == null)
-                return null;
+            if (connectionWrapper == null) {
+                discoveryConnectionRepository.connectionLoad(mapperRegistryKey);
+                connectionWrapper = discoveryConnectionRepository.connection(mapperRegistryKey);
+                if (connectionWrapper == null)
+                    return null;
+            }
             CuratorFramework curatorFramework = connectionWrapper.getConnection(CuratorFramework.class);
             DiscoveryProperties discoveryProperties = (DiscoveryProperties) properties;
             DiscoveryBuilder discoveryBuilder = new DiscoveryBuilder(curatorFramework, discoveryProperties.getZkRoot());
             ServiceDiscovery<ZookeeperInstance> serviceDiscovery = discoveryBuilder.build();
             serviceDiscovery.start();
-            return new ServiceDiscoveryWrapper(serviceDiscovery, dscrId, mapperRegistryKey);
+            return new ServiceDiscoveryWrapper(serviceDiscovery, dscrId, mapperRegistryKey, version);
         }
         return null;
     }

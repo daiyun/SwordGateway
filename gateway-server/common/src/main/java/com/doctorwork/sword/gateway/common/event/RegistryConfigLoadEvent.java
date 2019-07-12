@@ -1,22 +1,20 @@
 package com.doctorwork.sword.gateway.common.event;
 
-import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
-
 /**
  * @Author:czq
  * @Description:
  * @Date: 16:46 2019/7/11
  * @Modified By:
  */
-public class RegistryConfigLoadEvent extends RegistryEvent {
-    private ConnectionInfo connectionInfo;
+public class RegistryConfigLoadEvent extends RegistryConfigEvent {
+    private Integer version;
 
-    public RegistryConfigLoadEvent(String registryId, ConnectionInfo connectionInfo) {
+    public RegistryConfigLoadEvent(String registryId, Integer version) {
         super(registryId);
-        this.connectionInfo = connectionInfo;
+        this.version = version;
     }
 
-    public ConnectionInfo getConnectionInfo() {
-        return connectionInfo;
+    public Integer getVersion() {
+        return version;
     }
 }

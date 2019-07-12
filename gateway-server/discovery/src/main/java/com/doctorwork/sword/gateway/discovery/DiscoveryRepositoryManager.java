@@ -82,7 +82,7 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (serviceWrapper != null)
                 return serviceWrapper;
             //此处会有高并发情况
-            DiscoveryInfo discoveryInfo = discoveryConfigRepository.discoveryConfig(serviceId);
+            DiscoveryInfo discoveryInfo = discoveryConfigRepository.discoveryConfigFromLoadBalance(serviceId);
             if (discoveryInfo == null) {
                 logger.error("no discovery config for {}", serviceId);
                 return null;
@@ -222,7 +222,12 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
         } else if (event instanceof DiscoverConfigLoadEvent) {
             DiscoverConfigLoadEvent configLoadEvent = (DiscoverConfigLoadEvent) event;
             String dscrId = configLoadEvent.getDscrId();
-            logger.info("[DiscoverConfigLoadEvent]handle event for {}", dscrId);
+            logger.info("[DiscoverConfigLoadEvent]handle event for {} version {}", dscrId, configLoadEvent.getVersion());
+            ServiceDiscoveryWrapper wrapper = discoveryMap.get(dscrId);
+            if (wrapper != null && wrapper.versionValidate(configLoadEvent.getVersion())) {
+                logger.info("[DiscoverConfigLoadEvent]event for {}, version validate,no need to reload", dscrId);
+                return;
+            }
             try {
                 this.loadDiscovery(dscrId, null);
             } catch (Exception e) {
