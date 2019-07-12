@@ -306,12 +306,12 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             LoadBalanceConfigDeleteEvent configLoadEvent = (LoadBalanceConfigDeleteEvent) event;
             String lbMark = configLoadEvent.getLbMark();
             logger.info("[LoadBalanceConfigDeleteEvent]handle event for {}", lbMark);
-            this.loadBalanceLoad(lbMark);
+            this.loadBalanceDelete(lbMark);
         } else if (event instanceof LoadBalanceConfigLoadEvent) {
             LoadBalanceConfigLoadEvent configLoadEvent = (LoadBalanceConfigLoadEvent) event;
             String lbMark = configLoadEvent.getLbMark();
             logger.info("[LoadBalanceConfigLoadEvent]handle event for {}", lbMark);
-            this.loadBalanceDelete(lbMark);
+            this.loadBalanceLoad(lbMark);
         }
     }
 }

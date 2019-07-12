@@ -1,5 +1,7 @@
 package com.doctorwork.sword.gateway.admin;
 
+import com.doctorwork.sword.gateway.admin.core.GatewayAdminService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,11 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @Modified By:
  */
 @RestController
-@RequestMapping("test")
+@RequestMapping("loadbalance")
 public class TestController {
-    @RequestMapping("ww")
+    @Autowired
+    private GatewayAdminService gatewayAdminService;
+
+    @RequestMapping("/pubish")
     @ResponseBody
-    public String test() {
-        return "IJ";
+    public void test(String lbmark) throws Exception {
+        gatewayAdminService.publishLoadBalanceConfig(lbmark);
     }
 }
