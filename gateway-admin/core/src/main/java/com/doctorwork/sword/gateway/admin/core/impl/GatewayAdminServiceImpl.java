@@ -86,7 +86,7 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
                     .orSetData()
                     .creatingParentContainersIfNeeded()
                     .withMode(CreateMode.PERSISTENT)
-                    .forPath(REGISTRY_PATH.concat(LOADBALANCE_SERVER_NODE).concat(lbMark), JacksonUtil.toBytes(loadBalancerServer));
+                    .forPath(REGISTRY_PATH.concat(LOADBALANCE_SERVER_NODE).concat(lbMark).concat("/").concat(String.valueOf(server.getId())), JacksonUtil.toBytes(loadBalancerServer));
         }
     }
 

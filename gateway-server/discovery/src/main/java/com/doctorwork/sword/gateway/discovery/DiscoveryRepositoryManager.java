@@ -215,8 +215,11 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (registryLoadEvent.getReload()) {
                 try {
                     this.loadRegistry(registryId);
+                    registryLoadEvent.getCloseable().close();
                 } catch (Exception e) {
                     logger.error("[RegistryLoadEvent]handle event for {},but error happened", registryId, e);
+                } finally {
+                    registryLoadEvent.clear();
                 }
             }
         } else if (event instanceof DiscoverConfigLoadEvent) {

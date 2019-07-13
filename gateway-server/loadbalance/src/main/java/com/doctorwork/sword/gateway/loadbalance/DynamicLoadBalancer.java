@@ -6,14 +6,13 @@ import com.doctorwork.sword.gateway.loadbalance.param.ext.LoadbalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ext.RibbonLoadBalanceParam;
 import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
 import com.doctorwork.sword.gateway.loadbalance.param.rule.RuleParam;
+import com.doctorwork.sword.gateway.loadbalance.server.CustomerServerList;
 import com.netflix.loadbalancer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -47,15 +46,21 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
 
     protected volatile ServerListUpdater serverListUpdater;
 
-    public DynamicLoadBalancer(ServerList<T> serverListImpl) {
-        super();
+    public DynamicLoadBalancer(String lbmark, ServerList<T> serverListImpl) {
+        super(lbmark, null, null);
         this.serverListImpl = serverListImpl;
     }
+
+
+    @Override
+    protected void init() {
+        //do nothing
+    }
+
 
     public void init(LoadBalancerInfo loadbalanceInfo) {
         if (loadbalanceInfo == null)
             throw new RuntimeException("loadbalance info must not be null");
-        this.name = loadbalanceInfo.getId();
         this.ribbonLoadBalanceConfig = new RibbonLoadBalanceConfig(loadbalanceInfo);
         RibbonPingParam<IPing> pingParam;
         IPing iPing = null;
@@ -101,7 +106,6 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         }
         if (iPing != null)
             setPing(iPing);
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadBalancerInfo.getPingParam());
         this.ribbonLoadBalanceConfig.setPingParam(pingParam);
     }
 
@@ -116,14 +120,11 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
             iRule.setLoadBalancer(this);
             setRule(iRule);
         }
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setPingParam(loadBalancerInfo.getPingParam());
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setRuleParam(loadBalancerInfo.getRuleParam());
         this.ribbonLoadBalanceConfig.setRuleParam(ruleParam);
     }
 
     public void reloadAutoRefresh(LoadBalancerInfo loadBalancerInfo) {
         LoadbalanceParam loadbalanceParam = LoadbalanceParam.build(loadBalancerInfo);
-        this.ribbonLoadBalanceConfig.getLoadbalanceInfo().setLbExtParam(loadBalancerInfo.getLbExtParam());
         this.ribbonLoadBalanceConfig.setLoadbalanceParam(loadbalanceParam);
         if (loadbalanceParam == null) {
             stopServerListRefreshing();
@@ -168,33 +169,33 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
             }
         }
     }
-
-    @Override
-    public void setServersList(List lsrv) {
-        super.setServersList(lsrv);
-        List<T> serverList = (List<T>) lsrv;
-        Map<String, List<Server>> serversInZones = new HashMap<String, List<Server>>();
-        for (Server server : serverList) {
-            getLoadBalancerStats().getSingleServerStat(server);
-            String zone = server.getZone();
-            if (zone != null) {
-                zone = zone.toLowerCase();
-                List<Server> servers = serversInZones.get(zone);
-                if (servers == null) {
-                    servers = new ArrayList<Server>();
-                    serversInZones.put(zone, servers);
-                }
-                servers.add(server);
-            }
-        }
-        setServerListForZones(serversInZones);
-    }
-
-    protected void setServerListForZones(
-            Map<String, List<Server>> zoneServersMap) {
-        logger.debug("Setting server list for zones: {}", zoneServersMap);
-        getLoadBalancerStats().updateZoneServerMapping(zoneServersMap);
-    }
+//
+//    @Override
+//    public void setServersList(List lsrv) {
+//        super.setServersList(lsrv);
+//        List<T> serverList = (List<T>) lsrv;
+//        Map<String, List<Server>> serversInZones = new HashMap<String, List<Server>>();
+//        for (Server server : serverList) {
+//            getLoadBalancerStats().getSingleServerStat(server);
+//            String zone = server.getZone();
+//            if (zone != null) {
+//                zone = zone.toLowerCase();
+//                List<Server> servers = serversInZones.get(zone);
+//                if (servers == null) {
+//                    servers = new ArrayList<Server>();
+//                    serversInZones.put(zone, servers);
+//                }
+//                servers.add(server);
+//            }
+//        }
+//        setServerListForZones(serversInZones);
+//}
+//
+//    protected void setServerListForZones(
+//            Map<String, List<Server>> zoneServersMap) {
+//        logger.debug("Setting server list for zones: {}", zoneServersMap);
+//        getLoadBalancerStats().updateZoneServerMapping(zoneServersMap);
+//    }
 
     public ServerList<T> getServerListImpl() {
         return serverListImpl;
@@ -236,6 +237,7 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
     public void stopServerListRefreshing() {
         if (serverListUpdater != null) {
             serverListUpdater.stop();
+            this.serverListUpdater = null;
         }
     }
 
@@ -275,17 +277,15 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("DynamicServerListLoadBalancer:");
-        sb.append(super.toString());
-        sb.append("ServerList:" + String.valueOf(serverListImpl));
-        return sb.toString();
-    }
-
-    @Override
     public void shutdown() {
         super.shutdown();
         stopServerListRefreshing();
+        if (this.serverListImpl instanceof CustomerServerList) {
+            CustomerServerList customerServerList = (CustomerServerList) serverListImpl;
+            customerServerList.clear();
+        }
+        getRule().setLoadBalancer(null);
+        this.ribbonLoadBalanceConfig = null;
     }
 
 
@@ -303,5 +303,10 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
 
     public int getCoreThreads() {
         return serverListUpdater.getCoreThreads();
+    }
+
+    @Override
+    public String toString() {
+        return "DynamicLoadBalancer " + this.name;
     }
 }

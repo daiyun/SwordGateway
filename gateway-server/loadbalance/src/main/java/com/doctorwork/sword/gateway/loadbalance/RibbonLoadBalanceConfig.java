@@ -22,10 +22,7 @@ public class RibbonLoadBalanceConfig {
 
     private RuleParam ruleParam;
 
-    private LoadBalancerInfo loadbalanceInfo;
-
     public RibbonLoadBalanceConfig(LoadBalancerInfo loadbalanceInfo) {
-        this.loadbalanceInfo = loadbalanceInfo;
         this.pingParam = PingParam.build(loadbalanceInfo);
         this.loadbalanceParam = LoadbalanceParam.build(loadbalanceInfo);
         this.ruleParam = RuleParam.build(loadbalanceInfo);
@@ -54,7 +51,7 @@ public class RibbonLoadBalanceConfig {
     }
 
     public RibbonLoadBalanceParam extParam() {
-        return loadbalanceParam instanceof RibbonLoadBalanceParam ? null : (RibbonLoadBalanceParam) loadbalanceParam;
+        return loadbalanceParam instanceof RibbonLoadBalanceParam ? (RibbonLoadBalanceParam) loadbalanceParam : null;
     }
 
     public static IRule rule(RuleParam ruleParam) {
@@ -85,9 +82,5 @@ public class RibbonLoadBalanceConfig {
 
     public IRule rule() {
         return this.rule(this.ruleParam);
-    }
-
-    public LoadBalancerInfo getLoadbalanceInfo() {
-        return loadbalanceInfo;
     }
 }

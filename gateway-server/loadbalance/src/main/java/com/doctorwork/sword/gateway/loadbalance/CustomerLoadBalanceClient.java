@@ -107,7 +107,7 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
             serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, loadBalancerConfigRepository),
                     new ZookeeperServerList(lbMark, iDiscoveryRepository));
         }
-        DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(serverList);
+        DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(loadbalanceInfo.getId(), serverList);
         dynamicLoadBalancer.init(loadbalanceInfo);
         return dynamicLoadBalancer;
     }
@@ -128,14 +128,16 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 return;
             }
             if (lbInfo == null) {
-                old.shutdown();
                 loadBalancerMap.remove(lbMark);
+                old.shutdown();
                 logger.info(logPrex + "关闭负载器");
                 return;
             }
             BaseLoadBalancer baseLoadBalancer = loadBalancer(lbMark, lbInfo);
-            loadBalancerMap.put(lbMark, baseLoadBalancer);
-            old.shutdown();
+            BaseLoadBalancer shutdown = loadBalancerMap.put(lbMark, baseLoadBalancer);
+            if (shutdown != null) {
+                shutdown.shutdown();
+            }
             logger.info(logPrex + "Done");
         } finally {
             stampedLock.unlockWrite(stamp);

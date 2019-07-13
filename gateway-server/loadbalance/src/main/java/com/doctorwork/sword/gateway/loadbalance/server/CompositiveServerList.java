@@ -2,6 +2,7 @@ package com.doctorwork.sword.gateway.loadbalance.server;
 
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -124,5 +125,18 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
         } finally {
             stampedLock.unlockWrite(stamp);
         }
+    }
+
+    @Override
+    public void clear() {
+        if(dataBaseServerList != null){
+            dataBaseServerList.clear();
+        }
+        if(zookeeperServerList != null){
+            zookeeperServerList.clear();
+        }
+        this.dscrEnable = null;
+        this.stampedLock = null;
+        super.setServiceId(null);
     }
 }

@@ -5,6 +5,7 @@ import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
 import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,5 +56,11 @@ public class DataBaseServerList extends CustomerServerList<DataBaseServer> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void clear() {
+        this.loadBalancerConfigRepository = null;
+        super.setServiceId(null);
     }
 }

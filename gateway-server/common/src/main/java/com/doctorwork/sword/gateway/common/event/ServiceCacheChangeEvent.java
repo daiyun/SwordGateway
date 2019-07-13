@@ -8,9 +8,9 @@ public class ServiceCacheChangeEvent extends DiscoveryEvent {
 
     private final String serviceId;
 
-    public ServiceCacheChangeEvent(String serviceId, String serviceId1) {
-        super(serviceId);
-        this.serviceId = serviceId1;
+    public ServiceCacheChangeEvent(String serviceId, String dscrId) {
+        super(dscrId);
+        this.serviceId = serviceId;
     }
 
     public String getServiceId() {

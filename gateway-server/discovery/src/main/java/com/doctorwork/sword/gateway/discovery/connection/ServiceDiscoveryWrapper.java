@@ -20,9 +20,9 @@ import java.util.Objects;
  * @Modified By:
  */
 public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
-    private final ServiceDiscovery serviceDiscovery;
-    private final String id;
-    private final String connectionId;
+    private ServiceDiscovery serviceDiscovery;
+    private String id;
+    private String connectionId;
     private Integer version;
 
     public ServiceDiscoveryWrapper(ServiceDiscovery serviceDiscovery, String id, String connectionId, Integer version) {
@@ -49,6 +49,10 @@ public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
     @Override
     public void close() throws IOException {
         serviceDiscovery.close();
+        this.serviceDiscovery = null;
+        this.id = null;
+        this.connectionId = null;
+        this.version = null;
     }
 
     public ServiceCache<ZookeeperInstance> serviceCache(String name) {

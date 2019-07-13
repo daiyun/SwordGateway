@@ -9,6 +9,7 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,5 +67,11 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
             rethrowRuntimeException(e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public void clear() {
+        this.iDiscoveryRepository = null;
+        super.setServiceId(null);
     }
 }

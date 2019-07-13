@@ -70,10 +70,8 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
             old = connectionWrapperMap.get(registryId);
             connectionWrapperMap.put(registryId, connectionWrapper);
             Boolean isolde = old != null;
-            eventPost(new RegistryLoadEvent(registryId, isolde));
-            if (isolde) {
-                old.close();
-            }
+            eventPost(new RegistryLoadEvent(registryId, isolde, old));
+
         } catch (Exception e) {
             logger.info("error happened while connectionLoad regitry for {}", registryId, e);
         }
