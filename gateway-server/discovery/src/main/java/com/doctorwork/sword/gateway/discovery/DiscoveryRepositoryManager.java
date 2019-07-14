@@ -52,7 +52,6 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
                     && defaultDiscoveryConfig.isPreLoad()) {
                 logger.info("pre connectionLoad service discovery config for local");
                 discoveryConnectionRepository.connectionLoad(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
-                this.loadDiscovery("default", null);
             }
         }
 //        List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();

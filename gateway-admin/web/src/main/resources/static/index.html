@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-loadbalance"/>
+    <button id="btn-loadbalance">publish loadbalance</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-discovery"/>
+    <button id="btn-discovery">publish discovery</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-loadbalanceservers"/>
+    <button id="btn-loadbalanceservers">publish loadbalanceservers</button>
+</div>
+<div style="margin-top: 10px">
+    <input type="text" id="ipt-registry"/>
+    <button id="btn-registry">publish registry</button>
+</div>
+</body>
+<script src="./jquery/jquery-3.4.1.min.js"></script>
+<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+<script src="./bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //点击链接的时候调用
+        $("#btn-loadbalance").click(function () {
+            var value = $("#ipt-loadbalance").val();
+            $.get('/config/pubish/loadbalance', {"lbmark": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-discovery").click(function () {
+            var value = $("#ipt-discovery").val();
+            $.get('/config/pubish/discovery', {"dscrId": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-loadbalanceservers").click(function () {
+            var value = $("#ipt-loadbalanceservers").val();
+            $.get('/config/pubish/loadbalanceservers', {"lbmark": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+        $("#btn-registry").click(function () {
+            var value = $("#ipt-registry").val();
+            $.get('/config/pubish/registry', {"registryId": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
+    });
+</script>
+</html>
