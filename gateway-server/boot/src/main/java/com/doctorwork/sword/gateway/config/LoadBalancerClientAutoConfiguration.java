@@ -51,11 +51,12 @@ public class LoadBalancerClientAutoConfiguration {
     public ConfigManager configManager(GatewayConfig gatewayConfig, GatewayDiscoveryService gatewayDiscoveryService,
                                        GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
                                        GatewayLoadBalanceService gatewayLoadBalanceService, IRegistryConnectionRepository registryConnectionRepository,
-                                       EventBus eventBus) {
+                                       EventBus eventBus) throws Exception {
         DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig);
         RegistryConfigRepository registryConfigRepository = new RegistryConfigRepository(registryConnectionRepository, eventBus, gatewayConfig);
         ConfigManager configManager = new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
         registryConnectionRepository.setConnectionConfig(configManager);
+        configManager.init();
         return configManager;
     }
 

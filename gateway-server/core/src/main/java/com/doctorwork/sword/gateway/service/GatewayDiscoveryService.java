@@ -18,7 +18,7 @@ public interface GatewayDiscoveryService {
 
     DiscoveryInfo discoverConfig(String dscrId);
 
-    List<DiscoverConfig> preLoadList();
+    List<DiscoveryInfo> all();
 
     Map<String, DiscoverConfig> poolMap(List<DiscoverConfig> discoverConfigs);
 }

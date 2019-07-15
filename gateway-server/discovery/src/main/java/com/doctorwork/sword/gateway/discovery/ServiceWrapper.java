@@ -5,6 +5,7 @@ import com.doctorwork.sword.gateway.common.event.ServiceCacheChangeEvent;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.discovery.connection.ServiceDiscoveryWrapper;
+import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.x.discovery.ServiceCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,14 +85,8 @@ public class ServiceWrapper extends CacheListener {
     private void closeCache() {
         if (serviceCache != null) {
             serviceCache.removeListener(this);
-            try {
-                serviceCache.close();
-            } catch (Exception e) {
-                logger.error("error close servicecache for {}", serviceId, e);
-            } finally {
-                serviceCache = null;
-            }
-
+            CloseableUtils.closeQuietly(serviceCache);
+            serviceCache = null;
         }
     }
 
@@ -100,5 +95,9 @@ public class ServiceWrapper extends CacheListener {
         String serviceId = this.serviceId;
         String dscrMapKey = this.dscrMapKey;
         eventPost.eventPost(new ServiceCacheChangeEvent(serviceId, dscrMapKey));
+    }
+
+    public String getServiceId() {
+        return serviceId;
     }
 }

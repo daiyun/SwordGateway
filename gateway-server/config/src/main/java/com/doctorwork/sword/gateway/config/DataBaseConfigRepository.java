@@ -48,6 +48,11 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     }
 
     @Override
+    public Collection<DiscoveryInfo> all() {
+        return gatewayDiscoveryService.all();
+    }
+
+    @Override
     public LoadBalancerInfo loadbalanceConfig(String lbMark) {
         return gatewayLoadBalanceService.loadBalance(lbMark);
     }

@@ -144,11 +144,9 @@ public class DynamicLoadBalancer<T extends Server> extends BaseLoadBalancer {
         }
         logger.info("启用负载器{} 服务自动刷新策略[{}](该策略会刷新服务状态)", this.name, PollingServerListUpdater.class.getSimpleName());
         stopServerListRefreshing();
-        if (param != null) {
-            if (param.getInitialDelayMs() != null && param.getRefreshIntervalMs() != null) {
-                setServerListUpdater(new PollingServerListUpdater(param.getInitialDelayMs(), param.getRefreshIntervalMs()));
-                logger.info("负载器{} 服务自动刷新时间已配置，执行延迟时间：{}ms,延迟时间间隔:{}ms", this.name, param.getInitialDelayMs(), param.getRefreshIntervalMs());
-            }
+        if (param != null && param.getInitialDelayMs() != null && param.getRefreshIntervalMs() != null) {
+            setServerListUpdater(new PollingServerListUpdater(param.getInitialDelayMs(), param.getRefreshIntervalMs()));
+            logger.info("负载器{} 服务自动刷新时间已配置，执行延迟时间：{}ms,延迟时间间隔:{}ms", this.name, param.getInitialDelayMs(), param.getRefreshIntervalMs());
         } else {
             setServerListUpdater(new PollingServerListUpdater());
         }

@@ -1,7 +1,5 @@
 package com.doctorwork.sword.gateway.common.event;
 
-import java.io.Closeable;
-
 /**
  * @Author:czq
  * @Description:
@@ -11,23 +9,22 @@ import java.io.Closeable;
 public class RegistryLoadEvent extends RegistryEvent {
 
     private Boolean reload;
-    private Closeable closeable;
+    private EventCall<Void> eventCall;
 
-    public RegistryLoadEvent(String registryId, Boolean reload, Closeable closeable) {
+    public RegistryLoadEvent(String registryId, Boolean reload, EventCall<Void> eventCall) {
         super(registryId);
         this.reload = reload;
-        this.closeable = closeable;
+        this.eventCall = eventCall;
     }
 
     public Boolean getReload() {
         return reload;
     }
 
-    public void clear() {
-        this.closeable = null;
-    }
-
-    public Closeable getCloseable() {
-        return closeable;
+    public synchronized void eventCall() {
+        if (eventCall != null) {
+            eventCall.call();
+            this.eventCall = null;
+        }
     }
 }

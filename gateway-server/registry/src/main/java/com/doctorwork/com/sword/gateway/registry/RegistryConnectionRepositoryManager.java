@@ -8,6 +8,7 @@ import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import org.apache.curator.utils.CloseableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,13 @@ public class RegistryConnectionRepositoryManager implements IRegistryConnectionR
             old = connectionWrapperMap.get(registryId);
             connectionWrapperMap.put(registryId, connectionWrapper);
             Boolean isolde = old != null;
-            eventPost(new RegistryLoadEvent(registryId, isolde, old));
+            eventPost(new RegistryLoadEvent(registryId, isolde, isolde ? new EventCall<Void>() {
+                @Override
+                public Void call() {
+                    CloseableUtils.closeQuietly(old);
+                    return null;
+                }
+            } : null));
 
         } catch (Exception e) {
             logger.info("error happened while connectionLoad regitry for {}", registryId, e);

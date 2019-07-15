@@ -6,8 +6,11 @@ import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +45,20 @@ public class GatewayDiscoveryServiceImpl implements GatewayDiscoveryService {
     }
 
     @Override
-    public List<DiscoverConfig> preLoadList() {
-        return extDiscoverConfigMapper.preLoad();
+    public List<DiscoveryInfo> all() {
+        List<DiscoverConfig> discoverConfigs = extDiscoverConfigMapper.all();
+        if(CollectionUtils.isEmpty(discoverConfigs))
+            return Collections.emptyList();
+        List<DiscoveryInfo> discoveryInfos = new ArrayList<>(discoverConfigs.size());
+        for (DiscoverConfig discoverConfig : discoverConfigs) {
+            DiscoveryInfo discoveryInfo = new DiscoveryInfo();
+            discoveryInfo.setId(discoverConfig.getDscrId());
+            discoveryInfo.setConectionId(discoverConfig.getDscrRegitryId());
+            discoveryInfo.setConfig(discoverConfig.getDscrConfig());
+            discoveryInfo.setPreload(discoverConfig.getDscrPreloadEnable());
+            discoveryInfo.setType(discoverConfig.getDscrType());
+        }
+        return discoveryInfos;
     }
 
     @Override

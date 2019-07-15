@@ -3,6 +3,7 @@ package com.doctorwork.sword.gateway.discovery.connection;
 import com.doctorwork.sword.gateway.discovery.IQueryService;
 import com.doctorwork.sword.gateway.discovery.common.Constants;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
+import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.x.discovery.ServiceCache;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceInstance;
@@ -47,8 +48,8 @@ public class ServiceDiscoveryWrapper implements Closeable, IQueryService {
     }
 
     @Override
-    public void close() throws IOException {
-        serviceDiscovery.close();
+    public void close() {
+        CloseableUtils.closeQuietly(serviceDiscovery);
         this.serviceDiscovery = null;
         this.id = null;
         this.connectionId = null;

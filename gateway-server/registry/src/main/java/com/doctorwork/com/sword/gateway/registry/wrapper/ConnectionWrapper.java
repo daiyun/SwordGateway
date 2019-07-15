@@ -1,5 +1,7 @@
 package com.doctorwork.com.sword.gateway.registry.wrapper;
 
+import org.apache.curator.utils.CloseableUtils;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Objects;
@@ -31,8 +33,8 @@ public class ConnectionWrapper implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        t.close();
+    public void close() {
+        CloseableUtils.closeQuietly(t);
     }
 
     public String getId() {

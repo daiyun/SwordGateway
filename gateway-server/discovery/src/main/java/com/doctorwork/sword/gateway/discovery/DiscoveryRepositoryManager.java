@@ -1,7 +1,6 @@
 package com.doctorwork.sword.gateway.discovery;
 
 import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
-import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.common.event.*;
@@ -17,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,28 +46,10 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
     }
 
     private void preLoadDiscovery() throws Exception {
-        //local preload
-        synchronized (discoveryMap) {
-            if (defaultDiscoveryConfig != null && defaultDiscoveryConfig.isPreLoad() != null
-                    && defaultDiscoveryConfig.isPreLoad()) {
-                logger.info("pre connectionLoad service discovery config for local");
-                discoveryConnectionRepository.connectionLoad(RegistryConnectionRepositoryManager.DEFAULT_ZOOKEEPER);
-            }
+        Collection<DiscoveryInfo> discoveryInfos = discoveryConfigRepository.all();
+        for (DiscoveryInfo discoveryInfo : discoveryInfos) {
+            this.loadDiscovery(discoveryInfo.getId(), discoveryInfo);
         }
-//        List<DiscoverConfig> preLoadList = gatewayDiscoveryService.preLoadList();
-//        Set<String> regisryIdSet = preLoadList.stream().map(DiscoverConfig::getDscrRegitryId).collect(Collectors.toSet());
-//        for (String registryId : regisryIdSet) {
-//            discoveryConnectionRepository.connectionLoad(registryId);
-//        }
-//        for (DiscoverConfig discoverConfig : preLoadList) {
-//            this.loadDiscovery(discoverConfig.getDscrId(), discoverConfig);
-//        }
-//        //pre connectionLoad
-//        Map<String, DiscoverConfig> poolMap = gatewayDiscoveryService.poolMap(preLoadList);
-//        for (Map.Entry<String, DiscoverConfig> entry : poolMap.entrySet()) {
-//            logger.info("pre connectionLoad service discovery config for {}", entry.getKey());
-//            loadService(entry.getKey(), entry.getValue());
-//        }
     }
 
     @Override
@@ -136,6 +118,8 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
         mark = dscrId;
         if (discoveryConfig == null)
             discoveryConfig = DiscoveryConfig.build(config);
+        Map<String, String> serviceMap = new HashMap<>();
+        boolean postFlag = false;
         synchronized (("LOCK----" + dscrId).intern()) {
             ServiceDiscoveryWrapper serviceDiscoveryWrapper = discoveryConfig.buildServiceDiscovery(discoveryConnectionRepository);
             if (serviceDiscoveryWrapper == null) {
@@ -147,13 +131,37 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             for (ServiceWrapper wrapper : serviceWrapperMap.values()) {
                 if (mark.equals(wrapper.getDscrMapKey())) {
                     wrapper.reloadCache();
+                    serviceMap.put(wrapper.getServiceId(), wrapper.getDscrMapKey());
                 }
             }
             if (old != null) {
+                postFlag = true;
                 old.close();
             }
         }
+        if (postFlag) {
+            for (Map.Entry<String, String> serviceEntry : serviceMap.entrySet()) {
+                eventPost(new ServiceCacheChangeEvent(serviceEntry.getKey(), serviceEntry.getValue()));
+            }
+        }
+    }
 
+    public synchronized void discoveryDelete(String dscrId) {
+        Map<String, String> serviceMap = new HashMap<>();
+        ServiceDiscoveryWrapper discoveryWrapper = discoveryMap.get(dscrId);
+        if (discoveryWrapper == null)
+            return;
+        discoveryMap.remove(dscrId);
+        for (ServiceWrapper wrapper : serviceWrapperMap.values()) {
+            if (dscrId.equals(wrapper.getDscrMapKey())) {
+                wrapper.reloadCache();
+                serviceMap.put(wrapper.getServiceId(), wrapper.getDscrMapKey());
+            }
+        }
+        discoveryWrapper.close();
+        for (Map.Entry<String, String> serviceEntry : serviceMap.entrySet()) {
+            eventPost(new ServiceCacheChangeEvent(serviceEntry.getKey(), serviceEntry.getValue()));
+        }
     }
 
     //注册中心重载需要触发相应的服务更改
@@ -214,11 +222,10 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
             if (registryLoadEvent.getReload()) {
                 try {
                     this.loadRegistry(registryId);
-                    registryLoadEvent.getCloseable().close();
                 } catch (Exception e) {
                     logger.error("[RegistryLoadEvent]handle event for {},but error happened", registryId, e);
                 } finally {
-                    registryLoadEvent.clear();
+                    registryLoadEvent.eventCall();
                 }
             }
         } else if (event instanceof DiscoverConfigLoadEvent) {
@@ -238,7 +245,8 @@ public class DiscoveryRepositoryManager implements IDiscoveryRepository, EventPo
         } else if (event instanceof DiscoverConfigDeleteEvent) {
             DiscoverConfigDeleteEvent deleteEvent = (DiscoverConfigDeleteEvent) event;
             String dscrId = deleteEvent.getDscrId();
-            logger.info("[DiscoverConfigLoadEvent]handle event for {}, but do nothing", dscrId);
+            logger.info("[DiscoverConfigLoadEvent]handle event for {}", dscrId);
+            this.discoveryDelete(dscrId);
         }
     }
 }

@@ -7,5 +7,5 @@ import java.util.List;
 public interface ExtDiscoverConfigMapper {
     DiscoverConfig get(String dscrId);
 
-    List<DiscoverConfig> preLoad();
+    List<DiscoverConfig> all();
 }

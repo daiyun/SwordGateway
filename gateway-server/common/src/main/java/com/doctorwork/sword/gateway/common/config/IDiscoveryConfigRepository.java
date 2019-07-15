@@ -1,5 +1,7 @@
 package com.doctorwork.sword.gateway.common.config;
 
+import java.util.Collection;
+
 /**
  * @Author:czq
  * @Description:
@@ -10,4 +12,6 @@ public interface IDiscoveryConfigRepository {
     DiscoveryInfo discoveryConfig(String dscrId);
 
     DiscoveryInfo discoveryConfigFromLoadBalance(String lbMark);
+
+    Collection<DiscoveryInfo> all();
 }

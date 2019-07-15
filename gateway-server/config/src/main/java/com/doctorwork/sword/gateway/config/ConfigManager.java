@@ -5,7 +5,6 @@ import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
 import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
 import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
 
-import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -40,6 +39,11 @@ public class ConfigManager extends AbstractConfiguration {
     }
 
     @Override
+    public Collection<DiscoveryInfo> all() {
+        return getConfiguration().all();
+    }
+
+    @Override
     public LoadBalancerInfo loadbalanceConfig(String lbMark) {
         return getConfiguration().loadbalanceConfig(lbMark);
     }
@@ -49,14 +53,15 @@ public class ConfigManager extends AbstractConfiguration {
         return getConfiguration().loadbalanceServer(lbMark);
     }
 
+    public void init() throws Exception {
+        if (getGatewayConfig().isUseRegistry()) {
+            registryConfigRepository.init();
+        }
+    }
+
     @Override
     public AbstractConfiguration getConfiguration() {
         if (getGatewayConfig().isUseRegistry()) {
-            try {
-                registryConfigRepository.init();
-            } catch (IOException e) {
-                logger.error("registry config init error ", e);
-            }
             return registryConfigRepository;
         }
         return dataBaseConfigRepository;
