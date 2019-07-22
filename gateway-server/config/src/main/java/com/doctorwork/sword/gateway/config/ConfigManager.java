@@ -1,9 +1,6 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
-import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
+import com.doctorwork.sword.gateway.common.config.*;
 
 import java.util.Collection;
 
@@ -65,5 +62,15 @@ public class ConfigManager extends AbstractConfiguration {
             return registryConfigRepository;
         }
         return dataBaseConfigRepository;
+    }
+
+    @Override
+    public RouteInfo routeInfo(String routeMark) {
+        return getConfiguration().routeInfo(routeMark);
+    }
+
+    @Override
+    public Collection<RouteInfo> routeInfos() {
+        return getConfiguration().routeInfos();
     }
 }
