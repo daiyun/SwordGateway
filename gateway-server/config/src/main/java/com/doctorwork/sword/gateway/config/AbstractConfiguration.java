@@ -3,6 +3,7 @@ package com.doctorwork.sword.gateway.config;
 import com.doctorwork.sword.gateway.common.config.IConnectionConfigRepository;
 import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
+import com.doctorwork.sword.gateway.common.config.IRouteConfigRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @Date: 11:46 2019/7/10
  * @Modified By:
  */
-public abstract class AbstractConfiguration implements IDiscoveryConfigRepository, IConnectionConfigRepository, ILoadBalancerConfigRepository {
+public abstract class AbstractConfiguration implements IDiscoveryConfigRepository, IConnectionConfigRepository, ILoadBalancerConfigRepository, IRouteConfigRepository {
     protected static Logger logger = LoggerFactory.getLogger(AbstractConfiguration.class);
     private GatewayConfig gatewayConfig;
 

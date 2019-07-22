@@ -13,4 +13,13 @@
         where is_delete = 0
         and route_status = 1
     </select>
+
+    <select id="getEnable" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from route_info
+        where is_delete = 0
+        and route_status = 1
+        and route_mark = #{routeMark}
+    </select>
 </mapper>

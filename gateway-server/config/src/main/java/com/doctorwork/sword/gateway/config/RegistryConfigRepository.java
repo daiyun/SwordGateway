@@ -4,10 +4,7 @@ import com.doctorwork.com.sword.gateway.registry.IRegistryConnectionRepository;
 import com.doctorwork.com.sword.gateway.registry.RegistryConnectionRepositoryManager;
 import com.doctorwork.com.sword.gateway.registry.wrapper.ConnectionWrapper;
 import com.doctorwork.sword.gateway.common.JacksonUtil;
-import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
-import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
+import com.doctorwork.sword.gateway.common.config.*;
 import com.doctorwork.sword.gateway.common.event.*;
 import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
@@ -42,6 +39,7 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     private PathChildrenCache discoveryCache = null;
     private PathChildrenCache registryCache = null;
     private PathChildrenCache loadbalanceCache = null;
+    private PathChildrenCache routeCache = null;
     private final AtomicBoolean init = new AtomicBoolean(false);
     private StampedLock stampedLock = new StampedLock();
 
@@ -49,6 +47,9 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     private static final String LOADBALANCE_NODE = REGISTRY_PATH + "/loadbalance/";
     private static final String DISCOVERY_NODE = REGISTRY_PATH + "/discovery/";
     private static final String LOADBALANCE_SERVER_NODE = REGISTRY_PATH + "/loadbalance-server/";
+    private static final String ROUTE_NODE = REGISTRY_PATH + "/route/";
+    private static final String ROUTE_PREDICATION_NODE = REGISTRY_PATH + "/route-predication/";
+    private static final String ROUTE_FILTER_NODE = REGISTRY_PATH + "/route-filter/";
 
 
     public RegistryConfigRepository(IRegistryConnectionRepository registryConnectionRepository, EventBus eventBus, GatewayConfig gatewayConfig) {
@@ -172,6 +173,33 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
             }
         });
         loadbalanceCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+        routeCache = new PathChildrenCache(connectionWrapper.getConnection(CuratorFramework.class), ROUTE_NODE.substring(0, ROUTE_NODE.length() - 1), true);
+        routeCache.getListenable().addListener(new PathChildrenCacheListener() {
+            @Override
+            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                String node = ZKPaths.getNodeFromPath(event.getData().getPath());
+                ChildData data = event.getData();
+                switch (event.getType()) {
+                    case CHILD_ADDED: {
+                        logger.info("路由节点节点{}增加 ", node);
+                        eventPost(new RouteConfigLoadEvent(node));
+                        break;
+                    }
+
+                    case CHILD_UPDATED: {
+                        logger.info("路由节点节点{}更新", node);
+                        eventPost(new RouteConfigLoadEvent(node));
+                        break;
+                    }
+
+                    case CHILD_REMOVED: {
+                        logger.info("路由节点节点{}移除", node);
+                        eventPost(new RouteConfigDeleteEvent(node));
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -324,6 +352,52 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
             logger.error("{} config get error", nodePath, e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public RouteInfo routeInfo(String routeMark) {
+        long stamp = stampedLock.tryOptimisticRead();
+        byte[] datas;
+        ChildData data = routeCache.getCurrentData(ROUTE_NODE.concat(routeMark));
+        if (!stampedLock.validate(stamp)) {
+            stampedLock.readLock();
+            try {
+                data = routeCache.getCurrentData(ROUTE_NODE.concat(routeMark));
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        }
+        if (data == null)
+            return null;
+        datas = data.getData();
+        if (datas != null) {
+            return JacksonUtil.toObject(datas, RouteInfo.class);
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<RouteInfo> routeInfos() {
+        long stamp = stampedLock.tryOptimisticRead();
+        List<ChildData> dataList = routeCache.getCurrentData();
+        if (!stampedLock.validate(stamp)) {
+            stampedLock.readLock();
+            try {
+                dataList = routeCache.getCurrentData();
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        }
+        if (dataList == null || dataList.size() == 0)
+            return null;
+        List<RouteInfo> routeInfos = new ArrayList<>(dataList.size());
+        for (ChildData data : dataList) {
+            byte[] datas = data.getData();
+            if (datas != null) {
+                routeInfos.add(JacksonUtil.toObject(datas, RouteInfo.class));
+            }
+        }
+        return routeInfos;
     }
 
     @Override

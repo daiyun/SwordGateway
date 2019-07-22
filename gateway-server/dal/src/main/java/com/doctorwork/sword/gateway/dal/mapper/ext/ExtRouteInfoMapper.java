@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ExtRouteInfoMapper {
     List<RouteInfo> allEnable();
+
+    RouteInfo getEnable(String routeMark);
 }

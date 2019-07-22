@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.service;
 
+import com.doctorwork.sword.gateway.common.config.RouteInfo;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 
 import java.util.List;
@@ -12,5 +13,7 @@ import java.util.List;
  */
 public interface GatewayRouteService {
 
-    List<RouteDefinition> routeDefinitions();
+    RouteInfo routeDefinition(String routeMark);
+
+    List<RouteInfo> routeDefinitions();
 }

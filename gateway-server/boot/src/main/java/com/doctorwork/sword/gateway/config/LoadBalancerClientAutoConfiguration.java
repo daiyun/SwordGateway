@@ -16,6 +16,7 @@ import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
+import com.doctorwork.sword.gateway.service.GatewayRouteService;
 import com.google.common.eventbus.EventBus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -51,8 +52,9 @@ public class LoadBalancerClientAutoConfiguration {
     public ConfigManager configManager(GatewayConfig gatewayConfig, GatewayDiscoveryService gatewayDiscoveryService,
                                        GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
                                        GatewayLoadBalanceService gatewayLoadBalanceService, IRegistryConnectionRepository registryConnectionRepository,
+                                       GatewayRouteService gatewayRouteService,
                                        EventBus eventBus) throws Exception {
-        DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig);
+        DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig, gatewayRouteService);
         RegistryConfigRepository registryConfigRepository = new RegistryConfigRepository(registryConnectionRepository, eventBus, gatewayConfig);
         ConfigManager configManager = new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
         registryConnectionRepository.setConnectionConfig(configManager);

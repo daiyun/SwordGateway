@@ -1,13 +1,11 @@
 package com.doctorwork.sword.gateway.config;
 
-import com.doctorwork.sword.gateway.common.config.ConnectionInfo;
-import com.doctorwork.sword.gateway.common.config.DiscoveryInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerInfo;
-import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
+import com.doctorwork.sword.gateway.common.config.*;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
 import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
 import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
+import com.doctorwork.sword.gateway.service.GatewayRouteService;
 
 import java.util.Collection;
 
@@ -21,12 +19,14 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     private GatewayDiscoveryService gatewayDiscoveryService;
     private GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService;
     private GatewayLoadBalanceService gatewayLoadBalanceService;
+    private GatewayRouteService gatewayRouteService;
 
-    public DataBaseConfigRepository(GatewayLoadBalanceService gatewayLoadBalanceService, GatewayDiscoveryService gatewayDiscoveryService, GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, GatewayConfig gatewayConfig) {
+    public DataBaseConfigRepository(GatewayLoadBalanceService gatewayLoadBalanceService, GatewayDiscoveryService gatewayDiscoveryService, GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, GatewayConfig gatewayConfig, GatewayRouteService gatewayRouteService) {
         super(gatewayConfig);
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
         this.gatewayDiscoveryService = gatewayDiscoveryService;
         this.gatewayLoadBalanceService = gatewayLoadBalanceService;
+        this.gatewayRouteService = gatewayRouteService;
     }
 
     @Override
@@ -60,6 +60,16 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     @Override
     public Collection<LoadBalancerServer> loadbalanceServer(String lbMark) {
         return gatewayLoadBalanceService.loadBalanceServers(lbMark);
+    }
+
+    @Override
+    public RouteInfo routeInfo(String routeMark) {
+        return gatewayRouteService.routeDefinition(routeMark);
+    }
+
+    @Override
+    public Collection<RouteInfo> routeInfos() {
+        return gatewayRouteService.routeDefinitions();
     }
 
     @Override
