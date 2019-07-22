@@ -110,6 +110,10 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
     @EventListener(RefreshRoutesEvent.class)
     public void handleRefresh() {
         Collection<RouteInfo> routeInfos = routeConfigRepository.routeInfos();
+        if (CollectionUtils.isEmpty(routeInfos)) {
+            logger.warn("无路由信息载入");
+            return;
+        }
         logger.info("路由开始重载（路由数量{}）......", routeInfos.size());
         long start = System.currentTimeMillis();
         if (CollectionUtils.isEmpty(routeInfos)) {
