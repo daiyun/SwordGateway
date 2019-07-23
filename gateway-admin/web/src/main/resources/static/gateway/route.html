@@ -20,7 +20,7 @@
 
     <link href="../css/animate.css" rel="stylesheet">
     <link href="../css/style.css?v=4.1.0" rel="stylesheet">
-
+    <link href="../css/plugins/toastr/toastr.min.css" rel="stylesheet">
 </head>
 
 <body class="gray-bg">
@@ -49,7 +49,24 @@
         </div>
     </div>
 </div>
+<div class="modal inmodal" id="predicateModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">关闭</span>
+                </button>
+                <h4 class="modal-title">匹配规则</h4>
+            </div>
+            <div class="modal-body">
 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- 全局js -->
 <script src="../js/jquery.min.js?v=2.1.4"></script>
 <script src="../js/bootstrap.min.js?v=3.3.6"></script>
@@ -61,34 +78,101 @@
 <script src="../js/plugins/dataTables/jquery.dataTables.js"></script>
 <script src="../js/plugins/dataTables/dataTables.bootstrap.js"></script>
 
-<!-- 自定义js -->
-<script src="../js/content.js?v=1.0.0"></script>
+<script src="../js/plugins/toastr/toastr.min.js"></script>
 
 
-<!-- Page-Level Scripts -->
-<script>
+<script type="text/javascript">
     $(document).ready(function () {
-        $('#route-table').dataTable({
-            "bAutoWidth": false, //自适应宽度
-            "aaSorting": [[1, "asc"]],
-            "sPaginationType": "full_numbers",
-            "oLanguage": {
-                "sProcessing": "正在加载中......",
-                "sLengthMenu": "每页显示 _MENU_ 条记录",
-                "sZeroRecords": "对不起，查询不到相关数据！",
-                "sEmptyTable": "表中无数据存在！",
-                "sInfo": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_ 条记录",
-                "sInfoFiltered": "数据表中共为 _MAX_ 条记录",
-                "sSearch": "搜索",
-                "oPaginate": {
-                    "sFirst": "首页",
-                    "sPrevious": "上一页",
-                    "sNext": "下一页",
-                    "sLast": "末页"
+        var operateTarget;
+        $('#predicateModal').on('hidden.bs.modal', function () {
+            operateTarget = null;
+        })
+        $('#route-table').on('init.dt', function () {
+            $(".preficate").click(function () {
+                operateTarget = $(this).data("route");
+                $("#predicateModal").modal("show");
+            })
+        }).DataTable({
+            "searching": false,//启用搜索功能
+            serverSide: true,//启用服务端分页（这是使用Ajax服务端的必须配置）
+            ajax: {
+                url: "/route/list",
+                type: "post",
+                contentType: "application/json; Charset:UTF-8",
+                data: function (d) {
+                    var jsonData = {"pageNum": d.start, "pageSize": d.length};
+                    return JSON.stringify(jsonData);
+                },
+                dataSrc: function (data) {
+                    if (data.code === 0) {
+                        toastr.success("请求成功");
+                        var json = data.data;
+                        data.recordsTotal = json.totalCount;
+                        data.recordsFiltered = json.totalCount;
+                        return json.list;
+                    } else {
+                        toastr[error]("请求响应错误" + data.msg)
+                        return {};
+                    }
                 }
-            }
+            },
+            "columns": [
+                {"data": "id", visible: false},
+                {title: "路由标识", "data": "routeMark"},
+                {title: "名称", "data": "routeName"},
+                {title: "路由方式", "data": "routeTargetMode"},
+                {title: "路由目标", "data": "routeUri"},
+                {title: "路由备注", "data": "routeComment"},
+                {title: "路由状态", "data": "routeStatus"},
+                {
+                    title: "匹配规则",
+                    "data": null
+                },
+                {
+                    title: "过滤器规则",
+                    "data": null,
+                }
+            ],
+            "columnDefs": [{
+                "targets": 3,
+                "render": function (data, type, full, meta) {
+                    if (data === 1)
+                        return "直连";
+                    else if (data === 2)
+                        return "负载均衡";
+                    else
+                        return "未知";
+                }
+            }, {
+                "targets": 6,
+                "render": function (data, type, full, meta) {
+                    if (data === 0)
+                        return "尚未启用";
+                    else if (data === 1)
+                        return "已启用";
+                    else if (data === 2)
+                        return "已禁用";
+                    else
+                        return "未知";
+                }
+            }, {
+                "targets": 7,
+                "render": function (data, type, full, meta) {
+                    return "<button type='button' class='btn btn-outline btn-info preficate' data-route='" + full.routeMark + "'>查看</button>";
+                }
+            }, {
+                "targets": 8,
+                "render": function (data, type, full, meta) {
+                    return "<button type='button' class='btn btn-outline btn-info filter' data-route='" + full.routeMark + "'>查看</button>";
+                }
+            }]
         });
+        // $("#route-table").click(function (event) {
+        //     // console.log(event.target.id)
+        //
+        // });
     });
+
 </script>
 
 

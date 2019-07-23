@@ -16,6 +16,7 @@
         <module>dal</module>
         <module>common</module>
         <module>core</module>
+        <module>api</module>
     </modules>
 
     <dependencyManagement>
@@ -38,6 +39,11 @@
             <dependency>
                 <groupId>com.doctorwork.sword</groupId>
                 <artifactId>gateway-admin-core</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.doctorwork.sword</groupId>
+                <artifactId>gateway-admin-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>

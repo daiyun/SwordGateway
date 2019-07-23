@@ -21,6 +21,10 @@
             <artifactId>gateway-admin-dal</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.doctorwork.sword</groupId>
+            <artifactId>gateway-admin-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper</artifactId>
         </dependency>

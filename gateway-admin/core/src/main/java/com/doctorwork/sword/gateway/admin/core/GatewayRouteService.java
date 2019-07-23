@@ -1,5 +1,9 @@
 package com.doctorwork.sword.gateway.admin.core;
 
+import com.doctorwork.doctorwork.admin.api.req.RouteReq;
+import com.doctorwork.doctorwork.admin.api.res.RouteInfoRes;
+import com.doctorwork.sword.gateway.common.PageResult;
+
 /**
  * @Author:czq
  * @Description:
@@ -7,4 +11,5 @@ package com.doctorwork.sword.gateway.admin.core;
  * @Modified By:
  */
 public interface GatewayRouteService {
+    PageResult<RouteInfoRes> searchRoute(RouteReq req);
 }
