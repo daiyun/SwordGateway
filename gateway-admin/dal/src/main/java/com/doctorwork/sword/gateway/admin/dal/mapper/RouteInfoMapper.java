@@ -1,6 +1,7 @@
-package com.doctorwork.sword.gateway.dal.mapper;
+package com.doctorwork.sword.gateway.admin.dal.mapper;
 
-import com.doctorwork.sword.gateway.dal.model.RouteInfo;
+import com.doctorwork.sword.gateway.admin.dal.model.RouteInfo;
+
 import java.util.List;
 
 public interface RouteInfoMapper {

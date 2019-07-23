@@ -1,6 +1,7 @@
-package com.doctorwork.sword.gateway.dal.mapper;
+package com.doctorwork.sword.gateway.admin.dal.mapper;
 
-import com.doctorwork.sword.gateway.dal.model.RoutePredicate;
+import com.doctorwork.sword.gateway.admin.dal.model.RoutePredicate;
+
 import java.util.List;
 
 public interface RoutePredicateMapper {

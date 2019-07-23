@@ -1,6 +1,6 @@
-package com.doctorwork.sword.gateway.dal.mapper;
+package com.doctorwork.sword.gateway.admin.dal.mapper;
 
-import com.doctorwork.sword.gateway.dal.model.LoadbalanceInfo;
+import com.doctorwork.sword.gateway.admin.dal.model.LoadbalanceInfo;
 import java.util.List;
 
 public interface LoadbalanceInfoMapper {

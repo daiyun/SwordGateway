@@ -1,6 +1,7 @@
-package com.doctorwork.sword.gateway.dal.mapper;
+package com.doctorwork.sword.gateway.admin.dal.mapper;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverRegistryConfig;
+import com.doctorwork.sword.gateway.admin.dal.model.DiscoverRegistryConfig;
+
 import java.util.List;
 
 public interface DiscoverRegistryConfigMapper {

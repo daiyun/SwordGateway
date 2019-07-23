@@ -1,6 +1,6 @@
-package com.doctorwork.sword.gateway.dal.mapper.ext;
+package com.doctorwork.sword.gateway.admin.dal.mapper.ext;
 
-import com.doctorwork.sword.gateway.dal.model.DiscoverConfig;
+import com.doctorwork.sword.gateway.admin.dal.model.DiscoverConfig;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.doctorwork.sword.gateway.dal.model;
+package com.doctorwork.sword.gateway.admin.dal.model;
 
 import java.io.Serializable;
 import java.util.Date;

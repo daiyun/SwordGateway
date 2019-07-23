@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.doctorwork.sword.gateway.dal.mapper.ext.ExtRouteInfoMapper">
-    <resultMap id="BaseResultMap" type="com.doctorwork.sword.gateway.dal.model.RouteInfo"
-               extends="com.doctorwork.sword.gateway.dal.mapper.RouteInfoMapper.BaseResultMap"/>
+<mapper namespace="com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtRouteInfoMapper">
+    <resultMap id="BaseResultMap" type="com.doctorwork.sword.gateway.admin.dal.model.RouteInfo"
+               extends="com.doctorwork.sword.gateway.admin.dal.mapper.RouteInfoMapper.BaseResultMap"/>
     <sql id="Base_Column_List">
-        <include refid="com.doctorwork.sword.gateway.dal.mapper.RouteInfoMapper.Base_Column_List"/>
+        <include refid="com.doctorwork.sword.gateway.admin.dal.mapper.RouteInfoMapper.Base_Column_List"/>
     </sql>
-    <select id="allEnable" resultMap="BaseResultMap">
+    <select id="list" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from route_info
         where is_delete = 0
-        and route_status = 1
     </select>
 </mapper>
