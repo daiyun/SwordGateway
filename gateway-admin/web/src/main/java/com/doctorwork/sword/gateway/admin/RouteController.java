@@ -28,7 +28,7 @@ public class RouteController {
     }
     @RequestMapping("/predication/list")
     @ResponseBody
-    public Result publishLoadBalanceConfig(@RequestBody RouteReq req) {
-        return Result.result(gatewayRouteService.searchRoute(req));
+    public Result publishLoadBalanceConfig(String routeMark) {
+        return Result.result(gatewayRouteService.routePredication(routeMark));
     }
 }
