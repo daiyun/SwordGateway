@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <table class="route-table">
+                    <table class="route-table table table-striped table-bordered table-hover" id="route-table">
                     </table>
 
                 </div>
@@ -68,7 +68,7 @@
 <!-- Page-Level Scripts -->
 <script>
     $(document).ready(function () {
-        $('.route-table').dataTable({
+        $('#route-table').dataTable({
             "bAutoWidth": false, //自适应宽度
             "aaSorting": [[1, "asc"]],
             "sPaginationType": "full_numbers",

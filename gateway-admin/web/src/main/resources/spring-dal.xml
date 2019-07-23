@@ -33,6 +33,7 @@
 	<!-- 为Mybatis创建SqlSessionFactory，同时指定数据源 -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
 		<!-- 在classpath后面的*必不可少，缺少型号的话后面的通配符不起作用。 **表示可以表示任意多级目录，扫描自动和手动的Mapper文件 -->
 		<property name="mapperLocations" value="classpath*:sqlmap/**/*Mapper.xml" />
 	</bean>

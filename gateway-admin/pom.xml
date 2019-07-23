@@ -40,6 +40,11 @@
                 <artifactId>gateway-admin-core</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper</artifactId>
+                <version>${mybatis-pagehelper.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
