@@ -26,4 +26,9 @@ public class RouteController {
     public Result publishLoadBalanceConfig(@RequestBody RouteReq req) {
         return Result.result(gatewayRouteService.searchRoute(req));
     }
+    @RequestMapping("/predication/list")
+    @ResponseBody
+    public Result publishLoadBalanceConfig(@RequestBody RouteReq req) {
+        return Result.result(gatewayRouteService.searchRoute(req));
+    }
 }

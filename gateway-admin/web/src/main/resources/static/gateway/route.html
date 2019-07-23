@@ -59,7 +59,8 @@
                 <h4 class="modal-title">匹配规则</h4>
             </div>
             <div class="modal-body">
-
+                <table class="route-table table table-striped table-bordered table-hover" id="route-predicate-table">
+                </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
@@ -84,12 +85,14 @@
 <script type="text/javascript">
     $(document).ready(function () {
         var operateTarget;
+        var predicateTable = $('#route-predicate-table').DataTable();
         $('#predicateModal').on('hidden.bs.modal', function () {
             operateTarget = null;
+            predicateTable.destroy();
         })
         $('#route-table').on('init.dt', function () {
             $(".preficate").click(function () {
-                operateTarget = $(this).data("route");
+                predicateTable.ajax.url( '/route/predication/list' ).load();
                 $("#predicateModal").modal("show");
             })
         }).DataTable({

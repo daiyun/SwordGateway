@@ -12,4 +12,12 @@
         from route_info
         where is_delete = 0
     </select>
+
+    <select id="get" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from route_info
+        where is_delete = 0
+        and route_mark = #{routeMark}
+    </select>
 </mapper>

@@ -2,9 +2,12 @@ package com.doctorwork.sword.gateway.admin.core.impl;
 
 import com.doctorwork.doctorwork.admin.api.req.RouteReq;
 import com.doctorwork.doctorwork.admin.api.res.RouteInfoRes;
+import com.doctorwork.doctorwork.admin.api.res.RoutePredicateRes;
 import com.doctorwork.sword.gateway.admin.core.GatewayRouteService;
 import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtRouteInfoMapper;
+import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtRoutePredicateMapper;
 import com.doctorwork.sword.gateway.admin.dal.model.RouteInfo;
+import com.doctorwork.sword.gateway.admin.dal.model.RoutePredicate;
 import com.doctorwork.sword.gateway.common.PageResult;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 public class GatewayRouteServiceImpl implements GatewayRouteService {
     @Autowired
     private ExtRouteInfoMapper extRouteInfoMapper;
+    @Autowired
+    private ExtRoutePredicateMapper extRoutePredicateMapper;
 
     @Override
     public PageResult<RouteInfoRes> searchRoute(RouteReq req) {
@@ -43,5 +48,20 @@ public class GatewayRouteServiceImpl implements GatewayRouteService {
             return res;
         }).collect(Collectors.toList());
         return new PageResult<>(page.getTotal(), page.getPages(), page.getPageNum(), page.getPageSize(), routeInfoRes);
+    }
+
+    @Override
+    public List<RoutePredicateRes> routePredication(String routeMark) {
+        RouteInfo routeInfo = extRouteInfoMapper.get(routeMark);
+        if (routeInfo == null)
+            return null;
+        List<RoutePredicate> predicates = extRoutePredicateMapper.get(routeInfo.getId());
+        return predicates.stream().map(routePredicate -> {
+            RoutePredicateRes res = new RoutePredicateRes();
+            res.setRoutePredicateKey(routePredicate.getRoutePredicateKey());
+            res.setRoutePredicateValue(routePredicate.getRoutePredicateValue());
+            res.setRoutePredicateComment(routePredicate.getRoutePredicateComment());
+            return res;
+        }).collect(Collectors.toList());
     }
 }
