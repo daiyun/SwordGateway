@@ -2,128 +2,165 @@ var predicateConfig = (function ($) {
     $.After = {
         desc: 'After 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: after_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - After=2017-01-20T17:42:47.789-07:00[America/Denver]'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: after_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - After=2017-01-20T17:42:47.789-07:00[America/Denver]'
     };
     $.Before = {
         desc: 'Before 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: before_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Before=2017-01-20T17:42:47.789-07:00[America/Denver]'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: before_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Before=2017-01-20T17:42:47.789-07:00[America/Denver]'
     };
     $.Between = {
         desc: 'Between 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: between_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Between=2017-01-20T17:42:47.789-07:00[America/Denver], 2017-01-21T17:42:47.789-07:00[America/Denver]'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: between_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Between=2017-01-20T17:42:47.789-07:00[America/Denver], 2017-01-21T17:42:47.789-07:00[America/Denver]'
     };
     $.Cookie = {
         desc: 'Cookie 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: cookie_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Cookie=chocolate, ch.p'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: cookie_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Cookie=chocolate, ch.p'
     };
     $.Header = {
         desc: 'Header 路由断言',
         tooltip: 'spring:\n' +
-            ' cloud:\n' +
-            '   gateway:\n' +
-            '     routes:\n' +
-            '     - id: header_route\n' +
-            '       uri: http://example.org\n' +
-            '       predicates:\n' +
-            '       - Header=X-Request-Id, \\d+'
+        ' cloud:\n' +
+        '   gateway:\n' +
+        '     routes:\n' +
+        '     - id: header_route\n' +
+        '       uri: http://example.org\n' +
+        '       predicates:\n' +
+        '       - Header=X-Request-Id, \\d+'
     };
     $.Host = {
         desc: 'Host 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: host_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Host=**.somehost.org,**.anotherhost.org'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: host_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Host=**.somehost.org,**.anotherhost.org'
     };
     $.Method = {
         desc: 'Method 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: method_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Method=GET'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: method_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Method=GET'
     };
     $.Path = {
         desc: 'Path 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: host_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Path=/foo/{segment},/bar/{segment}'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: host_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Path=/foo/{segment},/bar/{segment}'
     };
     $.Query = {
         desc: 'Query 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: query_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - Query=baz'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: query_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - Query=baz'
     };
     $.RemoteAddr = {
         desc: 'RemoteAddr 路由断言',
         tooltip: 'spring:\n' +
-            '  cloud:\n' +
-            '    gateway:\n' +
-            '      routes:\n' +
-            '      - id: remoteaddr_route\n' +
-            '        uri: http://example.org\n' +
-            '        predicates:\n' +
-            '        - RemoteAddr=192.168.1.1/24'
+        '  cloud:\n' +
+        '    gateway:\n' +
+        '      routes:\n' +
+        '      - id: remoteaddr_route\n' +
+        '        uri: http://example.org\n' +
+        '        predicates:\n' +
+        '        - RemoteAddr=192.168.1.1/24'
     };
     return $;
 })({});
+var util = {
+    serializeObject: function (form) {
+        var formEL = $(form);
+        var o = {};
+        var a = formEL.serializeArray();
+        $.each(a, function () {
+            if (o[this.name]) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    },
+
+    fillFormData: function (form, obj, isStatus) {
+        var formEL = $(form);
+        $.each(obj, function (index, item) {
+            formEL.find("[name=" + index + "]").val(item);
+        });
+    },
+    empty: function (data) {
+        if (null == data || "" == data) return true;
+        else return false;
+    }
+};
+
+function initPredicateSelect() {
+    for (var i in predicateConfig) {
+        $('#predicateEditModal select').append("<option value='" + i + "'>" + predicateConfig[i].desc + "</option>");
+    }
+}
 
 $(document).ready(function () {
-    var operateTarget;
+    initPredicateSelect();
     var predicateTable;
-    $('#predicateModal').on('hidden.bs.modal', function () {
-        operateTarget = null;
-        predicateTable.destroy();
-    });
-    $('#route-table').on('init.dt', function () {
-        $(".preficate").click(function () {
+    $('#route-table').on('draw.dt', function (e, settings) {
+        var api = new $.fn.dataTable.Api(settings);
+        api.$(".preficate").click(function () {
+            console.log(323)
             var routeMark = $(this).data("route");
-            initPredicationTable(routeMark);
             $("#predicateModal").modal("show");
+            if (!predicateTable) {
+                initPredicationTable(routeMark);
+            } else {
+                updatePredicationTable(routeMark)
+            }
         })
     }).DataTable({
         ordering: false,
@@ -205,68 +242,37 @@ $(document).ready(function () {
     //     // console.log(event.target.id)
     //
     // });
+    function updatePredicationTable(routeMark) {
+        predicateTable.ajax.url("/route/predication/list?routeMark=" + routeMark).load();
+    }
+
     function initPredicationTable(routeMark) {
-        predicateTable = $('#route-predicate-table').on('init.dt', function (e, settings, json) {
-            var api = new $.fn.dataTable.Api(settings);
-            api.$('editPredicateValue').editable('/route/predication/edit', {
-                id: 'routeMark',
-                name: 'routePredicateValue',
-                submit: 'OK',
-                submitdata: function (value, settings) {
-                    var rowIndex = api.cell(this.parentNode).index().row;
-                    var routePredicateKey = api.row(rowIndex).data().routePredicateKey;
-                    if (routePredicateKey) {
-                        return {
-                            "routeMark": routeMark,
-                            "path": routePredicateKey
-                        };
-                    }
-                },
-                ajaxoptions: {
-                    dataType: 'json',
-                    success: function (result, status) {
-                        api.ajax.reload();
-                        api.draw();
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.success("更新匹配规则异常");
-                    }
-                }
+        $('#predicateEditModal').on('hidden.bs.modal', function () {
+            var select = $("#predicateEditModal select");
+            select.removeAttr("disabled");
+        });
+        $('#route-predicate-table').on('draw.dt', function (e, settings) {
+            predicateTable = new $.fn.dataTable.Api(settings);
+            predicateTable.$('.preficate-item-modify').click(function () {
+                var rowIndex = predicateTable.cell(this.parentNode).index().row;
+                var formData = predicateTable.row(rowIndex).data();
+                var select = $("#predicateEditModal select");
+                select.val(formData.routePredicateKey);
+                select.attr("disabled", "disabled");
+                $("#predicateEditValue").val(formData.routePredicateValue);
+                $("#predicateEditComment").val(formData.routePredicateComment);
+                $("#predicateEditModal").modal("show");
             });
-            api.$('editPredicateComment').editable('/route/predication/edit', {
-                id: 'routeMark',
-                name: 'routePredicateComment',
-                submit: 'OK',
-                submitdata: function (value, settings) {
-                    var rowIndex = api.cell(this.parentNode).index().row;
-                    var routePredicateKey = api.row(rowIndex).data().routePredicateKey;
-                    if (routePredicateKey) {
-                        return {
-                            "routeMark": routeMark,
-                            "path": routePredicateKey
-                        };
-                    }
-                },
-                ajaxoptions: {
-                    dataType: 'json',
-                    success: function (result, status) {
-                        console.log(result);
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.success("更新匹配规则异常");
-                    }
-                }
-            })
         }).DataTable({
             searching: false,
             ordering: false,
             paging: true,
             ajax: {
-                url: "/route/predication/list",
+                url: "/route/predication/list?routeMark=" + routeMark,
                 type: "get",
                 contentType: "application/json; Charset:UTF-8",
                 data: function () {
-                    return {"routeMark": routeMark};
+                    return {};
                 },
                 dataSrc: function (data) {
                     if (data.code === 0) {
@@ -284,6 +290,7 @@ $(document).ready(function () {
                 {title: "key", "data": "routePredicateKey"},
                 {title: "value(单击修改)", "data": "routePredicateValue"},
                 {title: "备注", "data": "routePredicateComment"},
+                {title: "修改", "data": null},
                 {title: "删除", "data": null}
             ],
             "columnDefs": [{
@@ -297,12 +304,12 @@ $(document).ready(function () {
                     }
                 }
             }, {
-                "targets": 2,
+                "targets": 4,
                 "render": function (data, type, full, meta) {
-                    return "<editPredicateValue>" + data + "</editPredicateValue>";
+                    return "<button type='button' class='btn btn-outline btn-info preficate-item-modify' data-route='" + full.routePredicateKey + "'>修改</button>";
                 }
             }, {
-                "targets": 4,
+                "targets": 5,
                 "render": function (data, type, full, meta) {
                     return "<button type='button' class='btn btn-outline btn-info preficate-item-del' data-route='" + full.routePredicateKey + "'>删除</button>";
                 }
