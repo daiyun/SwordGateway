@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.admin.core;
 
+import com.doctorwork.doctorwork.admin.api.req.RoutePredicateEdit;
 import com.doctorwork.doctorwork.admin.api.req.RouteReq;
 import com.doctorwork.doctorwork.admin.api.res.RouteInfoRes;
 import com.doctorwork.doctorwork.admin.api.res.RoutePredicateRes;
@@ -17,4 +18,6 @@ public interface GatewayRouteService {
     PageResult<RouteInfoRes> searchRoute(RouteReq req);
 
     List<RoutePredicateRes> routePredication(String routeMark);
+
+    void routePredicateUpdate(RoutePredicateEdit predicateEdit);
 }

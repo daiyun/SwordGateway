@@ -8,9 +8,24 @@
     </sql>
     <select id="get" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Base_Column_List"/>
         from route_predicate
         where is_delete = 0
         and route_id = #{routeId}
     </select>
+
+    <update id="update">
+        update route_predicate
+        <set>
+            <if test="param.routePredicateValue != null">
+                route_predicate_value = #{param.routePredicateValue,jdbcType=VARCHAR},
+            </if>
+            <if test="param.routePredicateComment != null">
+                route_predicate_comment = #{param.routePredicateComment,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where is_delete = 0
+        and route_id = #{param.routeId,jdbcType=BIGINT}
+        and route_predicate_key = #{param.routePredicateKey,jdbcType=VARCHAR}
+    </update>
 </mapper>

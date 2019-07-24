@@ -1,13 +1,11 @@
 package com.doctorwork.sword.gateway.admin;
 
+import com.doctorwork.doctorwork.admin.api.req.RoutePredicateEdit;
 import com.doctorwork.doctorwork.admin.api.req.RouteReq;
 import com.doctorwork.sword.gateway.admin.core.GatewayRouteService;
 import com.doctorwork.sword.gateway.common.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author:czq
@@ -26,9 +24,17 @@ public class RouteController {
     public Result publishLoadBalanceConfig(@RequestBody RouteReq req) {
         return Result.result(gatewayRouteService.searchRoute(req));
     }
+
     @RequestMapping("/predication/list")
     @ResponseBody
     public Result publishLoadBalanceConfig(String routeMark) {
         return Result.result(gatewayRouteService.routePredication(routeMark));
+    }
+
+    @PostMapping("/predication/edit")
+    @ResponseBody
+    public Result publishLoadBalanceConfig(RoutePredicateEdit predicateEdit) {
+        gatewayRouteService.routePredicateUpdate(predicateEdit);
+        return Result.result(null);
     }
 }

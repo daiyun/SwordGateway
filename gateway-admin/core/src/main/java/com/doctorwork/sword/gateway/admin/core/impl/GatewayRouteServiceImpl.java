@@ -1,5 +1,6 @@
 package com.doctorwork.sword.gateway.admin.core.impl;
 
+import com.doctorwork.doctorwork.admin.api.req.RoutePredicateEdit;
 import com.doctorwork.doctorwork.admin.api.req.RouteReq;
 import com.doctorwork.doctorwork.admin.api.res.RouteInfoRes;
 import com.doctorwork.doctorwork.admin.api.res.RoutePredicateRes;
@@ -63,5 +64,18 @@ public class GatewayRouteServiceImpl implements GatewayRouteService {
             res.setRoutePredicateComment(routePredicate.getRoutePredicateComment());
             return res;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void routePredicateUpdate(RoutePredicateEdit predicateEdit) {
+        RouteInfo routeInfo = extRouteInfoMapper.get(predicateEdit.getRouteMark());
+        if (routeInfo == null)
+            return;
+        RoutePredicate update = new RoutePredicate();
+        update.setRouteId(routeInfo.getId());
+        update.setRoutePredicateKey(predicateEdit.getPath());
+        update.setRoutePredicateValue(predicateEdit.getRoutePredicateValue());
+        update.setRoutePredicateComment(predicateEdit.getRoutePredicateComment());
+        extRoutePredicateMapper.update(update);
     }
 }
