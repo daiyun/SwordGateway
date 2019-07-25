@@ -15,4 +15,6 @@ public interface ExtRouteFilterMapper {
     int insert(@Param("param") RouteFilter routeFilter);
 
     int delete(@Param("id") Long id, @Param("routeFilterKey") String routeFilterKey);
+
+    int deleteByRoute(Long routeId);
 }

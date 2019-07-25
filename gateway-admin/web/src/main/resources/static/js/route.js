@@ -26,36 +26,46 @@ $(document).ready(function () {
         api.on('draw.dt', function (e, settings) {
             api.$(".predicate").click(function () {
                 var routeMark = $(this).data("route");
+                if (predicateInit)
+                    updatePredicationTable(routeMark);
+                else {
+                    initPredicationTable(routeMark);
+                    predicateInit = true;
+                }
                 $("#predicateModal").modal("show");
-                updatePredicationTable(routeMark)
             });
             api.$(".filter").click(function () {
                 var routeMark = $(this).data("route");
+                if (filterInit)
+                    updateFilterTable(routeMark);
+                else {
+                    initFilterTable(routeMark);
+                    filterInit = true;
+                }
                 $("#filterModal").modal("show");
-                updateFilterTable(routeMark);
             });
             clickRouteItem(api);
         });
         api.$(".predicate").click(function () {
             var routeMark = $(this).data("route");
-            $("#predicateModal").modal("show");
             if (predicateInit)
                 updatePredicationTable(routeMark)
             else {
                 initPredicationTable(routeMark);
                 predicateInit = true;
             }
+            $("#predicateModal").modal("show");
         });
 
         api.$(".filter").click(function () {
             var routeMark = $(this).data("route");
-            $("#filterModal").modal("show");
             if (filterInit)
                 updateFilterTable(routeMark)
             else {
                 initFilterTable(routeMark);
                 filterInit = true;
             }
+            $("#filterModal").modal("show");
         });
         clickRouteItem(api);
     }).DataTable({
@@ -65,6 +75,7 @@ $(document).ready(function () {
         ajax: {
             url: Api.route.list,
             type: "post",
+            async: true,
             contentType: "application/json; Charset:UTF-8",
             data: function (d) {
                 var jsonData = {"pageNum": d.start, "pageSize": d.length};
@@ -222,6 +233,7 @@ $(document).ready(function () {
             };
             $.ajaxPostApi({
                 url: Api.route.predicateDel,
+                async: true,
                 data: JSON.stringify(delData),
                 success: function (data) {
                     if (data.code === 0) {
@@ -244,13 +256,16 @@ $(document).ready(function () {
             var formData = api.row(rowIndex).data();
             $.ajaxGetApi({
                 url: Api.route.get,
+                async: true,
                 data: {routeMark: formData.routeMark},
                 success: function (data) {
                     if (data.code === 0) {
                         var retData = data.data;
                         $("#routeTargetMode").val(retData.routeTargetMode);
                         $("#routeUri").val(retData.routeUri);
-                        $("#routeMark").val(retData.routeMark);
+                        routeMarkInput = $("#routeMark");
+                        routeMarkInput.val(retData.routeMark);
+                        routeMarkInput.attr("disabled","disabled");
                         $("#routeName").val(retData.routeName);
                         $("#routeComment").val(retData.routeComment);
                         $("#routeSort").val(retData.routeSort);
@@ -271,6 +286,7 @@ $(document).ready(function () {
             var data = {routeMark: formData.routeMark};
             $.ajaxPostApi({
                 url: Api.route.del,
+                async: true,
                 data: JSON.stringify(data),
                 success: function (data) {
                     if (data.code === 0) {
@@ -289,6 +305,7 @@ $(document).ready(function () {
             var formData = api.row(rowIndex).data();
             $.ajaxGetApi({
                 url: Api.route.enable,
+                async: true,
                 data: {routeMark: formData.routeMark},
                 success: function (data) {
                     if (data.code === 0) {
@@ -307,6 +324,7 @@ $(document).ready(function () {
             var formData = api.row(rowIndex).data();
             $.ajaxGetApi({
                 url: Api.route.disable,
+                async: true,
                 data: {routeMark: formData.routeMark},
                 success: function (data) {
                     if (data.code === 0) {
@@ -345,6 +363,7 @@ $(document).ready(function () {
             };
             $.ajaxPostApi({
                 url: Api.route.filterDel,
+                async: true,
                 data: JSON.stringify(delData),
                 success: function (data) {
                     if (data.code === 0) {
@@ -376,6 +395,7 @@ $(document).ready(function () {
                 data.id = $("#predicateEditId").val();
                 $.ajaxPostApi({
                     url: Api.route.predicateEdit,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -394,6 +414,7 @@ $(document).ready(function () {
                 data.routeMark = $("#predicateEditRouteMark").val();
                 $.ajaxPostApi({
                     url: Api.route.predicateAdd,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -429,10 +450,10 @@ $(document).ready(function () {
                 routeComment: routeComment,
                 routeSort: routeSort
             };
-            console.log(isEdit)
             if (isEdit) {
                 $.ajaxPostApi({
                     url: Api.route.edit,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -450,6 +471,7 @@ $(document).ready(function () {
             } else {
                 $.ajaxPostApi({
                     url: Api.route.add,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -483,6 +505,7 @@ $(document).ready(function () {
                 data.id = $("#filterEditId").val();
                 $.ajaxPostApi({
                     url: Api.route.filterEdit,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -501,6 +524,7 @@ $(document).ready(function () {
                 data.routeMark = $("#filterEditRouteMark").val();
                 $.ajaxPostApi({
                     url: Api.route.filterAdd,
+                    async: true,
                     data: JSON.stringify(data),
                     success: function (data) {
                         if (data.code === 0) {
@@ -539,6 +563,7 @@ $(document).ready(function () {
             ajax: {
                 url: Api.route.predicateList.format({routeMark: routeMark}),
                 type: "get",
+                async: true,
                 contentType: "application/json; Charset:UTF-8",
                 data: function () {
                     return {};
@@ -606,6 +631,7 @@ $(document).ready(function () {
             ajax: {
                 url: Api.route.filterList.format({routeMark: routeMark}),
                 type: "get",
+                async: true,
                 contentType: "application/json; Charset:UTF-8",
                 data: function () {
                     return {};

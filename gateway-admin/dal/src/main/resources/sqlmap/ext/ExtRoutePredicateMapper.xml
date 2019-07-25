@@ -52,4 +52,12 @@
           and id = #{id,jdbcType=BIGINT}
           and route_predicate_key = #{routePredicateKey,jdbcType=VARCHAR}
     </update>
+
+    <update id="deleteByRoute">
+        update route_predicate
+        set is_delete = 1
+        where is_delete = 0
+          and id = #{id,jdbcType=BIGINT}
+          and route_id = #{routeId,jdbcType=VARCHAR}
+    </update>
 </mapper>

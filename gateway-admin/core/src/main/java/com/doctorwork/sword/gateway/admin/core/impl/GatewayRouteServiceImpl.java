@@ -114,6 +114,9 @@ public class GatewayRouteServiceImpl implements GatewayRouteService {
         routeDisable(del.getRouteMark());
         //删除路由
         extRouteInfoMapper.delete(del.getRouteMark());
+        //删除关联匹配规则和过滤规则
+        extRoutePredicateMapper.deleteByRoute(routeInfo.getId());
+        extRouteFilterMapper.deleteByRoute(routeInfo.getId());
     }
 
     @Override

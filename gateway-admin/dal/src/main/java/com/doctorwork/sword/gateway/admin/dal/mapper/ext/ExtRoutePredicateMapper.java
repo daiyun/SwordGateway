@@ -15,4 +15,6 @@ public interface ExtRoutePredicateMapper {
     int insert(@Param("param") RoutePredicate predicate);
 
     int delete(@Param("id") Long id, @Param("routePredicateKey")String routePredicateKey);
+
+    int deleteByRoute(Long routeId);
 }
