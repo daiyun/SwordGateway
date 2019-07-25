@@ -11,6 +11,14 @@
         <include refid="Base_Column_List"/>
         from route_predicate
         where is_delete = 0
+        and id = #{id}
+    </select>
+
+    <select id="getByRoute" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from route_predicate
+        where is_delete = 0
         and route_id = #{routeId}
     </select>
 
@@ -25,7 +33,23 @@
             </if>
         </set>
         where is_delete = 0
-        and route_id = #{param.routeId,jdbcType=BIGINT}
+        and id = #{param.id,jdbcType=BIGINT}
         and route_predicate_key = #{param.routePredicateKey,jdbcType=VARCHAR}
+    </update>
+
+    <insert id="insert">
+        insert into route_predicate (route_id, route_predicate_key, route_predicate_value,
+                                     route_predicate_comment)
+        values (#{param.routeId,jdbcType=BIGINT}, #{param.routePredicateKey,jdbcType=VARCHAR},
+                #{param.routePredicateValue,jdbcType=VARCHAR},
+                #{param.routePredicateComment,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="delete">
+        update route_predicate
+        set is_delete = 1
+        where is_delete = 0
+          and id = #{id,jdbcType=BIGINT}
+          and route_predicate_key = #{routePredicateKey,jdbcType=VARCHAR}
     </update>
 </mapper>

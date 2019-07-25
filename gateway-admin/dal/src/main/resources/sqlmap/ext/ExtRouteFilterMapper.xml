@@ -11,6 +11,44 @@
         <include refid="Base_Column_List"/>
         from route_filter
         where is_delete = 0
+        and id = #{id}
+    </select>
+    <select id="getByRoute" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from route_filter
+        where is_delete = 0
         and route_id = #{routeId}
     </select>
+
+    <update id="update">
+        update route_filter
+        <set>
+            <if test="param.routeFilterValue != null">
+                route_filter_value = #{param.routeFilterValue,jdbcType=VARCHAR},
+            </if>
+            <if test="param.routeFilterComment != null">
+                route_filter_comment = #{param.routeFilterComment,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{param.id,jdbcType=BIGINT}
+        and is_delete = 0
+        and route_filter_key = #{param.routeFilterKey,jdbcType=VARCHAR}
+    </update>
+
+    <update id="insert">
+        insert into route_filter (route_id, route_filter_key, route_filter_value,
+                                  route_filter_comment)
+        values (#{param.routeId,jdbcType=BIGINT}, #{param.routeFilterKey,jdbcType=VARCHAR},
+                #{param.routeFilterValue,jdbcType=VARCHAR},
+                #{param.routeFilterComment,jdbcType=VARCHAR})
+    </update>
+
+    <update id="delete">
+        update route_filter
+        set is_delete = 1
+        where id = #{id,jdbcType=BIGINT}
+          and is_delete = 0
+          and route_filter_key = #{routeFilterKey,jdbcType=VARCHAR}
+    </update>
 </mapper>

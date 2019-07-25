@@ -34,16 +34,14 @@
                         <a class="dropdown-toggle" data-toggle="dropdown" href="route.html#">
                             <i class="fa fa-wrench"></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-user">
-                            <li><a href="route.html#">新增</a>
-                            </li>
-                        </ul>
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <table class="route-table table table-striped table-bordered table-hover" id="route-table">
+                    <div style="float:right">
+                        <button type='button' class='btn btn-info' id="route-item-add"><i class="fa fa-edit"></i>新增</button>
+                    </div>
+                    <table class="route-item-table table table-striped table-bordered table-hover" id="route-table">
                     </table>
-
                 </div>
             </div>
         </div>
@@ -59,6 +57,9 @@
                 <h4 class="modal-title">匹配规则</h4>
             </div>
             <div class="modal-body">
+                <div style="float:right">
+                    <button type='button' class='btn btn-info predicate-item-add'><i class="fa fa-edit"></i>新增</button>
+                </div>
                 <table class="route-table table table-striped table-bordered table-hover" id="route-predicate-table">
                 </table>
             </div>
@@ -82,10 +83,12 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label">规则</label>
                         <div class="col-sm-10">
-                            <select class="form-control m-b">
+                            <select class="form-control m-b" id="predicateEditKeySelect">
                             </select>
                         </div>
                     </div>
+                    <input type="hidden" class="form-control" id="predicateEditRouteMark">
+                    <input type="hidden" class="form-control" id="predicateEditId">
                     <div class="form-group">
                         <label class="col-sm-2 control-label">值</label>
 
@@ -104,7 +107,133 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-primary save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="filterModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">关闭</span>
+                </button>
+                <h4 class="modal-title">过滤器规则</h4>
+            </div>
+            <div class="modal-body">
+                <div style="float:right">
+                    <button type='button' class='btn btn-info filter-item-add'><i class="fa fa-edit"></i>新增</button>
+                </div>
+                <table class="route-table table table-striped table-bordered table-hover" id="route-filter-table">
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="filterEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">关闭</span>
+                </button>
+                <h4 class="modal-title">过滤器规则</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">规则</label>
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="filterEditKeySelect">
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" class="form-control" id="filterEditRouteMark">
+                    <input type="hidden" class="form-control" id="filterEditId">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">值</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="filterEditValue">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">备注</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="filterEditComment">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="routeEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">关闭</span>
+                </button>
+                <h4 class="modal-title">路由</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">规则</label>
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="routeTargetMode">
+                                <option value="1">直连</option>
+                                <option value="2">负载均衡(需配置负载均衡器和注册中心)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">路由目标</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="routeUri">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">路由标识</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="routeMark">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">路由名称</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="routeName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">路由备注</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="routeComment">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">排序</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" id="routeSort">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary save">保存</button>
             </div>
         </div>
     </div>
@@ -122,7 +251,8 @@
 
 <script src="../js/plugins/toastr/toastr.min.js"></script>
 
-
+<script type="text/javascript" src="../js/api.js"></script>
+<script type="text/javascript" src="../js/gatewayConfig.js"></script>
 <script type="text/javascript" src="../js/route.js"></script>
 
 

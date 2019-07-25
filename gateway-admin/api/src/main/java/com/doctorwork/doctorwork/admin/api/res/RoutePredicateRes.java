@@ -7,6 +7,7 @@ package com.doctorwork.doctorwork.admin.api.res;
  * @Modified By:
  */
 public class RoutePredicateRes {
+    private String id;
     /**
      * <pre>
      * 路由谓词信息
@@ -53,5 +54,13 @@ public class RoutePredicateRes {
 
     public void setRoutePredicateComment(String routePredicateComment) {
         this.routePredicateComment = routePredicateComment;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

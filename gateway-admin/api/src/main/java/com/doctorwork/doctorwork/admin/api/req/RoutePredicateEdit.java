@@ -7,8 +7,9 @@ package com.doctorwork.doctorwork.admin.api.req;
  * @Modified By:
  */
 public class RoutePredicateEdit {
+    private String id;
     private String routeMark;
-    private String path;
+    private String routePredicateKey;
     private String routePredicateValue;
     private String routePredicateComment;
 
@@ -18,14 +19,6 @@ public class RoutePredicateEdit {
 
     public void setRouteMark(String routeMark) {
         this.routeMark = routeMark;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getRoutePredicateValue() {
@@ -42,5 +35,21 @@ public class RoutePredicateEdit {
 
     public void setRoutePredicateComment(String routePredicateComment) {
         this.routePredicateComment = routePredicateComment;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRoutePredicateKey() {
+        return routePredicateKey;
+    }
+
+    public void setRoutePredicateKey(String routePredicateKey) {
+        this.routePredicateKey = routePredicateKey;
     }
 }

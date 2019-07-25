@@ -6,7 +6,13 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface ExtRoutePredicateMapper {
-    List<RoutePredicate> get(Long routeId);
+    RoutePredicate get(Long id);
+
+    List<RoutePredicate> getByRoute(Long routeId);
 
     int update(@Param("param") RoutePredicate predicate);
+
+    int insert(@Param("param") RoutePredicate predicate);
+
+    int delete(@Param("id") Long id, @Param("routePredicateKey")String routePredicateKey);
 }

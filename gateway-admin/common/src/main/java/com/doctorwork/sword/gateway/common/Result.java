@@ -18,6 +18,20 @@ public class Result<T> {
         return result;
     }
 
+    public static <T> Result<T> error(int errorCode, String msg) {
+        Result<T> result = new Result<>();
+        result.setCode(errorCode);
+        result.setMsg(msg);
+        return result;
+    }
+
+    public static <T> Result<T> error(String msg) {
+        Result<T> result = new Result<>();
+        result.setCode(-1);
+        result.setMsg(msg);
+        return result;
+    }
+
     public int getCode() {
         return code;
     }

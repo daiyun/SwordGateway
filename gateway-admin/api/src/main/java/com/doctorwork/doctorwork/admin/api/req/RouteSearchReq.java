@@ -6,5 +6,5 @@ package com.doctorwork.doctorwork.admin.api.req;
  * @Date: 10:28 2019/7/23
  * @Modified By:
  */
-public class RouteReq extends Page {
+public class RouteSearchReq extends Page {
 }

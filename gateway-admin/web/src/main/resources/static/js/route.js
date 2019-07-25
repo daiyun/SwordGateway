@@ -1,173 +1,69 @@
-var predicateConfig = (function ($) {
-    $.After = {
-        desc: 'After 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: after_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - After=2017-01-20T17:42:47.789-07:00[America/Denver]'
-    };
-    $.Before = {
-        desc: 'Before 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: before_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Before=2017-01-20T17:42:47.789-07:00[America/Denver]'
-    };
-    $.Between = {
-        desc: 'Between 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: between_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Between=2017-01-20T17:42:47.789-07:00[America/Denver], 2017-01-21T17:42:47.789-07:00[America/Denver]'
-    };
-    $.Cookie = {
-        desc: 'Cookie 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: cookie_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Cookie=chocolate, ch.p'
-    };
-    $.Header = {
-        desc: 'Header 路由断言',
-        tooltip: 'spring:\n' +
-        ' cloud:\n' +
-        '   gateway:\n' +
-        '     routes:\n' +
-        '     - id: header_route\n' +
-        '       uri: http://example.org\n' +
-        '       predicates:\n' +
-        '       - Header=X-Request-Id, \\d+'
-    };
-    $.Host = {
-        desc: 'Host 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: host_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Host=**.somehost.org,**.anotherhost.org'
-    };
-    $.Method = {
-        desc: 'Method 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: method_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Method=GET'
-    };
-    $.Path = {
-        desc: 'Path 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: host_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Path=/foo/{segment},/bar/{segment}'
-    };
-    $.Query = {
-        desc: 'Query 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: query_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - Query=baz'
-    };
-    $.RemoteAddr = {
-        desc: 'RemoteAddr 路由断言',
-        tooltip: 'spring:\n' +
-        '  cloud:\n' +
-        '    gateway:\n' +
-        '      routes:\n' +
-        '      - id: remoteaddr_route\n' +
-        '        uri: http://example.org\n' +
-        '        predicates:\n' +
-        '        - RemoteAddr=192.168.1.1/24'
-    };
-    return $;
-})({});
-var util = {
-    serializeObject: function (form) {
-        var formEL = $(form);
-        var o = {};
-        var a = formEL.serializeArray();
-        $.each(a, function () {
-            if (o[this.name]) {
-                if (!o[this.name].push) {
-                    o[this.name] = [o[this.name]];
-                }
-                o[this.name].push(this.value || '');
-            } else {
-                o[this.name] = this.value || '';
-            }
-        });
-        return o;
-    },
-
-    fillFormData: function (form, obj, isStatus) {
-        var formEL = $(form);
-        $.each(obj, function (index, item) {
-            formEL.find("[name=" + index + "]").val(item);
-        });
-    },
-    empty: function (data) {
-        if (null == data || "" == data) return true;
-        else return false;
-    }
-};
-
 function initPredicateSelect() {
-    for (var i in predicateConfig) {
-        $('#predicateEditModal select').append("<option value='" + i + "'>" + predicateConfig[i].desc + "</option>");
+    for (var i in Config.predicate) {
+        $('#predicateEditModal select').append("<option value='" + i + "'>" + Config.predicate[i].desc + "</option>");
+    }
+}
+
+function initFilterSelect() {
+    for (var i in Config.filter) {
+        $('#filterEditModal select').append("<option value='" + i + "'>" + Config.filter[i].desc + "</option>");
     }
 }
 
 $(document).ready(function () {
     initPredicateSelect();
-    var predicateTable;
-    $('#route-table').on('draw.dt', function (e, settings) {
+    initFilterSelect();
+    saveRoute();
+    savePredicate();
+    saveFilter();
+    clickRouteItemAdd();
+    clickPredicateItemAdd();
+    clickFilterItemAdd();
+    var predicateInit = false;
+    var filterInit = false;
+    $('#route-table').on('init.dt', function (e, settings) {
         var api = new $.fn.dataTable.Api(settings);
-        api.$(".preficate").click(function () {
-            console.log(323)
+        api.on('draw.dt', function (e, settings) {
+            api.$(".predicate").click(function () {
+                var routeMark = $(this).data("route");
+                $("#predicateModal").modal("show");
+                updatePredicationTable(routeMark)
+            });
+            api.$(".filter").click(function () {
+                var routeMark = $(this).data("route");
+                $("#filterModal").modal("show");
+                updateFilterTable(routeMark);
+            });
+            clickRouteItem(api);
+        });
+        api.$(".predicate").click(function () {
             var routeMark = $(this).data("route");
             $("#predicateModal").modal("show");
-            if (!predicateTable) {
-                initPredicationTable(routeMark);
-            } else {
+            if (predicateInit)
                 updatePredicationTable(routeMark)
+            else {
+                initPredicationTable(routeMark);
+                predicateInit = true;
             }
-        })
+        });
+
+        api.$(".filter").click(function () {
+            var routeMark = $(this).data("route");
+            $("#filterModal").modal("show");
+            if (filterInit)
+                updateFilterTable(routeMark)
+            else {
+                initFilterTable(routeMark);
+                filterInit = true;
+            }
+        });
+        clickRouteItem(api);
     }).DataTable({
         ordering: false,
         searching: false,//启用搜索功能
         serverSide: true,//启用服务端分页（这是使用Ajax服务端的必须配置）
         ajax: {
-            url: "/route/list",
+            url: Api.route.list,
             type: "post",
             contentType: "application/json; Charset:UTF-8",
             data: function (d) {
@@ -182,8 +78,7 @@ $(document).ready(function () {
                     data.recordsFiltered = json.totalCount;
                     return json.list;
                 } else {
-                    toastr[error]("请求响应错误" + data.msg)
-                    return {};
+                    toastr['error'](data.msg, "路由列表响应错误")
                 }
             }
         },
@@ -195,14 +90,11 @@ $(document).ready(function () {
             {title: "路由目标", "data": "routeUri"},
             {title: "路由备注", "data": "routeComment"},
             {title: "路由状态", "data": "routeStatus"},
-            {
-                title: "匹配规则",
-                "data": null
-            },
-            {
-                title: "过滤器规则",
-                "data": null,
-            }
+            {title: "匹配规则", "data": null},
+            {title: "过滤器规则", "data": null},
+            {title: "编辑", "data": null},
+            {title: "删除", "data": null},
+            {title: "发布配置", "data": null}
         ],
         "columnDefs": [{
             "targets": 3,
@@ -229,21 +121,402 @@ $(document).ready(function () {
         }, {
             "targets": 7,
             "render": function (data, type, full, meta) {
-                return "<button type='button' class='btn btn-outline btn-info preficate' data-route='" + full.routeMark + "'>查看</button>";
+                return "<button type='button' class='btn btn-info predicate' data-route='" + full.routeMark + "'><i class='fa fa-bars'></i>查看</button>";
             }
         }, {
             "targets": 8,
             "render": function (data, type, full, meta) {
-                return "<button type='button' class='btn btn-outline btn-info filter' data-route='" + full.routeMark + "'>查看</button>";
+                return "<button type='button' class='btn btn-info filter' data-route='" + full.routeMark + "'><i class='fa fa-bars'></i>查看</button>";
+            }
+        }, {
+            "targets": 9,
+            "render": function (data, type, full, meta) {
+                return "<button type='button' class='btn btn-info route-item-modify'><i class='fa fa-edit'></i>修改</button>";
+            }
+        }, {
+            "targets": 10,
+            "render": function (data, type, full, meta) {
+                return "<button type='button' class='btn btn-info route-item-del'><i class='fa fa-trash-o'></i>删除</button>";
+            }
+        }, {
+            "targets": 11,
+            "render": function (data, type, full, meta) {
+                if (full.routeStatus === 0 || full.routeStatus === 2) {
+                    return "<button type='button' class='btn btn-info route-item-enable'><i class='fa fa-cloud-upload'></i>启用</button>";
+                } else if (full.routeStatus === 1) {
+                    return "<button type='button' class='btn btn-info route-item-disable'><i class='fa fa-cloud-upload'></i>禁用</button>";
+                } else {
+                    return "unknown status";
+                }
             }
         }]
     });
-    // $("#route-table").click(function (event) {
-    //     // console.log(event.target.id)
-    //
-    // });
+
     function updatePredicationTable(routeMark) {
-        predicateTable.ajax.url("/route/predication/list?routeMark=" + routeMark).load();
+        var api = $('#route-predicate-table').dataTable().api();
+        api.ajax.url(Api.route.predicateList.format({routeMark: routeMark})).load();
+        api.draw();
+    }
+
+    function updateFilterTable(routeMark) {
+        var api = $('#route-filter-table').dataTable().api();
+        api.ajax.url(Api.route.filterList.format({routeMark: routeMark})).load();
+        api.draw();
+    }
+
+    function reloadTable(which) {
+        var api = $('#' + which).dataTable().api();
+        api.ajax.reload();
+        api.draw();
+    }
+
+    function clickRouteItemAdd() {
+        $('#route-item-add').click(function () {
+            $("#routeEditModal .save").data("edit", false);
+            $("#routeEditModal").modal("show");
+        });
+    }
+
+    function clickPredicateItemAdd() {
+        $('#predicateModal .predicate-item-add').click(function () {
+            var select = $("#predicateEditKeySelect");
+            select.val();
+            select.removeAttr("disabled");
+            $("#predicateEditId").val('');
+            $("#predicateEditModal .save").data("edit", false);
+            $("#predicateEditModal").modal("show");
+        });
+    }
+
+    function clickFilterItemAdd() {
+        $('#filterModal .filter-item-add').click(function () {
+            var select = $("#filterEditKeySelect");
+            select.val();
+            select.removeAttr("disabled");
+            $("#filterEditId").val('');
+            $("#filterEditModal .save").data("edit", false);
+            $("#filterEditModal").modal("show");
+        });
+    }
+
+    function clickPredicateItem(api) {
+        api.$('.predicate-item-modify').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            var select = $("#predicateEditKeySelect");
+            select.val(formData.routePredicateKey);
+            select.attr("disabled", "disabled");
+            $("#predicateEditValue").val(formData.routePredicateValue);
+            $("#predicateEditId").val(formData.id);
+            $("#predicateEditModal").modal("show");
+            $("#predicateEditModal .save").data("edit", true);
+        });
+
+        api.$('.predicate-item-del').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+
+            var delData = {
+                id: formData.id,
+                routePredicateKey: formData.routePredicateKey
+            };
+            $.ajaxPostApi({
+                url: Api.route.predicateDel,
+                data: JSON.stringify(delData),
+                success: function (data) {
+                    if (data.code === 0) {
+                        toastr.success("删除匹配规则成功");
+                        reloadTable('route-predicate-table');
+                    } else {
+                        toastr['error'](data.msg, "删除匹配规则失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "删除匹配规则失败");
+                }
+            })
+        });
+    }
+
+    function clickRouteItem(api) {
+        api.$('.route-item-modify').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            $.ajaxGetApi({
+                url: Api.route.get,
+                data: {routeMark: formData.routeMark},
+                success: function (data) {
+                    if (data.code === 0) {
+                        var retData = data.data;
+                        $("#routeTargetMode").val(retData.routeTargetMode);
+                        $("#routeUri").val(retData.routeUri);
+                        $("#routeMark").val(retData.routeMark);
+                        $("#routeName").val(retData.routeName);
+                        $("#routeComment").val(retData.routeComment);
+                        $("#routeSort").val(retData.routeSort);
+                        $("#routeEditModal .save").data("edit", true);
+                        $("#routeEditModal").modal("show");
+                    } else {
+                        toastr['error'](data.msg, "查询路由信息失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "查询路由信息失败");
+                }
+            });
+        });
+        api.$('.route-item-del').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            var data = {routeMark: formData.routeMark};
+            $.ajaxPostApi({
+                url: Api.route.del,
+                data: JSON.stringify(data),
+                success: function (data) {
+                    if (data.code === 0) {
+                        reloadTable('route-table')
+                    } else {
+                        toastr['error'](data.msg, "删除路由信息失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "删除路由信息失败");
+                }
+            });
+        });
+        api.$('.route-item-enable').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            $.ajaxGetApi({
+                url: Api.route.enable,
+                data: {routeMark: formData.routeMark},
+                success: function (data) {
+                    if (data.code === 0) {
+                        reloadTable('route-table')
+                    } else {
+                        toastr['error'](data.msg, "启用路由失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "启用路由失败");
+                }
+            });
+        });
+        api.$('.route-item-disable').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            $.ajaxGetApi({
+                url: Api.route.disable,
+                data: {routeMark: formData.routeMark},
+                success: function (data) {
+                    if (data.code === 0) {
+                        reloadTable('route-table')
+                    } else {
+                        toastr['error'](data.msg, "禁用路由失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "禁用路由失败");
+                }
+            })
+        });
+    }
+
+    function clickFilterItem(api) {
+        api.$('.filter-item-modify').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+            var select = $("#filterEditKeySelect");
+            select.val(formData.routeFilterKey);
+            select.attr("disabled", "disabled");
+            $("#filterEditValue").val(formData.routeFilterValue);
+            $("#filterEditId").val(formData.id);
+            $("#filterEditModal").modal("show");
+            $("#filterEditModal .save").data("edit", true);
+        });
+
+        api.$('.filter-item-del').click(function () {
+            var rowIndex = api.cell(this.parentNode).index().row;
+            var formData = api.row(rowIndex).data();
+
+            var delData = {
+                id: formData.id,
+                routeFilterKey: formData.routeFilterKey
+            };
+            $.ajaxPostApi({
+                url: Api.route.filterDel,
+                data: JSON.stringify(delData),
+                success: function (data) {
+                    if (data.code === 0) {
+                        toastr.success("删除过滤器规则成功");
+                        reloadTable('route-filter-table');
+                    } else {
+                        toastr['error'](data.msg, "删除过滤器规则失败")
+                    }
+                },
+                error: function (e) {
+                    toastr['error'](e.status, "删除过滤器规则失败");
+                }
+            })
+        });
+    }
+
+    function savePredicate() {
+        $("#predicateEditModal .save").click(function () {
+            var isEdit = $(this).data("edit");
+            var predicatekey = $("#predicateEditKeySelect").val();
+            var predicateValue = $("#predicateEditValue").val();
+            var predicateComment = $("#predicateEditComment").val();
+            var data = {
+                routePredicateKey: predicatekey,
+                routePredicateValue: predicateValue,
+                routePredicateComment: predicateComment
+            };
+            if (isEdit) {
+                data.id = $("#predicateEditId").val();
+                $.ajaxPostApi({
+                    url: Api.route.predicateEdit,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("修改匹配规则成功");
+                            $("#predicateEditModal").modal("hide");
+                            reloadTable('route-predicate-table');
+                        } else {
+                            toastr['error'](data.msg, "修改匹配规则失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "修改匹配规则失败");
+                    }
+                });
+            } else {
+                data.routeMark = $("#predicateEditRouteMark").val();
+                $.ajaxPostApi({
+                    url: Api.route.predicateAdd,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("新增匹配规则成功");
+                            $("#predicateEditModal").modal("hide");
+                            reloadTable('route-predicate-table');
+                        } else {
+                            toastr['error'](data.msg, "新增匹配规则失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "新增匹配规则失败");
+                    }
+                })
+            }
+        });
+    }
+
+    function saveRoute() {
+        $("#routeEditModal .save").click(function () {
+            var isEdit = $(this).data("edit");
+            var routeTargetMode = $("#routeTargetMode").val();
+            var routeUri = $("#routeUri").val();
+            var routeMark = $("#routeMark").val();
+            var routeName = $("#routeName").val();
+            var routeComment = $("#routeComment").val();
+            var routeSort = $("#routeSort").val();
+            var data = {
+                routeTargetMode: routeTargetMode,
+                routeUri: routeUri,
+                routeMark: routeMark,
+                routeName: routeName,
+                routeComment: routeComment,
+                routeSort: routeSort
+            };
+            console.log(isEdit)
+            if (isEdit) {
+                $.ajaxPostApi({
+                    url: Api.route.edit,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("修改路由成功");
+                            $("#routeEditModal").modal("hide");
+                            reloadTable('route-table');
+                        } else {
+                            toastr['error'](data.msg, "修改路由失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "修改路由失败");
+                    }
+                });
+            } else {
+                $.ajaxPostApi({
+                    url: Api.route.add,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("新增路由成功");
+                            $("#routeEditModal").modal("hide");
+                            reloadTable('route-table');
+                        } else {
+                            toastr['error'](data.msg, "新增路由失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "新增路由失败");
+                    }
+                })
+            }
+        });
+    }
+
+    function saveFilter() {
+        $("#filterEditModal .save").click(function () {
+            var isEdit = $(this).data("edit");
+            var filterkey = $("#filterEditKeySelect").val();
+            var filterValue = $("#filterEditValue").val();
+            var filterComment = $("#filterEditComment").val();
+            var data = {
+                routeFilterKey: filterkey,
+                routeFilterValue: filterValue,
+                routeFilterComment: filterComment
+            };
+            if (isEdit) {
+                data.id = $("#filterEditId").val();
+                $.ajaxPostApi({
+                    url: Api.route.filterEdit,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("修改过滤器规则成功");
+                            $("#filterEditModal").modal("hide");
+                            reloadTable('route-filter-table');
+                        } else {
+                            toastr['error'](data.msg, "修改过滤器规则成功")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "修改过滤器规则失败");
+                    }
+                });
+            } else {
+                data.routeMark = $("#filterEditRouteMark").val();
+                $.ajaxPostApi({
+                    url: Api.route.filterAdd,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("新增过滤器规则成功");
+                            $("#filterEditModal").modal("hide");
+                            reloadTable('route-filter-table');
+                        } else {
+                            toastr['error'](data.msg, "新增过滤器规则失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "新增过滤器规则失败");
+                    }
+                })
+            }
+        });
     }
 
     function initPredicationTable(routeMark) {
@@ -251,24 +524,20 @@ $(document).ready(function () {
             var select = $("#predicateEditModal select");
             select.removeAttr("disabled");
         });
-        $('#route-predicate-table').on('draw.dt', function (e, settings) {
-            predicateTable = new $.fn.dataTable.Api(settings);
-            predicateTable.$('.preficate-item-modify').click(function () {
-                var rowIndex = predicateTable.cell(this.parentNode).index().row;
-                var formData = predicateTable.row(rowIndex).data();
-                var select = $("#predicateEditModal select");
-                select.val(formData.routePredicateKey);
-                select.attr("disabled", "disabled");
-                $("#predicateEditValue").val(formData.routePredicateValue);
-                $("#predicateEditComment").val(formData.routePredicateComment);
-                $("#predicateEditModal").modal("show");
+        $('#route-predicate-table').on('init.dt', function (e, settings) {
+            var api = new $.fn.dataTable.Api(settings);
+            api.on('draw.dt', function (e, settings) {
+                clickPredicateItem(api)
+                $("#predicateEditRouteMark").val($.getUrlParam(api.ajax.url(), 'routeMark'));
             });
+            $("#predicateEditRouteMark").val($.getUrlParam(api.ajax.url(), 'routeMark'));
+            clickPredicateItem(api)
         }).DataTable({
             searching: false,
             ordering: false,
             paging: true,
             ajax: {
-                url: "/route/predication/list?routeMark=" + routeMark,
+                url: Api.route.predicateList.format({routeMark: routeMark}),
                 type: "get",
                 contentType: "application/json; Charset:UTF-8",
                 data: function () {
@@ -280,23 +549,23 @@ $(document).ready(function () {
                         var json = data.data;
                         return json;
                     } else {
-                        toastr[error]("请求响应错误" + data.msg)
-                        return {};
+                        toastr[error]("请求响应错误" + data.msg);
                     }
                 }
             },
             "columns": [
+                {data: 'id', visible: false},
                 {title: "名称", "data": null},
                 {title: "key", "data": "routePredicateKey"},
-                {title: "value(单击修改)", "data": "routePredicateValue"},
+                {title: "value", "data": "routePredicateValue"},
                 {title: "备注", "data": "routePredicateComment"},
                 {title: "修改", "data": null},
                 {title: "删除", "data": null}
             ],
             "columnDefs": [{
-                "targets": 0,
+                "targets": 1,
                 "render": function (data, type, full, meta) {
-                    var prediction = predicateConfig[full.routePredicateKey];
+                    var prediction = Config.predicate[full.routePredicateKey];
                     if (!prediction)
                         return "未知";
                     else {
@@ -304,14 +573,81 @@ $(document).ready(function () {
                     }
                 }
             }, {
-                "targets": 4,
+                "targets": 5,
                 "render": function (data, type, full, meta) {
-                    return "<button type='button' class='btn btn-outline btn-info preficate-item-modify' data-route='" + full.routePredicateKey + "'>修改</button>";
+                    return "<button type='button' class='btn btn-info predicate-item-modify'><i class='fa fa-edit'></i>修改</button>";
+                }
+            }, {
+                "targets": 6,
+                "render": function (data, type, full, meta) {
+                    return "<button type='button' class='btn btn-info predicate-item-del'><i class='fa fa-trash-o'></i>删除</button>";
+                }
+            }]
+        });
+    }
+
+    function initFilterTable(routeMark) {
+        $('#filterEditModal').on('hidden.bs.modal', function () {
+            var select = $("#filterEditModal select");
+            select.removeAttr("disabled");
+        });
+        $('#route-filter-table').on('init.dt', function (e, settings) {
+            var api = new $.fn.dataTable.Api(settings);
+            api.on('draw.dt', function (e, settings) {
+                clickFilterItem(api)
+                $("#filterEditRouteMark").val($.getUrlParam(api.ajax.url(), 'routeMark'));
+            });
+            $("#filterEditRouteMark").val($.getUrlParam(api.ajax.url(), 'routeMark'));
+            clickFilterItem(api)
+        }).DataTable({
+            searching: false,
+            ordering: false,
+            paging: true,
+            ajax: {
+                url: Api.route.filterList.format({routeMark: routeMark}),
+                type: "get",
+                contentType: "application/json; Charset:UTF-8",
+                data: function () {
+                    return {};
+                },
+                dataSrc: function (data) {
+                    if (data.code === 0) {
+                        toastr.success("请求成功");
+                        var json = data.data;
+                        return json;
+                    } else {
+                        toastr[error]("请求响应错误" + data.msg);
+                    }
+                }
+            },
+            "columns": [
+                {data: 'id', visible: false},
+                {title: "名称", "data": null},
+                {title: "key", "data": "routeFilterKey"},
+                {title: "value", "data": "routeFilterValue"},
+                {title: "备注", "data": "routeFilterComment"},
+                {title: "修改", "data": null},
+                {title: "删除", "data": null}
+            ],
+            "columnDefs": [{
+                "targets": 1,
+                "render": function (data, type, full, meta) {
+                    var filter = Config.filter[full.routeFilterKey];
+                    if (!filter)
+                        return "未知";
+                    else {
+                        return '<a href="#" class="tooltip-test" data-toggle="tooltip" title="' + filter.tooltip + '">' + filter.desc + '</a>';
+                    }
                 }
             }, {
                 "targets": 5,
                 "render": function (data, type, full, meta) {
-                    return "<button type='button' class='btn btn-outline btn-info preficate-item-del' data-route='" + full.routePredicateKey + "'>删除</button>";
+                    return "<button type='button' class='btn btn-info filter-item-modify'><i class='fa fa-edit'></i>修改</button>";
+                }
+            }, {
+                "targets": 6,
+                "render": function (data, type, full, meta) {
+                    return "<button type='button' class='btn btn-info filter-item-del'><i class='fa fa-trash-o'></i>删除</button>";
                 }
             }]
         });

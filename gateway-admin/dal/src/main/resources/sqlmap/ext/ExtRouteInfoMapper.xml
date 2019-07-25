@@ -20,4 +20,41 @@
         where is_delete = 0
         and route_mark = #{routeMark}
     </select>
+
+    <insert id="insert">
+        insert into route_info (route_mark, route_name, route_target_mode,
+                                route_uri, route_comment, apollo_id,
+                                route_status, route_sort)
+        values (#{param.routeMark,jdbcType=VARCHAR}, #{param.routeName,jdbcType=VARCHAR},
+                #{param.routeTargetMode,jdbcType=TINYINT},
+                #{param.routeUri,jdbcType=VARCHAR}, #{param.routeComment,jdbcType=VARCHAR},
+                #{param.apolloId,jdbcType=VARCHAR},
+                #{param.routeStatus,jdbcType=TINYINT}, #{param.routeSort,jdbcType=INTEGER})
+    </insert>
+
+    <insert id="updateStatus">
+        update route_info
+        set route_status = #{routeStatus,jdbcType=VARCHAR}
+        where is_delete = 0
+          and route_mark = #{routeMark,jdbcType=VARCHAR}
+    </insert>
+
+    <update id="update">
+        update route_info
+        set route_name        = #{param.routeName,jdbcType=VARCHAR},
+            route_target_mode = #{param.routeTargetMode,jdbcType=TINYINT},
+            route_uri         = #{param.routeUri,jdbcType=VARCHAR},
+            route_comment     = #{param.routeComment,jdbcType=VARCHAR},
+            apollo_id         = #{param.apolloId,jdbcType=VARCHAR},
+            route_sort        = #{param.routeSort,jdbcType=INTEGER}
+        where is_delete = 0
+          and route_mark = #{param.routeMark,jdbcType=VARCHAR}
+    </update>
+
+    <update id="delete">
+        update route_info
+        set is_delete = 1
+        where is_delete = 0
+          and route_mark = #{routeMark,jdbcType=VARCHAR}
+    </update>
 </mapper>
