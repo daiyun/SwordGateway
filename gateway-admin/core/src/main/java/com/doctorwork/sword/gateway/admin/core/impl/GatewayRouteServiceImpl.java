@@ -120,13 +120,19 @@ public class GatewayRouteServiceImpl implements GatewayRouteService {
     }
 
     @Override
-    public void routeEnable(String routeMark) {
+    public void routeEnable(String routeMark) throws BusinessException {
+        RouteInfo routeInfo = extRouteInfoMapper.get(routeMark);
+        if (routeInfo == null)
+            throw new BusinessException("未找到路由信息");
         //发布配置
         extRouteInfoMapper.updateStatus(routeMark, 1);
     }
 
     @Override
-    public void routeDisable(String routeMark) {
+    public void routeDisable(String routeMark) throws BusinessException {
+        RouteInfo routeInfo = extRouteInfoMapper.get(routeMark);
+        if (routeInfo == null)
+            throw new BusinessException("未找到路由信息");
         //发布配置
         extRouteInfoMapper.updateStatus(routeMark, 2);
     }

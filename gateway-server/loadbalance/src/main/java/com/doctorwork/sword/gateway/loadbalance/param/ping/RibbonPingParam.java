@@ -20,7 +20,6 @@ public abstract class RibbonPingParam<T extends IPing> extends PingParam<T> {
     private String pingStrategy = "serial";
 
     public RibbonPingParam(String pingMode, String pingStrategy) {
-        super("ribbon");
         if (StringUtils.isEmpty(pingMode))
             this.pingMode = Constants.PINGMODE_DUMMY;
         else

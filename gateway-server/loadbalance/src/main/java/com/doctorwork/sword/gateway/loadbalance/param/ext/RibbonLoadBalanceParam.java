@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * @author chenzhiqiang
  * @date 2019/6/22
  */
-@JsonTypeName(Constants.LBTYPE_RIBBON)
 public class RibbonLoadBalanceParam extends LoadbalanceParam {
     //服务自动刷新标识
     private Boolean autoRefresh;
@@ -16,10 +15,6 @@ public class RibbonLoadBalanceParam extends LoadbalanceParam {
     private Long initialDelayMs;
     //服务刷新延迟时间间隔 （默认30秒）
     private Long refreshIntervalMs;
-
-    public RibbonLoadBalanceParam() {
-        super(Constants.LBTYPE_RIBBON);
-    }
 
     public Boolean getAutoRefresh() {
         return autoRefresh;

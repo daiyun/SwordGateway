@@ -52,16 +52,16 @@ public class RouteController {
         return Result.result(null);
     }
 
-    @GetMapping("/enable")
+    @PostMapping("/enable")
     @ResponseBody
-    public Result routeEnable(String routeMark) {
+    public Result routeEnable(String routeMark) throws BusinessException {
         gatewayRouteService.routeEnable(routeMark);
         return Result.result(null);
     }
 
-    @GetMapping("/disable")
+    @PostMapping("/disable")
     @ResponseBody
-    public Result routeDisable(String routeMark) {
+    public Result routeDisable(String routeMark) throws BusinessException {
         gatewayRouteService.routeDisable(routeMark);
         return Result.result(null);
     }

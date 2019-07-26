@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * @author chenzhiqiang
  * @date 2019/6/22
  */
-@JsonTypeName(Constants.LBRULE_AVAILABILITYFILTERING)
+@JsonTypeName(Constants.LBRULE_RETRY)
 public class RetryRuleParam extends RuleParam {
     public RetryRuleParam() {
         super(Constants.LBRULE_RETRY);

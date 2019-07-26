@@ -26,9 +26,9 @@ public interface GatewayRouteService {
 
     void routeDel(RouteDel del) throws BusinessException;
 
-    void routeEnable(String routeMark);
+    void routeEnable(String routeMark) throws BusinessException;
 
-    void routeDisable(String routeMark);
+    void routeDisable(String routeMark) throws BusinessException;
 
     List<RoutePredicateRes> routePredication(String routeMark) throws BusinessException;
 

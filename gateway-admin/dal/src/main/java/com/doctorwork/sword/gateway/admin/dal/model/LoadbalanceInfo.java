@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-12
+ * @since 2019-07-26
  */
 public class LoadbalanceInfo implements Serializable {
     /**
@@ -96,6 +96,14 @@ public class LoadbalanceInfo implements Serializable {
      * </pre>
      */
     private String dscrId;
+
+    /**
+     * <pre>
+     * 是否启用，0默认未启用 1启用 2禁用
+     * This field corresponds to the database column <tt>loadbalance_info.lb_status<tt>
+     * </pre>
+     */
+    private Integer lbStatus;
 
     /**
      * <pre>
@@ -346,6 +354,28 @@ public class LoadbalanceInfo implements Serializable {
 
     /**
      * <pre>
+     * This field corresponds to the database column <tt>loadbalance_info.lb_status<tt>
+     * </pre>
+     *
+     * @return 是否启用，0默认未启用 1启用 2禁用
+     */
+    public Integer getLbStatus() {
+        return lbStatus;
+    }
+
+    /**
+     * <pre>
+     * This field corresponds to the database column <tt>loadbalance_info.lb_status<tt>
+     * </pre>
+     *
+     * @param lbStatus 是否启用，0默认未启用 1启用 2禁用
+     */
+    public void setLbStatus(Integer lbStatus) {
+        this.lbStatus = lbStatus;
+    }
+
+    /**
+     * <pre>
      * This field corresponds to the database column <tt>loadbalance_info.is_delete<tt>
      * </pre>
      *
@@ -429,6 +459,7 @@ public class LoadbalanceInfo implements Serializable {
         sb.append(", lbExtParam=").append(lbExtParam);
         sb.append(", dscrEnable=").append(dscrEnable);
         sb.append(", dscrId=").append(dscrId);
+        sb.append(", lbStatus=").append(lbStatus);
         sb.append(", isDelete=").append(isDelete);
         sb.append(", gmtCreate=").append(gmtCreate);
         sb.append(", gmtModified=").append(gmtModified);
@@ -462,6 +493,7 @@ public class LoadbalanceInfo implements Serializable {
             && (this.getLbExtParam() == null ? other.getLbExtParam() == null : this.getLbExtParam().equals(other.getLbExtParam()))
             && (this.getDscrEnable() == null ? other.getDscrEnable() == null : this.getDscrEnable().equals(other.getDscrEnable()))
             && (this.getDscrId() == null ? other.getDscrId() == null : this.getDscrId().equals(other.getDscrId()))
+            && (this.getLbStatus() == null ? other.getLbStatus() == null : this.getLbStatus().equals(other.getLbStatus()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
             && (this.getGmtCreate() == null ? other.getGmtCreate() == null : this.getGmtCreate().equals(other.getGmtCreate()))
             && (this.getGmtModified() == null ? other.getGmtModified() == null : this.getGmtModified().equals(other.getGmtModified()));
@@ -484,6 +516,7 @@ public class LoadbalanceInfo implements Serializable {
         result = prime * result + ((getLbExtParam() == null) ? 0 : getLbExtParam().hashCode());
         result = prime * result + ((getDscrEnable() == null) ? 0 : getDscrEnable().hashCode());
         result = prime * result + ((getDscrId() == null) ? 0 : getDscrId().hashCode());
+        result = prime * result + ((getLbStatus() == null) ? 0 : getLbStatus().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getGmtCreate() == null) ? 0 : getGmtCreate().hashCode());
         result = prime * result + ((getGmtModified() == null) ? 0 : getGmtModified().hashCode());

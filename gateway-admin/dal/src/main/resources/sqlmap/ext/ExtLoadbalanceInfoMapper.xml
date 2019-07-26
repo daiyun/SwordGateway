@@ -14,4 +14,39 @@
         and lb_mark = #{lbMark}
         limit 1
     </select>
+
+    <select id="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from loadbalance_info
+        where is_delete = 0
+    </select>
+
+    <update id="update">
+        update loadbalance_info
+        set lb_name      = #{lbName,jdbcType=VARCHAR},
+            lb_comment   = #{lbComment,jdbcType=VARCHAR},
+            lb_type      = #{lbType,jdbcType=VARCHAR},
+            rule_param   = #{ruleParam,jdbcType=VARCHAR},
+            ping_param   = #{pingParam,jdbcType=VARCHAR},
+            lb_ext_param = #{lbExtParam,jdbcType=VARCHAR},
+            dscr_enable  = #{dscrEnable,jdbcType=TINYINT},
+            dscr_id      = #{dscrId,jdbcType=VARCHAR}
+        where is_delete = 0
+          and lb_mark = #{param.lbMark,jdbcType=VARCHAR}
+    </update>
+
+    <update id="delete">
+        update loadbalance_info
+        set is_delete = 1
+        where is_delete = 0
+          and lb_mark = #{lbMark,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateStatus">
+        update loadbalance_info
+        set lb_status = #{lbStatus}
+        where is_delete = 0
+          and lb_mark = #{lbMark,jdbcType=VARCHAR}
+    </update>
 </mapper>

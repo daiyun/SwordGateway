@@ -16,6 +16,15 @@ var Api = (function ($) {
         filterAdd: '/route/filter/add',
         filterDel: '/route/filter/del',
     };
+    $.payload = {
+        list: '/payload/list',
+        get: '/payload/get',
+        add: '/payload/add',
+        edit: '/payload/edit',
+        del: '/payload/del',
+        enable: '/payload/enable',
+        disable: '/payload/disable',
+    }
     return $;
 })({});
 String.prototype.format = function (opts) {//use 'my name is ${name}'.format({name:'lake'})

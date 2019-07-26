@@ -11,27 +11,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @author chenzhiqiang
  * @date 2019/6/22
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "lbType", include = JsonTypeInfo.As.EXISTING_PROPERTY, visible = true)
-@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class LoadbalanceParam<T> implements Param {
-    private String lbType;
 
     public static LoadbalanceParam build(LoadBalancerInfo loadbalanceInfo) {
         if (Constants.LBTYPE_RIBBON.equals(loadbalanceInfo.getType())) {
-            return JacksonUtil.toSubTypeObject(loadbalanceInfo.getLbExtParam(), RibbonLoadBalanceParam.class);
+            return JacksonUtil.toObject(loadbalanceInfo.getLbExtParam(), RibbonLoadBalanceParam.class);
         }
         return null;
-    }
-
-    public LoadbalanceParam(String lbType) {
-        this.lbType = lbType;
-    }
-
-    public String getLbType() {
-        return lbType;
-    }
-
-    public void setLbType(String lbType) {
-        this.lbType = lbType;
     }
 }

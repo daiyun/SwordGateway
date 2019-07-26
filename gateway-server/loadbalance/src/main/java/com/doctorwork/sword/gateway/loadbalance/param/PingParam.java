@@ -12,8 +12,6 @@ import com.doctorwork.sword.gateway.loadbalance.param.ping.RibbonPingParam;
  */
 
 public abstract class PingParam<T> implements Param {
-    private String lbType;
-
     public static RibbonPingParam build(LoadBalancerInfo loadbalanceInfo) {
         if(StringUtils.isEmpty(loadbalanceInfo.getPingParam())){
             return null;
@@ -25,16 +23,4 @@ public abstract class PingParam<T> implements Param {
     }
 
     public abstract T ping();
-
-    public PingParam(String lbType) {
-        this.lbType = lbType;
-    }
-
-    public String getLbType() {
-        return lbType;
-    }
-
-    public void setLbType(String lbType) {
-        this.lbType = lbType;
-    }
 }

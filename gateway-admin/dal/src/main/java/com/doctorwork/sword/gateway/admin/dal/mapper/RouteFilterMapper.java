@@ -1,7 +1,6 @@
 package com.doctorwork.sword.gateway.admin.dal.mapper;
 
 import com.doctorwork.sword.gateway.admin.dal.model.RouteFilter;
-
 import java.util.List;
 
 public interface RouteFilterMapper {

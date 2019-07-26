@@ -85,8 +85,10 @@ $(document).ready(function () {
                 if (data.code === 0) {
                     toastr.success("请求成功");
                     var json = data.data;
-                    data.recordsTotal = json.totalCount;
-                    data.recordsFiltered = json.totalCount;
+                    console.log(this)
+                    thisSettings = $(this).dataTableSettings[0];
+                    thisSettings._iRecordsTotal = json.totalCount;
+                    thisSettings._iRecordsDisplay = json.totalCount;
                     return json.list;
                 } else {
                     toastr['error'](data.msg, "路由列表响应错误")
@@ -303,7 +305,7 @@ $(document).ready(function () {
         api.$('.route-item-enable').click(function () {
             var rowIndex = api.cell(this.parentNode).index().row;
             var formData = api.row(rowIndex).data();
-            $.ajaxGetApi({
+            $.ajaxPostApi({
                 url: Api.route.enable,
                 async: true,
                 data: {routeMark: formData.routeMark},
@@ -322,7 +324,7 @@ $(document).ready(function () {
         api.$('.route-item-disable').click(function () {
             var rowIndex = api.cell(this.parentNode).index().row;
             var formData = api.row(rowIndex).data();
-            $.ajaxGetApi({
+            $.ajaxPostApi({
                 url: Api.route.disable,
                 async: true,
                 data: {routeMark: formData.routeMark},

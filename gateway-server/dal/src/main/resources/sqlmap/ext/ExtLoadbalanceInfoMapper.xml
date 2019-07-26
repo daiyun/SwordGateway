@@ -12,6 +12,7 @@
         from loadbalance_info
         where is_delete = 0
         and lb_mark = #{lbMark}
+        and lb_status = 1
         limit 1
     </select>
 </mapper>

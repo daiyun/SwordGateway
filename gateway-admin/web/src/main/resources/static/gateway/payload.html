@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title> - 负载均衡器</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <!-- Data Tables -->
+    <link href="../css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="../css/animate.css" rel="stylesheet">
+    <link href="../css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="../css/plugins/toastr/toastr.min.css" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>负载均衡列表</h5>
+                    <div class="ibox-tools">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="route.html#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div style="float:right">
+                        <button type='button' class='btn btn-info' id="payload-item-add"><i class="fa fa-edit"></i>新增
+                        </button>
+                    </div>
+                    <table class="payload-item-table table table-striped table-bordered table-hover"
+                           id="payload-table">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="payloadEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">关闭</span>
+                </button>
+                <h4 class="modal-title">负载均衡器</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">负载器类型</label>
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="payloadType">
+                                <option value="ribbon">Ribbon</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">负载器标识</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="payloadMark">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">负载器名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="payloadName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">负载器备注</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="payloadComment">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">负载器转发模式</label>
+
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="payloadRule">
+                                <option value="roundrobin">无（默认为轮询）</option>
+                                <option value="roundrobin">轮询</option>
+                                <option value="weightroundrobin">加权轮询</option>
+                                <option value="random">随机</option>
+                                <option value="retry">重试(服务在负载列表中被标记为下线，则尝试重试获取服务)</option>
+                                <option value="">其他模式（尚未开发）</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">服务PING</label>
+
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="payloadPingMode">
+                                <option value="">无</option>
+                                <option value="url">URL</option>
+                                <option value="dummy">假PING（服务器默认存活）</option>
+                            </select>
+                            <select class="form-control m-b" id="payloadPingStrategy">
+                                <option value="serial">无(默认串行ping)</option>
+                                <option value="serial">串行Ping</option>
+                            </select>
+                            <input type="number" placeholder="Default 20s" class="form-control m-b"
+                                   id="payloadPingIntervalTime">
+                            <input type="number" placeholder="Default 2s" class="form-control m-b"
+                                   id="payloadMaxTotalPingTime">
+                            <input type="text" placeholder="if mode is URL, this must not be null"
+                                   class="form-control m-b" id="payloadPingUrl">
+
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">服务刷新规则</label>
+
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="payloadServerReload">
+                                <option value="">无</option>
+                                <option value="autoRefresh">自动刷新</option>
+                            </select>
+                            <input type="number" placeholder="Default 1s" class="form-control m-b"
+                                   id="payloadRefreshInitialDelayMs">
+                            <input type="number" placeholder="Default 30s" class="form-control m-b"
+                                   id="payloadRefreshIntervalMs">
+
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">服务发现</label>
+
+                        <div class="col-sm-10">
+                            <select class="form-control m-b" id="payloadDscrEnable">
+                                <option value="0">不可用</option>
+                                <option value="1">可用</option>
+                            </select>
+                            <input type="text" placeholder="即为服务发现标识" class="form-control m-b"
+                                   id="payloadDscrId">
+
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="../js/jquery.min.js?v=2.1.4"></script>
+<script src="../js/bootstrap.min.js?v=3.3.6"></script>
+
+
+<script src="../js/plugins/jeditable/jquery.jeditable.js"></script>
+
+<!-- Data Tables -->
+<script src="../js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="../js/plugins/dataTables/dataTables.bootstrap.js"></script>
+
+<script src="../js/plugins/toastr/toastr.min.js"></script>
+
+<script type="text/javascript" src="../js/api.js"></script>
+<script type="text/javascript" src="../js/payload.js"></script>
+
+
+</body>
+
+</html>
