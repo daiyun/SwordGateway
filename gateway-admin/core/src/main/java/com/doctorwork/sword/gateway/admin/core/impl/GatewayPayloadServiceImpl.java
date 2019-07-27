@@ -1,15 +1,17 @@
 package com.doctorwork.sword.gateway.admin.core.impl;
 
-import com.doctorwork.doctorwork.admin.api.req.PayloadDel;
-import com.doctorwork.doctorwork.admin.api.req.PayloadEdit;
-import com.doctorwork.doctorwork.admin.api.req.PayloadSearchReq;
+import com.doctorwork.doctorwork.admin.api.req.*;
 import com.doctorwork.doctorwork.admin.api.res.PayloadInfoRes;
 import com.doctorwork.doctorwork.admin.api.res.PayloadRes;
 import com.doctorwork.sword.gateway.admin.core.GatewayPayloadService;
+import com.doctorwork.sword.gateway.admin.core.dto.ExtParam;
+import com.doctorwork.sword.gateway.admin.core.dto.PingParam;
+import com.doctorwork.sword.gateway.admin.core.dto.RuleParam;
 import com.doctorwork.sword.gateway.admin.dal.mapper.LoadbalanceInfoMapper;
 import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtLoadbalanceInfoMapper;
 import com.doctorwork.sword.gateway.admin.dal.model.LoadbalanceInfo;
 import com.doctorwork.sword.gateway.common.BusinessException;
+import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.common.PageResult;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -62,12 +64,12 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         res.setLbName(loadbalanceInfo.getLbName());
         res.setDscrEnable(loadbalanceInfo.getDscrEnable());
         res.setDscrId(loadbalanceInfo.getDscrId());
-        res.setLbExtParam(loadbalanceInfo.getLbExtParam());
         res.setLbComment(loadbalanceInfo.getLbComment());
-        res.setPingParam(loadbalanceInfo.getPingParam());
-        res.setRuleParam(loadbalanceInfo.getRuleParam());
         res.setLbType(loadbalanceInfo.getLbType());
         res.setLbStatus(loadbalanceInfo.getLbStatus());
+        res.setPayloadPing(JacksonUtil.toObject(loadbalanceInfo.getPingParam(), PayloadPing.class));
+        res.setPayloadRule(JacksonUtil.toObject(loadbalanceInfo.getRuleParam(), PayloadRule.class));
+        res.setServerReload(JacksonUtil.toObject(loadbalanceInfo.getLbExtParam(), PayloadServerReload.class));
         return res;
     }
 
@@ -83,9 +85,15 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         update.setLbType(edit.getLbType());
         update.setDscrEnable(edit.getDscrEnable());
         update.setDscrId(edit.getDscrId());
-        update.setPingParam(edit.getPingParam());
-        update.setLbExtParam(edit.getLbExtParam());
-        update.setRuleParam(edit.getRuleParam());
+        PingParam pingParam = PingParam.param(edit.getPayloadPing());
+        if (pingParam != null)
+            update.setPingParam(pingParam.serialize());
+        RuleParam ruleParam = RuleParam.param(edit.getPayloadRule());
+        if (ruleParam != null)
+            update.setRuleParam(ruleParam.serialize());
+        ExtParam extParam = ExtParam.param(edit.getPayloadServerReload());
+        if (extParam != null)
+            update.setLbExtParam(extParam.serialize());
         extLoadbalanceInfoMapper.update(loadbalanceInfo);
     }
 
@@ -101,10 +109,16 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         insert.setLbType(edit.getLbType());
         insert.setDscrEnable(edit.getDscrEnable());
         insert.setDscrId(edit.getDscrId());
-        insert.setPingParam(edit.getPingParam());
-        insert.setLbExtParam(edit.getLbExtParam());
-        insert.setRuleParam(edit.getRuleParam());
-        insert.setLbStatus(0);
+        PingParam pingParam = PingParam.param(edit.getPayloadPing());
+        if (pingParam != null)
+            insert.setPingParam(pingParam.serialize());
+        RuleParam ruleParam = RuleParam.param(edit.getPayloadRule());
+        if (ruleParam != null)
+            insert.setRuleParam(ruleParam.serialize());
+        ExtParam extParam = ExtParam.param(edit.getPayloadServerReload());
+        if (extParam != null)
+            insert.setLbExtParam(extParam.serialize());
+        insert.setLbStatus(0);//
         loadbalanceInfoMapper.insert(insert);
     }
 

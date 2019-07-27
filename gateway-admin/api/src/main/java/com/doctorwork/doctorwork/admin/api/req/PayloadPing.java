@@ -11,6 +11,7 @@ public class PayloadPing {
     private Integer pingIntervalTime;
     private Integer maxTotalPingTime;
     private String pingStrategy;
+    private String pingUrl;
 
     public String getPingMode() {
         return pingMode;
@@ -42,5 +43,13 @@ public class PayloadPing {
 
     public void setPingStrategy(String pingStrategy) {
         this.pingStrategy = pingStrategy;
+    }
+
+    public String getPingUrl() {
+        return pingUrl;
+    }
+
+    public void setPingUrl(String pingUrl) {
+        this.pingUrl = pingUrl;
     }
 }

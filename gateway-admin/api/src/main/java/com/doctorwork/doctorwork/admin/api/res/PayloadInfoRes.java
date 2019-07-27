@@ -1,5 +1,9 @@
 package com.doctorwork.doctorwork.admin.api.res;
 
+import com.doctorwork.doctorwork.admin.api.req.PayloadPing;
+import com.doctorwork.doctorwork.admin.api.req.PayloadRule;
+import com.doctorwork.doctorwork.admin.api.req.PayloadServerReload;
+
 import java.util.function.Function;
 
 /**
@@ -47,7 +51,7 @@ public class PayloadInfoRes {
      * This field corresponds to the database column <tt>loadbalance_info.rule_param<tt>
      * </pre>
      */
-    private String ruleParam;
+    private PayloadRule payloadRule;
 
     /**
      * <pre>
@@ -55,7 +59,7 @@ public class PayloadInfoRes {
      * This field corresponds to the database column <tt>loadbalance_info.ping_param<tt>
      * </pre>
      */
-    private String pingParam;
+    private PayloadPing payloadPing;
 
     /**
      * <pre>
@@ -63,7 +67,7 @@ public class PayloadInfoRes {
      * This field corresponds to the database column <tt>loadbalance_info.lb_ext_param<tt>
      * </pre>
      */
-    private String lbExtParam;
+    private PayloadServerReload serverReload;
 
     /**
      * <pre>
@@ -115,28 +119,28 @@ public class PayloadInfoRes {
         this.lbType = lbType;
     }
 
-    public String getRuleParam() {
-        return ruleParam;
+    public PayloadRule getPayloadRule() {
+        return payloadRule;
     }
 
-    public void setRuleParam(String ruleParam) {
-        this.ruleParam = ruleParam;
+    public void setPayloadRule(PayloadRule payloadRule) {
+        this.payloadRule = payloadRule;
     }
 
-    public String getPingParam() {
-        return pingParam;
+    public PayloadPing getPayloadPing() {
+        return payloadPing;
     }
 
-    public void setPingParam(String pingParam) {
-        this.pingParam = pingParam;
+    public void setPayloadPing(PayloadPing payloadPing) {
+        this.payloadPing = payloadPing;
     }
 
-    public String getLbExtParam() {
-        return lbExtParam;
+    public PayloadServerReload getServerReload() {
+        return serverReload;
     }
 
-    public void setLbExtParam(String lbExtParam) {
-        this.lbExtParam = lbExtParam;
+    public void setServerReload(PayloadServerReload serverReload) {
+        this.serverReload = serverReload;
     }
 
     public Integer getDscrEnable() {
