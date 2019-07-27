@@ -7,7 +7,7 @@
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="lb_mark" jdbcType="VARCHAR" property="lbMark" />
-    <result column="srv_id" jdbcType="BIGINT" property="srvId" />
+    <result column="srv_id" jdbcType="VARCHAR" property="srvId" />
     <result column="srv_ip" jdbcType="VARCHAR" property="srvIp" />
     <result column="srv_port" jdbcType="INTEGER" property="srvPort" />
     <result column="srv_name" jdbcType="VARCHAR" property="srvName" />
@@ -44,7 +44,7 @@
     insert into loadbalance_server (lb_mark, srv_id, srv_ip, 
       srv_port, srv_name, srv_weight, 
       apollo_id, comment)
-    values (#{lbMark,jdbcType=VARCHAR}, #{srvId,jdbcType=BIGINT}, #{srvIp,jdbcType=VARCHAR}, 
+    values (#{lbMark,jdbcType=VARCHAR}, #{srvId,jdbcType=VARCHAR}, #{srvIp,jdbcType=VARCHAR}, 
       #{srvPort,jdbcType=INTEGER}, #{srvName,jdbcType=VARCHAR}, #{srvWeight,jdbcType=TINYINT}, 
       #{apolloId,jdbcType=VARCHAR}, #{comment,jdbcType=VARCHAR})
   </insert>
@@ -87,7 +87,7 @@
         #{lbMark,jdbcType=VARCHAR},
       </if>
       <if test="srvId != null">
-        #{srvId,jdbcType=BIGINT},
+        #{srvId,jdbcType=VARCHAR},
       </if>
       <if test="srvIp != null">
         #{srvIp,jdbcType=VARCHAR},
@@ -119,7 +119,7 @@
         lb_mark = #{lbMark,jdbcType=VARCHAR},
       </if>
       <if test="srvId != null">
-        srv_id = #{srvId,jdbcType=BIGINT},
+        srv_id = #{srvId,jdbcType=VARCHAR},
       </if>
       <if test="srvIp != null">
         srv_ip = #{srvIp,jdbcType=VARCHAR},
@@ -148,7 +148,7 @@
     -->
     update loadbalance_server
     set lb_mark = #{lbMark,jdbcType=VARCHAR},
-      srv_id = #{srvId,jdbcType=BIGINT},
+      srv_id = #{srvId,jdbcType=VARCHAR},
       srv_ip = #{srvIp,jdbcType=VARCHAR},
       srv_port = #{srvPort,jdbcType=INTEGER},
       srv_name = #{srvName,jdbcType=VARCHAR},

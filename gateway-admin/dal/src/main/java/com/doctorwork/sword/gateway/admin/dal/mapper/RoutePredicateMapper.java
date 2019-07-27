@@ -18,7 +18,7 @@ public interface RoutePredicateMapper {
     int insertSelective(RoutePredicate record);
 
     /**
-     * get one record by primary key from <tt>route_predicate</tt>
+     * getByLbMark one record by primary key from <tt>route_predicate</tt>
      *
      * @param id
      */
@@ -38,7 +38,7 @@ public interface RoutePredicateMapper {
     int updateByPrimaryKey(RoutePredicate record);
 
     /**
-     * get all records from  <tt>route_predicate</tt>
+     * getByLbMark all records from  <tt>route_predicate</tt>
      *
      */
     List<RoutePredicate> selectAll();

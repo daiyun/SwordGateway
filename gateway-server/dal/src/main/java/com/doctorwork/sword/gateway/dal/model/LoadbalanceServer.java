@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-02
+ * @since 2019-07-27
  */
 public class LoadbalanceServer implements Serializable {
     /**
@@ -39,7 +39,7 @@ public class LoadbalanceServer implements Serializable {
      * This field corresponds to the database column <tt>loadbalance_server.srv_id<tt>
      * </pre>
      */
-    private Long srvId;
+    private String srvId;
 
     /**
      * <pre>
@@ -167,7 +167,7 @@ public class LoadbalanceServer implements Serializable {
      *
      * @return 服务id
      */
-    public Long getSrvId() {
+    public String getSrvId() {
         return srvId;
     }
 
@@ -178,8 +178,8 @@ public class LoadbalanceServer implements Serializable {
      *
      * @param srvId 服务id
      */
-    public void setSrvId(Long srvId) {
-        this.srvId = srvId;
+    public void setSrvId(String srvId) {
+        this.srvId = srvId == null ? null : srvId.trim();
     }
 
     /**

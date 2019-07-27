@@ -18,7 +18,7 @@ public interface RouteFilterMapper {
     int insertSelective(RouteFilter record);
 
     /**
-     * get one record by primary key from <tt>route_filter</tt>
+     * getByLbMark one record by primary key from <tt>route_filter</tt>
      *
      * @param id
      */
@@ -38,7 +38,7 @@ public interface RouteFilterMapper {
     int updateByPrimaryKey(RouteFilter record);
 
     /**
-     * get all records from  <tt>route_filter</tt>
+     * getByLbMark all records from  <tt>route_filter</tt>
      *
      */
     List<RouteFilter> selectAll();

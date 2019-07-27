@@ -1,8 +1,6 @@
 package com.doctorwork.sword.gateway.admin;
 
-import com.doctorwork.doctorwork.admin.api.req.PayloadDel;
-import com.doctorwork.doctorwork.admin.api.req.PayloadEdit;
-import com.doctorwork.doctorwork.admin.api.req.PayloadSearchReq;
+import com.doctorwork.doctorwork.admin.api.req.*;
 import com.doctorwork.sword.gateway.admin.core.GatewayPayloadService;
 import com.doctorwork.sword.gateway.common.BusinessException;
 import com.doctorwork.sword.gateway.common.Result;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("payload")
-public class LoadBalanceController {
+public class PayloadController {
     @Autowired
     private GatewayPayloadService gatewayPayloadService;
 
@@ -66,5 +64,38 @@ public class LoadBalanceController {
     public Result payloadDisable(String lbMark) throws BusinessException {
         gatewayPayloadService.payloadDisable(lbMark);
         return Result.result(null);
+    }
+
+    @PostMapping("/server/list")
+    @ResponseBody
+    public Result payloadServerList(PayloadServerSearchReq req) throws BusinessException {
+        return Result.result(gatewayPayloadService.payloadServerList(req));
+    }
+
+    @PostMapping("/server/add")
+    @ResponseBody
+    public Result payloadServerAdd(PayloadServerEdit edit) throws BusinessException {
+        gatewayPayloadService.payloadServerAdd(edit);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/edit")
+    @ResponseBody
+    public Result payloadServerUpdate(PayloadServerEdit edit) throws BusinessException {
+        gatewayPayloadService.payloadServerUpdate(edit);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/del")
+    @ResponseBody
+    public Result payloadServerDel(String id) throws BusinessException {
+        gatewayPayloadService.payloadServerDel(id);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/discover/list")
+    @ResponseBody
+    public Result payloadDiscoverServerList(PayloadServerSearchReq req) throws Exception {
+        return Result.result(gatewayPayloadService.payloadDiscoverServerList(req));
     }
 }

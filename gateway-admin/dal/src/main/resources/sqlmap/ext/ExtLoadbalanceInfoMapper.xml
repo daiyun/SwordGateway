@@ -24,14 +24,14 @@
 
     <update id="update">
         update loadbalance_info
-        set lb_name      = #{lbName,jdbcType=VARCHAR},
-            lb_comment   = #{lbComment,jdbcType=VARCHAR},
-            lb_type      = #{lbType,jdbcType=VARCHAR},
-            rule_param   = #{ruleParam,jdbcType=VARCHAR},
-            ping_param   = #{pingParam,jdbcType=VARCHAR},
-            lb_ext_param = #{lbExtParam,jdbcType=VARCHAR},
-            dscr_enable  = #{dscrEnable,jdbcType=TINYINT},
-            dscr_id      = #{dscrId,jdbcType=VARCHAR}
+        set lb_name      = #{param.lbName,jdbcType=VARCHAR},
+            lb_comment   = #{param.lbComment,jdbcType=VARCHAR},
+            lb_type      = #{param.lbType,jdbcType=VARCHAR},
+            rule_param   = #{param.ruleParam,jdbcType=VARCHAR},
+            ping_param   = #{param.pingParam,jdbcType=VARCHAR},
+            lb_ext_param = #{param.lbExtParam,jdbcType=VARCHAR},
+            dscr_enable  = #{param.dscrEnable,jdbcType=TINYINT},
+            dscr_id      = #{param.dscrId,jdbcType=VARCHAR}
         where is_delete = 0
           and lb_mark = #{param.lbMark,jdbcType=VARCHAR}
     </update>

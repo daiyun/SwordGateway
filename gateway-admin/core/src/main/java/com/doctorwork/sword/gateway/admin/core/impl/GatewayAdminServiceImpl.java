@@ -18,6 +18,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+import static com.doctorwork.sword.gateway.common.Constant.*;
+
 /**
  * @Author:czq
  * @Description:
@@ -40,11 +42,6 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
     @Autowired
     private ExtDiscoverRegistryConfigMapper extDiscoverRegistryConfigMapper;
 
-    private static final String REGISTRY_PATH = "/doctorwork/gateway/configuration";
-    private static final String REGISTRY_NODE = "/registry/";
-    private static final String LOADBALANCE_NODE = "/loadbalance/";
-    private static final String DISCOVERY_NODE = "/discovery/";
-    private static final String LOADBALANCE_SERVER_NODE = "/loadbalance-server/";
 
     @Override
     public void publishLoadBalanceConfig(String lbMark) throws Exception {
@@ -74,7 +71,7 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
         if (StringUtils.isEmpty(lbMark)) {
             return;
         }
-        List<LoadbalanceServer> servers = extLoadbalanceServerMapper.get(lbMark);
+        List<LoadbalanceServer> servers = extLoadbalanceServerMapper.getByLbMark(lbMark);
         for (LoadbalanceServer server : servers) {
             LoadBalancerServer loadBalancerServer = new LoadBalancerServer();
             loadBalancerServer.setLbId(server.getLbMark());

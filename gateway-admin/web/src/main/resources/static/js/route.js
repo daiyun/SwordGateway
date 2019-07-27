@@ -24,48 +24,7 @@ $(document).ready(function () {
     $('#route-table').on('init.dt', function (e, settings) {
         var api = new $.fn.dataTable.Api(settings);
         api.on('draw.dt', function (e, settings) {
-            api.$(".predicate").click(function () {
-                var routeMark = $(this).data("route");
-                if (predicateInit)
-                    updatePredicationTable(routeMark);
-                else {
-                    initPredicationTable(routeMark);
-                    predicateInit = true;
-                }
-                $("#predicateModal").modal("show");
-            });
-            api.$(".filter").click(function () {
-                var routeMark = $(this).data("route");
-                if (filterInit)
-                    updateFilterTable(routeMark);
-                else {
-                    initFilterTable(routeMark);
-                    filterInit = true;
-                }
-                $("#filterModal").modal("show");
-            });
             clickRouteItem(api);
-        });
-        api.$(".predicate").click(function () {
-            var routeMark = $(this).data("route");
-            if (predicateInit)
-                updatePredicationTable(routeMark)
-            else {
-                initPredicationTable(routeMark);
-                predicateInit = true;
-            }
-            $("#predicateModal").modal("show");
-        });
-
-        api.$(".filter").click(function () {
-            var routeMark = $(this).data("route");
-            if (filterInit)
-                updateFilterTable(routeMark)
-            else {
-                initFilterTable(routeMark);
-                filterInit = true;
-            }
-            $("#filterModal").modal("show");
         });
         clickRouteItem(api);
     }).DataTable({
@@ -185,6 +144,7 @@ $(document).ready(function () {
 
     function clickRouteItemAdd() {
         $('#route-item-add').click(function () {
+            $("#routeMark").removeAttr("disabled");
             $("#routeEditModal .save").data("edit", false);
             $("#routeEditModal").modal("show");
         });
@@ -233,7 +193,7 @@ $(document).ready(function () {
                 id: formData.id,
                 routePredicateKey: formData.routePredicateKey
             };
-            $.ajaxPostApi({
+            $.ajaxPostJsonApi({
                 url: Api.route.predicateDel,
                 async: true,
                 data: JSON.stringify(delData),
@@ -254,20 +214,20 @@ $(document).ready(function () {
 
     function clickRouteItem(api) {
         api.$('.route-item-modify').click(function () {
-            var rowIndex = api.cell(this.parentNode).index().row;
-            var formData = api.row(rowIndex).data();
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
             $.ajaxGetApi({
                 url: Api.route.get,
                 async: true,
                 data: {routeMark: formData.routeMark},
                 success: function (data) {
                     if (data.code === 0) {
-                        var retData = data.data;
+                        let retData = data.data;
                         $("#routeTargetMode").val(retData.routeTargetMode);
                         $("#routeUri").val(retData.routeUri);
                         routeMarkInput = $("#routeMark");
                         routeMarkInput.val(retData.routeMark);
-                        routeMarkInput.attr("disabled","disabled");
+                        routeMarkInput.attr("disabled", "disabled");
                         $("#routeName").val(retData.routeName);
                         $("#routeComment").val(retData.routeComment);
                         $("#routeSort").val(retData.routeSort);
@@ -283,10 +243,10 @@ $(document).ready(function () {
             });
         });
         api.$('.route-item-del').click(function () {
-            var rowIndex = api.cell(this.parentNode).index().row;
-            var formData = api.row(rowIndex).data();
-            var data = {routeMark: formData.routeMark};
-            $.ajaxPostApi({
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
+            let data = {routeMark: formData.routeMark};
+            $.ajaxPostJsonApi({
                 url: Api.route.del,
                 async: true,
                 data: JSON.stringify(data),
@@ -303,8 +263,8 @@ $(document).ready(function () {
             });
         });
         api.$('.route-item-enable').click(function () {
-            var rowIndex = api.cell(this.parentNode).index().row;
-            var formData = api.row(rowIndex).data();
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
             $.ajaxPostApi({
                 url: Api.route.enable,
                 async: true,
@@ -322,8 +282,8 @@ $(document).ready(function () {
             });
         });
         api.$('.route-item-disable').click(function () {
-            var rowIndex = api.cell(this.parentNode).index().row;
-            var formData = api.row(rowIndex).data();
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
             $.ajaxPostApi({
                 url: Api.route.disable,
                 async: true,
@@ -339,6 +299,18 @@ $(document).ready(function () {
                     toastr['error'](e.status, "禁用路由失败");
                 }
             })
+        });
+        api.$(".predicate").click(function () {
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
+            predicationTable(formData.routeMark);
+            $("#predicateModal").modal("show");
+        });
+        api.$(".filter").click(function () {
+            let rowIndex = api.cell(this.parentNode).index().row;
+            let formData = api.row(rowIndex).data();
+            filterTable(formData.routeMark);
+            $("#filterModal").modal("show");
         });
     }
 
@@ -363,7 +335,7 @@ $(document).ready(function () {
                 id: formData.id,
                 routeFilterKey: formData.routeFilterKey
             };
-            $.ajaxPostApi({
+            $.ajaxPostJsonApi({
                 url: Api.route.filterDel,
                 async: true,
                 data: JSON.stringify(delData),
@@ -395,7 +367,7 @@ $(document).ready(function () {
             };
             if (isEdit) {
                 data.id = $("#predicateEditId").val();
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.predicateEdit,
                     async: true,
                     data: JSON.stringify(data),
@@ -414,7 +386,7 @@ $(document).ready(function () {
                 });
             } else {
                 data.routeMark = $("#predicateEditRouteMark").val();
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.predicateAdd,
                     async: true,
                     data: JSON.stringify(data),
@@ -453,7 +425,7 @@ $(document).ready(function () {
                 routeSort: routeSort
             };
             if (isEdit) {
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.edit,
                     async: true,
                     data: JSON.stringify(data),
@@ -471,7 +443,7 @@ $(document).ready(function () {
                     }
                 });
             } else {
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.add,
                     async: true,
                     data: JSON.stringify(data),
@@ -505,7 +477,7 @@ $(document).ready(function () {
             };
             if (isEdit) {
                 data.id = $("#filterEditId").val();
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.filterEdit,
                     async: true,
                     data: JSON.stringify(data),
@@ -524,7 +496,7 @@ $(document).ready(function () {
                 });
             } else {
                 data.routeMark = $("#filterEditRouteMark").val();
-                $.ajaxPostApi({
+                $.ajaxPostJsonApi({
                     url: Api.route.filterAdd,
                     async: true,
                     data: JSON.stringify(data),
@@ -545,7 +517,12 @@ $(document).ready(function () {
         });
     }
 
-    function initPredicationTable(routeMark) {
+    function predicationTable(routeMark) {
+        if (predicateInit) {
+            updatePredicationTable(routeMark);
+            return;
+        }
+        predicateInit = true;
         $('#predicateEditModal').on('hidden.bs.modal', function () {
             var select = $("#predicateEditModal select");
             select.removeAttr("disabled");
@@ -613,13 +590,18 @@ $(document).ready(function () {
         });
     }
 
-    function initFilterTable(routeMark) {
+    function filterTable(routeMark) {
+        if (filterInit) {
+            updateFilterTable(routeMark);
+            return;
+        }
+        filterInit = true;
         $('#filterEditModal').on('hidden.bs.modal', function () {
-            var select = $("#filterEditModal select");
+            let select = $("#filterEditModal select");
             select.removeAttr("disabled");
         });
         $('#route-filter-table').on('init.dt', function (e, settings) {
-            var api = new $.fn.dataTable.Api(settings);
+            let api = new $.fn.dataTable.Api(settings);
             api.on('draw.dt', function (e, settings) {
                 clickFilterItem(api)
                 $("#filterEditRouteMark").val($.getUrlParam(api.ajax.url(), 'routeMark'));
@@ -641,7 +623,7 @@ $(document).ready(function () {
                 dataSrc: function (data) {
                     if (data.code === 0) {
                         toastr.success("请求成功");
-                        var json = data.data;
+                        let json = data.data;
                         return json;
                     } else {
                         toastr[error]("请求响应错误" + data.msg);
@@ -660,7 +642,7 @@ $(document).ready(function () {
             "columnDefs": [{
                 "targets": 1,
                 "render": function (data, type, full, meta) {
-                    var filter = Config.filter[full.routeFilterKey];
+                    let filter = Config.filter[full.routeFilterKey];
                     if (!filter)
                         return "未知";
                     else {

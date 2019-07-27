@@ -24,7 +24,12 @@ var Api = (function ($) {
         del: '/payload/del',
         enable: '/payload/enable',
         disable: '/payload/disable',
-    }
+        serverList: '/payload/server/list?lbMark=${lbMark}',
+        serverAdd: '/payload/server/add',
+        serverEdit: '/payload/server/edit',
+        serverDel: '/payload/server/del',
+        serverDiscoverList: '/payload/server/discover/list'
+    };
     return $;
 })({});
 String.prototype.format = function (opts) {//use 'my name is ${name}'.format({name:'lake'})
@@ -62,22 +67,27 @@ $.getUrlParam = function (search, q) {
     }
     return items;
 };
+var defaultPostOpt = {
+    type: 'post',
+    async: false,
+    dataType: "json"
+};
+var defaultGetOpt = {
+    type: 'get',
+    async: false,
+    dataType: "json"
+};
+var jsonOpt = $.extend({
+    contentType: "application/json",
+}, defaultPostOpt)
 $.ajaxPostApi = function (ajaxOpts) {
-    var defaultOpt = {
-        type: 'post',
-        async: false,
-        contentType: "application/json",
-        dataType: "json"
-    };
-    return $.ajax($.extend(defaultOpt, ajaxOpts));
+    return $.ajax($.extend(ajaxOpts, defaultPostOpt));
+};
+$.ajaxPostJsonApi = function (ajaxOpts) {
+    return $.ajax($.extend(ajaxOpts, jsonOpt));
 };
 $.ajaxGetApi = function (ajaxOpts) {
-    var defaultOpt = {
-        type: 'get',
-        async: false,
-        dataType: "json"
-    };
-    return $.ajax($.extend(defaultOpt, ajaxOpts));
+    return $.ajax($.extend(ajaxOpts, defaultGetOpt));
 };
 var toastrOpt = (function ($) {
     $.success = {

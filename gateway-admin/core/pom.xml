@@ -28,6 +28,10 @@
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.doctorwork.sword</groupId>
+            <artifactId>gateway-discovery-common</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

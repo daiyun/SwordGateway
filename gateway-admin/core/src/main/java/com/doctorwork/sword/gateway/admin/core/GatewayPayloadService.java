@@ -1,9 +1,10 @@
 package com.doctorwork.sword.gateway.admin.core;
 
 import com.doctorwork.doctorwork.admin.api.req.*;
+import com.doctorwork.doctorwork.admin.api.res.PayloadDiscoverServerRes;
 import com.doctorwork.doctorwork.admin.api.res.PayloadInfoRes;
 import com.doctorwork.doctorwork.admin.api.res.PayloadRes;
-import com.doctorwork.doctorwork.admin.api.res.RouteInfoRes;
+import com.doctorwork.doctorwork.admin.api.res.PayloadServerRes;
 import com.doctorwork.sword.gateway.common.BusinessException;
 import com.doctorwork.sword.gateway.common.PageResult;
 
@@ -27,4 +28,14 @@ public interface GatewayPayloadService {
     void payloadEnable(String lbMark) throws BusinessException;
 
     void payloadDisable(String lbMark) throws BusinessException;
+
+    PageResult<PayloadServerRes> payloadServerList(PayloadServerSearchReq req) throws BusinessException;
+
+    void payloadServerAdd(PayloadServerEdit edit) throws BusinessException;
+
+    void payloadServerUpdate(PayloadServerEdit edit) throws BusinessException;
+
+    void payloadServerDel(String id) throws BusinessException;
+
+    PageResult<PayloadDiscoverServerRes> payloadDiscoverServerList(PayloadServerSearchReq req) throws Exception;
 }

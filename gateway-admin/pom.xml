@@ -51,6 +51,11 @@
                 <artifactId>pagehelper</artifactId>
                 <version>${mybatis-pagehelper.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.doctorwork.sword</groupId>
+                <artifactId>gateway-discovery-common</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

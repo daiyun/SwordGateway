@@ -6,11 +6,52 @@
     <sql id="Base_Column_List">
         <include refid="com.doctorwork.sword.gateway.admin.dal.mapper.LoadbalanceServerMapper.Base_Column_List"/>
     </sql>
+
     <select id="get" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from loadbalance_server
+        where is_delete = 0
+        and id = #{param.id,jdbcType=BIGINT}
+    </select>
+
+    <select id="getByLbMark" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from loadbalance_server
         where is_delete = 0
         and lb_mark = #{lbMark}
     </select>
+
+    <update id="update">
+        update loadbalance_server
+        set
+          srv_id = #{param.srvId,jdbcType=VARCHAR},
+          srv_ip = #{param.srvIp,jdbcType=VARCHAR},
+          srv_port = #{param.srvPort,jdbcType=INTEGER},
+          srv_name = #{param.srvName,jdbcType=VARCHAR},
+          srv_weight = #{param.srvWeight,jdbcType=TINYINT},
+          apollo_id = #{param.apolloId,jdbcType=VARCHAR},
+          comment = #{param.comment,jdbcType=VARCHAR}
+        where is_delete = 0
+        and id = #{param.id,jdbcType=BIGINT}
+    </update>
+
+    <select id="getByIpPort" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from loadbalance_server
+        where is_delete = 0
+        and lb_mark = #{lbMark}
+        and srv_ip = #{ip}
+        and srv_port = #{port}
+    </select>
+
+    <update id="delete">
+        update loadbalance_server
+        set
+          is_delete = 1
+        where is_delete = 0
+        and id = #{param.id,jdbcType=BIGINT}
+    </update>
 </mapper>
