@@ -8,11 +8,11 @@ import com.doctorwork.sword.gateway.common.config.LoadBalancerServer;
  * @Date: 18:43 2019/6/10
  * @Modified By:
  */
-public class DataBaseServer extends AbstractServer {
+public class ConfigServer extends AbstractServer {
 
     private final LoadBalancerServer server;
 
-    public DataBaseServer(LoadBalancerServer server) {
+    public ConfigServer(LoadBalancerServer server) {
         // TODO: ssl support
         super(server.getSrvIp(), server.getSrvPort(), new MetaInfo() {
             @Override

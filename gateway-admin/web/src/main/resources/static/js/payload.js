@@ -386,7 +386,23 @@ $(document).ready(function () {
                     {title: "备注", "data": "comment"},
                     {title: "编辑", "data": null},
                     {title: "删除", "data": null}
-                ]
+                ],
+                "columnDefs": [{
+                    "targets": 7,
+                    "render": function (data, type, full, meta) {
+                        return "<button type='button' class='btn btn-info server-item-modify'><i class='fa fa-edit'></i>修改</button>";
+                    }
+                }, {
+                    "targets": 8,
+                    "render": function (data, type, full, meta) {
+                        return "<button type='button' class='btn btn-info server-item-del'><i class='fa fa-remove'></i>删除</button>";
+                    }
+                }, {
+                    "targets": 8,
+                    "render": function (data, type, full, meta) {
+                        return "<button type='button' class='btn btn-info server-item-del'><i class='fa fa-remove'></i>删除</button>";
+                    }
+                }]
             });
         }
     }

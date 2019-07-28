@@ -8,20 +8,20 @@ package com.doctorwork.sword.gateway.loadbalance.server;
  */
 public class CompositiveServer extends AbstractServer {
 
-    private final DataBaseServer dataBaseServer;
+    private final ConfigServer configServer;
 
     private final ZookeeperServer zookeeperServer;
 
-    public CompositiveServer(DataBaseServer dataBaseServer, ZookeeperServer zookeeperServer) {
+    public CompositiveServer(ConfigServer configServer, ZookeeperServer zookeeperServer) {
         // TODO: ssl support
-        super(dataBaseServer.getHost(), dataBaseServer.getPort(), dataBaseServer.getMetaInfo());
-        this.dataBaseServer = dataBaseServer;
+        super(configServer.getHost(), configServer.getPort(), configServer.getMetaInfo());
+        this.configServer = configServer;
         this.zookeeperServer = zookeeperServer;
     }
 
     @Override
     public Integer weight() {
-        Integer weight = dataBaseServer.weight();
+        Integer weight = configServer.weight();
         if (weight == null)
             return zookeeperServer.weight();
         return weight;

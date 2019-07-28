@@ -18,4 +18,8 @@ public interface ExtLoadbalanceServerMapper {
                                   @Param("port") Integer port);
 
     int delete(Long id);
+
+    int updateStatus(@Param("id") Long id, @Param("srvStatus") Integer srvStatus);
+
+    int updateEnable(@Param("id") Long id, @Param("srvEnable") Integer srvStatus);
 }

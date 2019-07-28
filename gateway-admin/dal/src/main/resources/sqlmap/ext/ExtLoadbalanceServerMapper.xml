@@ -54,4 +54,19 @@
         where is_delete = 0
         and id = #{param.id,jdbcType=BIGINT}
     </update>
+    <update id="updateStatus">
+        update loadbalance_server
+        set
+          srv_status = #{srvStatus}
+        where is_delete = 0
+        and id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateEnable">
+        update loadbalance_server
+        set
+          srv_enable = #{srvStatus}
+        where is_delete = 0
+        and id = #{id,jdbcType=BIGINT}
+    </update>
 </mapper>

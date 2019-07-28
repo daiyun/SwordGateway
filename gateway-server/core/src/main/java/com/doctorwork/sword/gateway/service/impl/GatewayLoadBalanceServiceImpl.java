@@ -51,6 +51,8 @@ public class GatewayLoadBalanceServiceImpl implements GatewayLoadBalanceService 
             loadBalancerServer.setSrvName(server.getSrvName());
             loadBalancerServer.setSrvPort(server.getSrvPort());
             loadBalancerServer.setSrvWeight(server.getSrvWeight());
+            loadBalancerServer.setSrvStatus(server.getSrvStatus());
+            loadBalancerServer.setSrvEnable(server.getSrvEnable());
             retList.add(loadBalancerServer);
         }
         return retList;

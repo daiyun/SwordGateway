@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-27
+ * @since 2019-07-28
  */
 public class DiscoverConfig implements Serializable {
     /**

@@ -9,7 +9,6 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,31 +33,37 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
 
     @Override
     public List<ZookeeperServer> getInitialListOfServers() {
-        List<ZookeeperServer> dataBaseServers = getServers();
+        List<ZookeeperServer> dataBaseServers = getServers(true);
         logger.info("获取初始化Zookeeper负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", getServiceId(), dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
         return dataBaseServers;
     }
 
     @Override
     public List<ZookeeperServer> getUpdatedListOfServers() {
-        List<ZookeeperServer> dataBaseServers = getServers();
+        List<ZookeeperServer> dataBaseServers = getServers(true);
         logger.info("获取更新Zookeeper负载器{}服务列表 \n--服务数量{}\n--服务列表:{}", getServiceId(), dataBaseServers.size(), JacksonUtil.toJSon(dataBaseServers));
         return dataBaseServers;
     }
 
-    protected List<ZookeeperServer> getServers() {
+    protected List<ZookeeperServer> getServers(boolean valid) {
         try {
             Collection<ServiceInstance<ZookeeperInstance>> instances = iDiscoveryRepository.queryServices(getServiceId());
             if (CollectionUtils.isEmpty(instances))
                 return Collections.emptyList();
             List<ZookeeperServer> servers = new ArrayList<>();
-            for (ServiceInstance<ZookeeperInstance> instance : instances) {
-                String instanceStatus = null;
-                if (instance.getPayload() != null && instance.getPayload().getMetadata() != null) {
-                    instanceStatus = instance.getPayload().getMetadata().get(Constants.APP_STATUS_ZK_KEY);
+            if (valid) {
+                for (ServiceInstance<ZookeeperInstance> instance : instances) {
+                    String instanceStatus = null;
+                    if (instance.getPayload() != null && instance.getPayload().getMetadata() != null) {
+                        instanceStatus = instance.getPayload().getMetadata().get(Constants.APP_STATUS_ZK_KEY);
+                    }
+                    if (!StringUtils.hasText(instanceStatus) // backwards compatibility
+                            || instanceStatus.equalsIgnoreCase(AppStatusEnum.ON.name())) {
+                        servers.add(new ZookeeperServer(instance));
+                    }
                 }
-                if (!StringUtils.hasText(instanceStatus) // backwards compatibility
-                        || instanceStatus.equalsIgnoreCase(AppStatusEnum.ON.name())) {
+            } else {
+                for (ServiceInstance<ZookeeperInstance> instance : instances) {
                     servers.add(new ZookeeperServer(instance));
                 }
             }
@@ -67,6 +72,11 @@ public class ZookeeperServerList extends CustomerServerList<ZookeeperServer> {
             rethrowRuntimeException(e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<ZookeeperServer> getServer(boolean valid) {
+        return getServers(valid);
     }
 
     @Override

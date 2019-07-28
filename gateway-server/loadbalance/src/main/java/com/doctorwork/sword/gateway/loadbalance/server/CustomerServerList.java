@@ -5,7 +5,7 @@ import com.netflix.loadbalancer.AbstractServerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
+import java.util.List;
 
 /**
  * @Author:czq
@@ -35,6 +35,8 @@ public abstract class CustomerServerList<T extends AbstractServer> extends Abstr
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
+
+    public abstract List<T> getServer(boolean valid);
 
     public abstract void clear();
 }

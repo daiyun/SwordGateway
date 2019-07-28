@@ -10,7 +10,7 @@ import com.doctorwork.sword.gateway.common.listener.EventListener;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
 import com.doctorwork.sword.gateway.discovery.common.util.StringUtils;
 import com.doctorwork.sword.gateway.loadbalance.server.CompositiveServerList;
-import com.doctorwork.sword.gateway.loadbalance.server.DataBaseServerList;
+import com.doctorwork.sword.gateway.loadbalance.server.ConfigServerList;
 import com.doctorwork.sword.gateway.loadbalance.server.ZookeeperServerList;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -102,9 +102,9 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
         ServerList serverList;
         boolean dscrEnable = loadbalanceInfo.getDscrEnable() != null && loadbalanceInfo.getDscrEnable().equals(1);
         if (!dscrEnable) {
-            serverList = new CompositiveServerList(lbMark, new DataBaseServerList(lbMark, loadBalancerConfigRepository));
+            serverList = new CompositiveServerList(lbMark, new ConfigServerList(lbMark, loadBalancerConfigRepository));
         } else {
-            serverList = new CompositiveServerList(lbMark, true, new DataBaseServerList(lbMark, loadBalancerConfigRepository),
+            serverList = new CompositiveServerList(lbMark, true, new ConfigServerList(lbMark, loadBalancerConfigRepository),
                     new ZookeeperServerList(lbMark, iDiscoveryRepository));
         }
         DynamicLoadBalancer dynamicLoadBalancer = new DynamicLoadBalancer(loadbalanceInfo.getId(), serverList);
@@ -275,9 +275,9 @@ public class CustomerLoadBalanceClient extends AbstractLoadBalanceClient impleme
                 }
                 CompositiveServerList serverList = (CompositiveServerList) oldServerList;
                 if (!dscrEnable) {
-                    serverList.discoveryReload(false, new DataBaseServerList(lbMark, loadBalancerConfigRepository), null);
+                    serverList.discoveryReload(false, new ConfigServerList(lbMark, loadBalancerConfigRepository), null);
                 } else {
-                    serverList.discoveryReload(true, new DataBaseServerList(lbMark, loadBalancerConfigRepository),
+                    serverList.discoveryReload(true, new ConfigServerList(lbMark, loadBalancerConfigRepository),
                             new ZookeeperServerList(lbMark, iDiscoveryRepository));
                 }
                 logger.info(logPrex + "Done");

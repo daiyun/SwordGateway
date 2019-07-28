@@ -2,7 +2,6 @@ package com.doctorwork.sword.gateway.loadbalance.server;
 
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +17,7 @@ import static org.springframework.util.ReflectionUtils.rethrowRuntimeException;
  */
 public class CompositiveServerList extends CustomerServerList<AbstractServer> {
 
-    private DataBaseServerList dataBaseServerList;
+    private ConfigServerList configServerList;
     private ZookeeperServerList zookeeperServerList;
     private Boolean dscrEnable;
     private StampedLock stampedLock = new StampedLock();
@@ -27,17 +26,17 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
         super(serviceId);
     }
 
-    public CompositiveServerList(String serviceId, DataBaseServerList dataBaseServerList) {
+    public CompositiveServerList(String serviceId, ConfigServerList configServerList) {
         super(serviceId);
-        this.dataBaseServerList = dataBaseServerList;
+        this.configServerList = configServerList;
     }
 
-    public CompositiveServerList(String serviceId, Boolean dscrEnable, DataBaseServerList dataBaseServerList, ZookeeperServerList zookeeperServerList) {
+    public CompositiveServerList(String serviceId, Boolean dscrEnable, ConfigServerList configServerList, ZookeeperServerList zookeeperServerList) {
         super(serviceId);
         this.dscrEnable = dscrEnable;
-        if (!dataBaseServerList.getServiceId().equals(zookeeperServerList.getServiceId()))
+        if (!configServerList.getServiceId().equals(zookeeperServerList.getServiceId()))
             throw new RuntimeException("different type");
-        this.dataBaseServerList = dataBaseServerList;
+        this.configServerList = configServerList;
         this.zookeeperServerList = zookeeperServerList;
     }
 
@@ -53,14 +52,15 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
 
     protected List<AbstractServer> getServers(boolean update) {
         try {
+            boolean valid = true;
             long stamp = stampedLock.tryOptimisticRead();
             List<AbstractServer> servers = new ArrayList<>();
-            compsitiveServerList(update, servers);
+            compsitiveServerList(valid, update, servers);
             if (!stampedLock.validate(stamp)) {
                 stampedLock.readLock();
                 try {
                     servers.clear();
-                    compsitiveServerList(update, servers);
+                    compsitiveServerList(valid, update, servers);
                 } finally {
                     stampedLock.unlockRead(stamp);
                 }
@@ -72,29 +72,37 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
         return Collections.emptyList();
     }
 
-    private void compsitiveServerList(boolean update, List<AbstractServer> servers) {
-        List<DataBaseServer> dataBaseServers = null;
+    private void compsitiveServerList(boolean valid, boolean update, List<AbstractServer> servers) {
+        List<ConfigServer> configServers = null;
         List<ZookeeperServer> zookeeperServers;
-        if (dataBaseServerList != null) {
-            dataBaseServers = update ? dataBaseServerList.getUpdatedListOfServers() : dataBaseServerList.getInitialListOfServers();
+        if (configServerList != null) {
+            if (valid) {
+                configServers = update ? configServerList.getUpdatedListOfServers() : configServerList.getInitialListOfServers();
+            } else {
+                configServers = configServerList.getServer(valid);
+            }
         }
         if (dscrEnable != null && dscrEnable) {
             if (zookeeperServerList == null)
                 return;
-            zookeeperServers = update ? zookeeperServerList.getUpdatedListOfServers() : zookeeperServerList.getInitialListOfServers();
+            if (valid) {
+                zookeeperServers = update ? zookeeperServerList.getUpdatedListOfServers() : zookeeperServerList.getInitialListOfServers();
+            } else {
+                zookeeperServers = zookeeperServerList.getServer(valid);
+            }
             if (CollectionUtils.isEmpty(zookeeperServers)) {
                 return;
             }
-            if (CollectionUtils.isEmpty(dataBaseServers)) {
+            if (CollectionUtils.isEmpty(configServers)) {
                 servers.addAll(zookeeperServers);
                 return;
             }
             for (ZookeeperServer zookeeperServer : zookeeperServers) {
                 boolean flag = true;
-                for (DataBaseServer dataBaseServer : dataBaseServers) {
-                    if (dataBaseServer.getId().equals(zookeeperServer.getId())) {
+                for (ConfigServer configServer : configServers) {
+                    if (configServer.getId().equals(zookeeperServer.getId())) {
                         flag = false;
-                        CompositiveServer compositiveServer = new CompositiveServer(dataBaseServer, zookeeperServer);
+                        CompositiveServer compositiveServer = new CompositiveServer(configServer, zookeeperServer);
                         servers.add(compositiveServer);
                     }
                 }
@@ -103,8 +111,8 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
             }
             return;
         }
-        if (!CollectionUtils.isEmpty(dataBaseServers)) {
-            servers.addAll(dataBaseServers);
+        if (!CollectionUtils.isEmpty(configServers)) {
+            servers.addAll(configServers);
         }
     }
 
@@ -112,10 +120,10 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
         return dscrEnable;
     }
 
-    public void discoveryReload(Boolean dscrEnable, DataBaseServerList dataBaseServerList, ZookeeperServerList zookeeperServerList) {
+    public void discoveryReload(Boolean dscrEnable, ConfigServerList configServerList, ZookeeperServerList zookeeperServerList) {
         long stamp = stampedLock.writeLock();
         try {
-            this.dataBaseServerList = dataBaseServerList;
+            this.configServerList = configServerList;
             this.dscrEnable = true;
             if (dscrEnable != null && dscrEnable) {
                 this.zookeeperServerList = zookeeperServerList;
@@ -128,11 +136,18 @@ public class CompositiveServerList extends CustomerServerList<AbstractServer> {
     }
 
     @Override
+    public List<AbstractServer> getServer(boolean valid) {
+        List<AbstractServer> servers = new ArrayList<>();
+        compsitiveServerList(true, true, servers);
+        return servers;
+    }
+
+    @Override
     public void clear() {
-        if(dataBaseServerList != null){
-            dataBaseServerList.clear();
+        if (configServerList != null) {
+            configServerList.clear();
         }
-        if(zookeeperServerList != null){
+        if (zookeeperServerList != null) {
             zookeeperServerList.clear();
         }
         this.dscrEnable = null;

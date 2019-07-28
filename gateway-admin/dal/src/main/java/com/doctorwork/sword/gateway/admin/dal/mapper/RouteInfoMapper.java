@@ -18,7 +18,7 @@ public interface RouteInfoMapper {
     int insertSelective(RouteInfo record);
 
     /**
-     * getByLbMark one record by primary key from <tt>route_info</tt>
+     * get one record by primary key from <tt>route_info</tt>
      *
      * @param id
      */
@@ -38,7 +38,7 @@ public interface RouteInfoMapper {
     int updateByPrimaryKey(RouteInfo record);
 
     /**
-     * getByLbMark all records from  <tt>route_info</tt>
+     * get all records from  <tt>route_info</tt>
      *
      */
     List<RouteInfo> selectAll();

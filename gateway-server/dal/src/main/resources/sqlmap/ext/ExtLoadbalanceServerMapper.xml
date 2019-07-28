@@ -12,5 +12,7 @@
         from loadbalance_server
         where is_delete = 0
         and lb_mark = #{lbMark}
+        and srv_status = 1
+        and srv_enable = 0
     </select>
 </mapper>

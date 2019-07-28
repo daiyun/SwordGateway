@@ -37,5 +37,13 @@ public interface GatewayPayloadService {
 
     void payloadServerDel(String id) throws BusinessException;
 
+    void payloadServerOn(String id) throws BusinessException;
+
+    void payloadServerOff(String id) throws BusinessException;
+
+    void payloadServerEnable(String id) throws BusinessException;
+
+    void payloadServerDisable(String id) throws BusinessException;
+
     PageResult<PayloadDiscoverServerRes> payloadDiscoverServerList(PayloadServerSearchReq req) throws Exception;
 }

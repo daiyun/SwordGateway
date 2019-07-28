@@ -14,7 +14,7 @@ import java.util.Date;
  * according to your needs, then run <tt>ant</tt> to generate this file in {project-home}/dalgen.
  * 
  * @author dwframe
- * @since 2019-07-27
+ * @since 2019-07-28
  */
 public class LoadbalanceServer implements Serializable {
     /**
@@ -88,6 +88,22 @@ public class LoadbalanceServer implements Serializable {
      * </pre>
      */
     private String comment;
+
+    /**
+     * <pre>
+     * 状态 0 下线 1 上线
+     * This field corresponds to the database column <tt>loadbalance_server.srv_status<tt>
+     * </pre>
+     */
+    private Integer srvStatus;
+
+    /**
+     * <pre>
+     * 是否禁用 0启用 1禁用
+     * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
+     * </pre>
+     */
+    private Integer srvEnable;
 
     /**
      * <pre>
@@ -316,6 +332,50 @@ public class LoadbalanceServer implements Serializable {
 
     /**
      * <pre>
+     * This field corresponds to the database column <tt>loadbalance_server.srv_status<tt>
+     * </pre>
+     *
+     * @return 状态 0 下线 1 上线
+     */
+    public Integer getSrvStatus() {
+        return srvStatus;
+    }
+
+    /**
+     * <pre>
+     * This field corresponds to the database column <tt>loadbalance_server.srv_status<tt>
+     * </pre>
+     *
+     * @param srvStatus 状态 0 下线 1 上线
+     */
+    public void setSrvStatus(Integer srvStatus) {
+        this.srvStatus = srvStatus;
+    }
+
+    /**
+     * <pre>
+     * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
+     * </pre>
+     *
+     * @return 是否禁用 0启用 1禁用
+     */
+    public Integer getSrvEnable() {
+        return srvEnable;
+    }
+
+    /**
+     * <pre>
+     * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
+     * </pre>
+     *
+     * @param srvEnable 是否禁用 0启用 1禁用
+     */
+    public void setSrvEnable(Integer srvEnable) {
+        this.srvEnable = srvEnable;
+    }
+
+    /**
+     * <pre>
      * This field corresponds to the database column <tt>loadbalance_server.is_delete<tt>
      * </pre>
      *
@@ -398,6 +458,8 @@ public class LoadbalanceServer implements Serializable {
         sb.append(", srvWeight=").append(srvWeight);
         sb.append(", apolloId=").append(apolloId);
         sb.append(", comment=").append(comment);
+        sb.append(", srvStatus=").append(srvStatus);
+        sb.append(", srvEnable=").append(srvEnable);
         sb.append(", isDelete=").append(isDelete);
         sb.append(", gmtCreate=").append(gmtCreate);
         sb.append(", gmtModified=").append(gmtModified);
@@ -430,6 +492,8 @@ public class LoadbalanceServer implements Serializable {
             && (this.getSrvWeight() == null ? other.getSrvWeight() == null : this.getSrvWeight().equals(other.getSrvWeight()))
             && (this.getApolloId() == null ? other.getApolloId() == null : this.getApolloId().equals(other.getApolloId()))
             && (this.getComment() == null ? other.getComment() == null : this.getComment().equals(other.getComment()))
+            && (this.getSrvStatus() == null ? other.getSrvStatus() == null : this.getSrvStatus().equals(other.getSrvStatus()))
+            && (this.getSrvEnable() == null ? other.getSrvEnable() == null : this.getSrvEnable().equals(other.getSrvEnable()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
             && (this.getGmtCreate() == null ? other.getGmtCreate() == null : this.getGmtCreate().equals(other.getGmtCreate()))
             && (this.getGmtModified() == null ? other.getGmtModified() == null : this.getGmtModified().equals(other.getGmtModified()));
@@ -451,6 +515,8 @@ public class LoadbalanceServer implements Serializable {
         result = prime * result + ((getSrvWeight() == null) ? 0 : getSrvWeight().hashCode());
         result = prime * result + ((getApolloId() == null) ? 0 : getApolloId().hashCode());
         result = prime * result + ((getComment() == null) ? 0 : getComment().hashCode());
+        result = prime * result + ((getSrvStatus() == null) ? 0 : getSrvStatus().hashCode());
+        result = prime * result + ((getSrvEnable() == null) ? 0 : getSrvEnable().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getGmtCreate() == null) ? 0 : getGmtCreate().hashCode());
         result = prime * result + ((getGmtModified() == null) ? 0 : getGmtModified().hashCode());

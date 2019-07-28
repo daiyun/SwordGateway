@@ -61,6 +61,16 @@ public class PayloadServerRes {
      */
     private String comment;
 
+    /**
+     * 0下线 1上线
+     */
+    private Integer srvStatus;
+
+    /**
+     * 0启用 1禁用
+     */
+    private Integer srvEnable;
+
     public PayloadServerRes() {
     }
 
@@ -118,5 +128,21 @@ public class PayloadServerRes {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getSrvStatus() {
+        return srvStatus;
+    }
+
+    public void setSrvStatus(Integer srvStatus) {
+        this.srvStatus = srvStatus;
+    }
+
+    public Integer getSrvEnable() {
+        return srvEnable;
+    }
+
+    public void setSrvEnable(Integer srvEnable) {
+        this.srvEnable = srvEnable;
     }
 }

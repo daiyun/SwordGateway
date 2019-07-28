@@ -181,7 +181,7 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
             throw new BusinessException("未找到负载器信息");
         PageHelper.startPage(req.getPageNum(), req.getPageSize());
         Page<LoadbalanceServer> page = (Page<LoadbalanceServer>) extLoadbalanceServerMapper.getByLbMark(req.getLbMark());
-        return new PageResult<PayloadServerRes>(page.getTotal(), page.getPages(), req.getPageNum(), req.getPageSize(), page.stream().map(loadbalanceServer -> {
+        return new PageResult<>(page.getTotal(), page.getPages(), req.getPageNum(), req.getPageSize(), page.stream().map(loadbalanceServer -> {
             PayloadServerRes res = new PayloadServerRes();
             res.setId(String.valueOf(loadbalanceServer.getId()));
             res.setComment(loadbalanceServer.getComment());
@@ -190,6 +190,8 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
             res.setSrvPort(loadbalanceServer.getSrvPort());
             res.setSrvName(loadbalanceServer.getSrvName());
             res.setSrvWeight(loadbalanceServer.getSrvWeight());
+            res.setSrvStatus(loadbalanceServer.getSrvStatus());
+            res.setSrvEnable(loadbalanceServer.getSrvEnable());
             return res;
         }).collect(Collectors.toList()));
     }
@@ -206,6 +208,8 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         insert.setSrvPort(edit.getSrvPort());
         insert.setSrvWeight(edit.getSrvWeight());
         insert.setSrvName(edit.getSrvName());
+        insert.setSrvStatus(0);
+        insert.setSrvEnable(1);
         insert.setSrvId(edit.getSrvIp().concat(":").concat(String.valueOf(edit.getSrvPort())));
         loadbalanceServerMapper.insert(insert);
     }
@@ -233,6 +237,42 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         if (exits == null)
             throw new BusinessException("不存在该服务");
         extLoadbalanceServerMapper.delete(Long.valueOf(id));
+    }
+
+    @Override
+    public void payloadServerOn(String id) throws BusinessException {
+        Long tmp = Long.valueOf(id);
+        LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
+        if (exits == null)
+            throw new BusinessException("不存在该服务");
+        extLoadbalanceServerMapper.updateStatus(tmp, 1);
+    }
+
+    @Override
+    public void payloadServerOff(String id) throws BusinessException {
+        Long tmp = Long.valueOf(id);
+        LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
+        if (exits == null)
+            throw new BusinessException("不存在该服务");
+        extLoadbalanceServerMapper.updateStatus(tmp, 0);
+    }
+
+    @Override
+    public void payloadServerEnable(String id) throws BusinessException {
+        Long tmp = Long.valueOf(id);
+        LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
+        if (exits == null)
+            throw new BusinessException("不存在该服务");
+        extLoadbalanceServerMapper.updateEnable(tmp, 0);
+    }
+
+    @Override
+    public void payloadServerDisable(String id) throws BusinessException {
+        Long tmp = Long.valueOf(id);
+        LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
+        if (exits == null)
+            throw new BusinessException("不存在该服务");
+        extLoadbalanceServerMapper.updateEnable(tmp, 1);
     }
 
     @Override

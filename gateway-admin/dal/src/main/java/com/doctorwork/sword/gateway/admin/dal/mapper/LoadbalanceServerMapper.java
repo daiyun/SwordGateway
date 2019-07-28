@@ -18,7 +18,7 @@ public interface LoadbalanceServerMapper {
     int insertSelective(LoadbalanceServer record);
 
     /**
-     * getByLbMark one record by primary key from <tt>loadbalance_server</tt>
+     * get one record by primary key from <tt>loadbalance_server</tt>
      *
      * @param id
      */
@@ -38,7 +38,7 @@ public interface LoadbalanceServerMapper {
     int updateByPrimaryKey(LoadbalanceServer record);
 
     /**
-     * getByLbMark all records from  <tt>loadbalance_server</tt>
+     * get all records from  <tt>loadbalance_server</tt>
      *
      */
     List<LoadbalanceServer> selectAll();

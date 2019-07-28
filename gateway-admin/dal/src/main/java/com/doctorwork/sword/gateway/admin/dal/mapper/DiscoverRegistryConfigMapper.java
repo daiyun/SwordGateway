@@ -18,7 +18,7 @@ public interface DiscoverRegistryConfigMapper {
     int insertSelective(DiscoverRegistryConfig record);
 
     /**
-     * getByLbMark one record by primary key from <tt>discover_registry_config</tt>
+     * get one record by primary key from <tt>discover_registry_config</tt>
      *
      * @param id
      */
@@ -38,7 +38,7 @@ public interface DiscoverRegistryConfigMapper {
     int updateByPrimaryKey(DiscoverRegistryConfig record);
 
     /**
-     * getByLbMark all records from  <tt>discover_registry_config</tt>
+     * get all records from  <tt>discover_registry_config</tt>
      *
      */
     List<DiscoverRegistryConfig> selectAll();
