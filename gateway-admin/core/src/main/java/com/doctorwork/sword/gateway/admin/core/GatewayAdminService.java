@@ -14,4 +14,6 @@ public interface GatewayAdminService {
     void publishDiscoveryConfig(String dscrId) throws Exception;
 
     void publishRegistryConfig(String registryId) throws Exception;
+
+    void publishRouteConfig(String routeMark) throws Exception;
 }

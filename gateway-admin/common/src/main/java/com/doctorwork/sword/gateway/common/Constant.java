@@ -11,4 +11,5 @@ public class Constant {
     public static final String LOADBALANCE_NODE = "/loadbalance/";
     public static final String DISCOVERY_NODE = "/discovery/";
     public static final String LOADBALANCE_SERVER_NODE = "/loadbalance-server/";
+    public static final String ROUTE_NODE = "/route/";
 }

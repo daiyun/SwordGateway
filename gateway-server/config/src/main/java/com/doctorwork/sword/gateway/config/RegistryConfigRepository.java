@@ -173,6 +173,9 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
             }
         });
         loadbalanceCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+        if (routeCache != null) {
+            CloseableUtils.closeQuietly(routeCache);
+        }
         routeCache = new PathChildrenCache(connectionWrapper.getConnection(CuratorFramework.class), ROUTE_NODE.substring(0, ROUTE_NODE.length() - 1), true);
         routeCache.getListenable().addListener(new PathChildrenCacheListener() {
             @Override
@@ -181,25 +184,26 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
                 ChildData data = event.getData();
                 switch (event.getType()) {
                     case CHILD_ADDED: {
-                        logger.info("路由节点节点{}增加 ", node);
+                        logger.info("路由节点{}增加 ", node);
                         eventPost(new RouteConfigLoadEvent(node));
                         break;
                     }
 
                     case CHILD_UPDATED: {
-                        logger.info("路由节点节点{}更新", node);
+                        logger.info("路由节点{}更新", node);
                         eventPost(new RouteConfigLoadEvent(node));
                         break;
                     }
 
                     case CHILD_REMOVED: {
-                        logger.info("路由节点节点{}移除", node);
+                        logger.info("路由节点{}移除", node);
                         eventPost(new RouteConfigDeleteEvent(node));
                         break;
                     }
                 }
             }
         });
+        routeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
     }
 
     @Override

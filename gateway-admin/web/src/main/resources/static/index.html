@@ -12,6 +12,10 @@
 </head>
 <body>
 <div style="margin-top: 10px">
+    <input type="text" id="ipt-route"/>
+    <button id="btn-route">publish route</button>
+</div>
+<div style="margin-top: 10px">
     <input type="text" id="ipt-loadbalance"/>
     <button id="btn-loadbalance">publish loadbalance</button>
 </div>
@@ -34,6 +38,13 @@
 <script type="text/javascript">
     $(document).ready(function () {
         //点击链接的时候调用
+        $("#btn-route").click(function () {
+            var value = $("#ipt-route").val();
+            $.get('/config/pubish/route', {"routeMark": value}, function (data, status) {
+                console.log('服务器返回的数据：', data);
+                console.log('返回状态：', status);
+            })
+        });
         $("#btn-loadbalance").click(function () {
             var value = $("#ipt-loadbalance").val();
             $.get('/config/pubish/loadbalance', {"lbmark": value}, function (data, status) {

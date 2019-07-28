@@ -99,7 +99,7 @@ public class LoadbalanceServer implements Serializable {
 
     /**
      * <pre>
-     * 是否禁用 0启用 1禁用
+     * 是否禁用 0未启用 1已启用 2已禁用
      * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
      * </pre>
      */
@@ -357,7 +357,7 @@ public class LoadbalanceServer implements Serializable {
      * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
      * </pre>
      *
-     * @return 是否禁用 0启用 1禁用
+     * @return 是否禁用 0未启用 1已启用 2已禁用
      */
     public Integer getSrvEnable() {
         return srvEnable;
@@ -368,7 +368,7 @@ public class LoadbalanceServer implements Serializable {
      * This field corresponds to the database column <tt>loadbalance_server.srv_enable<tt>
      * </pre>
      *
-     * @param srvEnable 是否禁用 0启用 1禁用
+     * @param srvEnable 是否禁用 0未启用 1已启用 2已禁用
      */
     public void setSrvEnable(Integer srvEnable) {
         this.srvEnable = srvEnable;

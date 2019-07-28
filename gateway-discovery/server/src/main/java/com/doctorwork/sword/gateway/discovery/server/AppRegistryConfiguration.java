@@ -41,8 +41,9 @@ public class AppRegistryConfiguration {
         if (!StringUtils.isEmpty(discoveryProperties.getAppName())) {
             discoveryProperties.setAppName(discoveryProperties.getAppName().replaceAll("_", "-"));
         }
+        discoveryProperties.getMetadata().put("app_status", discoveryProperties.getInitStatus());
         ZookeeperInstance zookeeperInstance = new ZookeeperInstance(UUID.randomUUID().toString().replaceAll("-", ""),
-                discoveryProperties.getAppName(), discoveryProperties.getMetadata());
+                discoveryProperties.getAppName(),discoveryProperties.getMetadata());
         AppInstanceRegistration.RegistrationBuilder builder = AppInstanceRegistration.builder()
                 .address(discoveryProperties.getHost())
                 .name(discoveryProperties.getAppName())

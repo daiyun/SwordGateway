@@ -41,4 +41,10 @@ public class PublishController {
     public void publishRegistryConfig(String registryId) throws Exception {
         gatewayAdminService.publishRegistryConfig(registryId);
     }
+
+    @RequestMapping("/pubish/route")
+    @ResponseBody
+    public void publishRouteConfig(String routeMark) throws Exception {
+        gatewayAdminService.publishRouteConfig(routeMark);
+    }
 }

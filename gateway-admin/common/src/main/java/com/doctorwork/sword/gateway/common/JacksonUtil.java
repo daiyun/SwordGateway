@@ -2,13 +2,15 @@ package com.doctorwork.sword.gateway.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * @Author:czq
@@ -28,6 +30,7 @@ public class JacksonUtil {
 
         static {
             INSTANT.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            INSTANT.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
     }
 
@@ -57,6 +60,17 @@ public class JacksonUtil {
         return null;
     }
 
+    public static <T> T toObject(byte[] bytes, JavaType type) {
+        if (bytes == null)
+            return null;
+        try {
+            return getInstance().readValue(bytes, type);
+        } catch (IOException e) {
+            logger.error("json 解析异常", e);
+        }
+        return null;
+    }
+
     public static <T> String toJSon(T t) {
         if (t == null)
             return null;
@@ -77,5 +91,9 @@ public class JacksonUtil {
             logger.error("json 序列化异常", e);
         }
         return null;
+    }
+
+    public static JavaType getType(Class clzz){
+        return getInstance().getTypeFactory().constructType(clzz);
     }
 }

@@ -74,14 +74,14 @@ public class PayloadController {
 
     @PostMapping("/server/add")
     @ResponseBody
-    public Result payloadServerAdd(PayloadServerEdit edit) throws BusinessException {
+    public Result payloadServerAdd(@RequestBody PayloadServerEdit edit) throws BusinessException {
         gatewayPayloadService.payloadServerAdd(edit);
         return Result.result(null);
     }
 
     @PostMapping("/server/edit")
     @ResponseBody
-    public Result payloadServerUpdate(PayloadServerEdit edit) throws BusinessException {
+    public Result payloadServerUpdate(@RequestBody PayloadServerEdit edit) throws BusinessException {
         gatewayPayloadService.payloadServerUpdate(edit);
         return Result.result(null);
     }
@@ -90,6 +90,34 @@ public class PayloadController {
     @ResponseBody
     public Result payloadServerDel(String id) throws BusinessException {
         gatewayPayloadService.payloadServerDel(id);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/on")
+    @ResponseBody
+    public Result payloadServerOn(String id) throws BusinessException {
+        gatewayPayloadService.payloadServerOn(id);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/off")
+    @ResponseBody
+    public Result payloadServerOff(String id) throws BusinessException {
+        gatewayPayloadService.payloadServerOff(id);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/enable")
+    @ResponseBody
+    public Result payloadServerEnable(String id) throws BusinessException {
+        gatewayPayloadService.payloadServerEnable(id);
+        return Result.result(null);
+    }
+
+    @PostMapping("/server/disable")
+    @ResponseBody
+    public Result payloadServerDisable(String id) throws BusinessException {
+        gatewayPayloadService.payloadServerDisable(id);
         return Result.result(null);
     }
 

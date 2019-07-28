@@ -65,7 +65,7 @@
     <update id="updateEnable">
         update loadbalance_server
         set
-          srv_enable = #{srvStatus}
+          srv_enable = #{srvEnable}
         where is_delete = 0
         and id = #{id,jdbcType=BIGINT}
     </update>

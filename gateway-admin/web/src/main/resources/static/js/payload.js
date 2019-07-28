@@ -1,7 +1,10 @@
 $(document).ready(function () {
         let serverTableInit = false;
+        let serverDisoveryTableInit = false;
         savePayLoad();
+        saveServer();
         clickPayloadItemAdd();
+        clickServerItemAdd();
         $('#payload-table').on('init.dt', function (e, settings) {
             let api = new $.fn.dataTable.Api(settings);
             api.on('draw.dt', function (e, settings) {
@@ -98,6 +101,71 @@ $(document).ready(function () {
                 }
             }]
         });
+
+        function saveServer() {
+            $('#serverEditModal').on('hidden.bs.modal', function () {
+                $("#payloadSrvIp").removeAttr("disabled");
+                $("#payloadSrvId").val('')
+                $("#payloadSrvPort").removeAttr("disabled");
+            });
+            $("#serverEditModal .save").click(function () {
+                let isEdit = $(this).data("edit");
+                let lbMark = $("#payloadLbMark").val();
+                let srvName = $("#payloadSrvName").val();
+                let srvIp = $("#payloadSrvIp").val();
+                let srvPort = $("#payloadSrvPort").val();
+                let srvWeight = $("#payloadSrvWeight").val();
+                let srvComment = $("#payloadSrvComment").val();
+                let id = $("#payloadSrvId").val();
+
+                let formData = {
+                    lbMark: lbMark,
+                    srvName: srvName,
+                    srvComment: srvComment,
+                    srvIp: srvIp,
+                    srvPort: srvPort,
+                    srvWeight: srvWeight
+                };
+                if (isEdit) {
+                    $.ajaxPostJsonApi({
+                        url: Api.payload.serverEdit,
+                        async: true,
+                        data: JSON.stringify(formData),
+                        success: function (data) {
+                            if (data.code === 0) {
+                                toastr.success("修改路由成功");
+                                $("#serverEditModal").modal("hide");
+                                reloadTable('server-table');
+                            } else {
+                                toastr['error'](data.msg, "修改服务失败")
+                            }
+                        },
+                        error: function (e) {
+                            toastr['error'](e.status, "修改服务失败");
+                        }
+                    })
+                } else {
+                    formData.id = id;
+                    $.ajaxPostJsonApi({
+                        url: Api.payload.serverAdd,
+                        async: true,
+                        data: JSON.stringify(formData),
+                        success: function (data) {
+                            if (data.code === 0) {
+                                toastr.success("修改路由成功");
+                                $("#serverEditModal").modal("hide");
+                                reloadTable('server-table');
+                            } else {
+                                toastr['error'](data.msg, "新增服务失败")
+                            }
+                        },
+                        error: function (e) {
+                            toastr['error'](e.status, "新增服务失败");
+                        }
+                    })
+                }
+            })
+        }
 
         function savePayLoad() {
             $("#payloadEditModal .save").click(function () {
@@ -319,7 +387,8 @@ $(document).ready(function () {
                 let rowIndex = api.cell(this.parentNode).index().row;
                 let formData = api.row(rowIndex).data();
                 serverTable(formData.lbMark);
-                $("#serverEditModal").modal('show');
+                serverDiscveryTable(formData.lbMark);
+                $("#serverTableModal").modal('show');
             });
         }
 
@@ -336,19 +405,38 @@ $(document).ready(function () {
             })
         }
 
+        function clickServerItemAdd() {
+            $("#server-item-add").click(function () {
+                $("#serverEditModal .save").data("edit", false);
+                $("#serverEditModal").modal('show');
+            });
+        }
+
         function updateServerTable(lbMark) {
             var api = $('#server-table').dataTable().api();
             api.ajax.url(Api.payload.serverList.format({lbMark: lbMark})).load();
             api.draw();
         }
 
+        function updateServerDiscoverTable(lbMark) {
+            var api = $('#server-discover-table').dataTable().api();
+            api.ajax.url(Api.payload.serverDiscoverList.format({lbMark: lbMark})).load();
+            api.draw();
+        }
+
         function serverTable(lbMark) {
+            $("#payloadLbMark").val(lbMark);
             if (serverTableInit) {
                 updateServerTable(lbMark);
                 return;
             }
             serverTableInit = true;
             $('#server-table').on('init.dt', function (e, settings) {
+                let api = new $.fn.dataTable.Api(settings);
+                api.on('draw.dt', function (e, settings) {
+                    clickServerItem(api);
+                });
+                clickServerItem(api);
             }).DataTable({
                 ordering: false,
                 searching: false,//启用搜索功能
@@ -372,7 +460,7 @@ $(document).ready(function () {
                             thisSettings._iRecordsDisplay = json.totalCount;
                             return json.list;
                         } else {
-                            toastr['error'](data.msg, "路由服务列表响应错误")
+                            toastr['error'](data.msg, "服务列表响应错误")
                         }
                     }
                 },
@@ -384,25 +472,252 @@ $(document).ready(function () {
                     {title: "端口", "data": "srvPort"},
                     {title: "权重", "data": "srvWeight"},
                     {title: "备注", "data": "comment"},
+                    {title: "服务状态", "data": "srvStatus"},
+                    {title: "服务可用", "data": "srvEnable"},
                     {title: "编辑", "data": null},
-                    {title: "删除", "data": null}
+                    {title: "删除", "data": null},
+                    {title: "服务状态控制", "data": null},
+                    {title: "可用状态", "data": null},
+                    {title: "发布", "data": null}
                 ],
                 "columnDefs": [{
                     "targets": 7,
                     "render": function (data, type, full, meta) {
+                        if (data === 0)
+                            return "已下线";
+                        else if (data === 1)
+                            return "已上线";
+                        return "未知";
+                    }
+                }, {
+                    "targets": 8,
+                    "render": function (data, type, full, meta) {
+                        if (data === 0)
+                            return "未启用";
+                        else if (data === 1)
+                            return "已启用";
+                        else if (data === 2)
+                            return "已禁用";
+                        return "未知";
+                    }
+                }, {
+                    "targets": 9,
+                    "render": function (data, type, full, meta) {
                         return "<button type='button' class='btn btn-info server-item-modify'><i class='fa fa-edit'></i>修改</button>";
                     }
                 }, {
-                    "targets": 8,
+                    "targets": 10,
                     "render": function (data, type, full, meta) {
                         return "<button type='button' class='btn btn-info server-item-del'><i class='fa fa-remove'></i>删除</button>";
                     }
                 }, {
-                    "targets": 8,
+                    "targets": 11,
                     "render": function (data, type, full, meta) {
-                        return "<button type='button' class='btn btn-info server-item-del'><i class='fa fa-remove'></i>删除</button>";
+                        if (full.srvStatus === 0)
+                            return "<button type='button' class='btn btn-info server-item-on'><i class='fa fa-edit'></i>上线</button>";
+                        else if (full.srvStatus === 1)
+                            return "<button type='button' class='btn btn-info server-item-off'><i class='fa fa-edit'></i>下线</button>";
+                        return "未知";
+                    }
+                }, {
+                    "targets": 12,
+                    "render": function (data, type, full, meta) {
+                        if (full.srvEnable === 1)
+                            return "<button type='button' class='btn btn-info server-item-disable'><i class='fa fa-edit'></i>禁用</button>";
+                        else if (full.srvEnable === 0 || full.srvEnable === 2)
+                            return "<button type='button' class='btn btn-info server-item-enable'><i class='fa fa-edit'></i>启用</button>";
+                        return "未知";
+                    }
+                }, {
+                    "targets": 13,
+                    "render": function (data, type, full, meta) {
+                        return "<button type='button' class='btn btn-info server-item-publish'><i class='fa fa-edit'></i>发布</button>";
                     }
                 }]
+            });
+        }
+
+        function serverDiscveryTable(lbMark) {
+            if (serverDisoveryTableInit) {
+                updateServerDiscoverTable(lbMark);
+                return;
+            }
+            serverDisoveryTableInit = true;
+            $('#server-discover-table').on('init.dt', function (e, settings) {
+
+            }).DataTable({
+                ordering: false,
+                searching: false,//启用搜索功能
+                serverSide: true,//启用服务端分页（这是使用Ajax服务端的必须配置）
+                ajax: {
+                    url: Api.payload.serverDiscoverList.format({lbMark: lbMark}),
+                    type: "post",
+                    async: true,
+                    processing: true,
+                    contentType: "application/json; charset=UTF-8",
+                    data: function (d) {
+                        let jsonData = {"pageNum": d.start, "pageSize": d.length};
+                        return JSON.stringify(jsonData);
+                    },
+                    dataSrc: function (data) {
+                        if (data.code === 0) {
+                            toastr.success("请求成功");
+                            let json = data.data;
+                            let thisSettings = $(this).dataTableSettings[2];
+                            thisSettings._iRecordsTotal = json.totalCount;
+                            thisSettings._iRecordsDisplay = json.totalCount;
+                            return json.list;
+                        } else {
+                            toastr['error'](data.msg, "服务列表响应错误")
+                        }
+                    }
+                },
+                "columns": [
+                    {"data": "id", visible: false},
+                    {title: "所属负载器", "data": "lbMark"},
+                    {title: "地址", "data": "srvIp"},
+                    {title: "端口", "data": "srvPort"},
+                    {title: "服务状态", "data": "metaData"},
+                    {title: "控制", "data": null}
+                ],
+                "columnDefs": [{
+                    "targets": 4,
+                    "render": function (data, type, full, meta) {
+                        if (data.app_status === "ON") {
+                            return "已上线";
+                        } else if (data.app_status === "OFF") {
+                            return "已下线";
+                        }
+                        return "未知";
+                    }
+                }, {
+                    "targets": 5,
+                    "render": function (data, type, full, meta) {
+                        if (full.metaData.app_status === "ON") {
+                            return "<button type='button' class='btn btn-info server-discover-item-off'><i class='fa fa-edit'></i>下线</button>";
+                        } else if (full.metaData.app_status === "OFF") {
+                            return "<button type='button' class='btn btn-info server-discover-item-on'><i class='fa fa-edit'></i>上线</button>";
+                        }
+                        return "<button type='button' class='btn btn-info server-discover-item-on'><i class='fa fa-edit'></i>上线</button>";
+                    }
+                }]
+            });
+        }
+
+        function clickServerItem(api) {
+            api.$('.server-item-modify').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                $("#payloadSrvId").val(formData.id)
+                $("#payloadSrvName").val(formData.srvName);
+                $("#payloadSrvIp").val(formData.srvIp);
+                $("#payloadSrvIp").attr("disabled", "disabled");
+                $("#payloadSrvPort").val(formData.srvPort);
+                $("#payloadSrvPort").attr("disabled", "disabled");
+                $("#payloadSrvWeight").val(formData.srvWeight);
+                $("#payloadSrvComment").val(formData.comment);
+                $("#serverEditModal .save").data("edit", true);
+                $("#serverEditModal").modal('show');
+            });
+            api.$('.server-item-del').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                let data = {id: formData.id};
+                $.ajaxPostApi({
+                    url: Api.payload.serverDel,
+                    async: true,
+                    data: data,
+                    success: function (data) {
+                        if (data.code === 0) {
+                            reloadTable('server-table')
+                        } else {
+                            toastr['error'](data.msg, "删除服务信息失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "删除服务信息失败");
+                    }
+                });
+            });
+            api.$('.server-item-on').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                let data = {id: formData.id};
+                $.ajaxPostApi({
+                    url: Api.payload.serverOn,
+                    async: true,
+                    data: data,
+                    success: function (data) {
+                        if (data.code === 0) {
+                            reloadTable('server-table')
+                        } else {
+                            toastr['error'](data.msg, "上线服务信息失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "上线服务信息失败");
+                    }
+                });
+            });
+            api.$('.server-item-off').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                let data = {id: formData.id};
+                $.ajaxPostApi({
+                    url: Api.payload.serverOff,
+                    async: true,
+                    data: data,
+                    success: function (data) {
+                        if (data.code === 0) {
+                            reloadTable('server-table')
+                        } else {
+                            toastr['error'](data.msg, "下线服务信息失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "下线服务信息失败");
+                    }
+                });
+            });
+            api.$('.server-item-enable').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                let data = {id: formData.id};
+                $.ajaxPostApi({
+                    url: Api.payload.serverEnable,
+                    async: true,
+                    data: data,
+                    success: function (data) {
+                        if (data.code === 0) {
+                            reloadTable('server-table')
+                        } else {
+                            toastr['error'](data.msg, "启用服务信息失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "启用服务信息失败");
+                    }
+                });
+            });
+            api.$('.server-item-disable').click(function () {
+                let rowIndex = api.cell(this.parentNode).index().row;
+                let formData = api.row(rowIndex).data();
+                let data = {id: formData.id};
+                $.ajaxPostApi({
+                    url: Api.payload.serverDisable,
+                    async: true,
+                    data: data,
+                    success: function (data) {
+                        if (data.code === 0) {
+                            reloadTable('server-table')
+                        } else {
+                            toastr['error'](data.msg, "禁用服务信息失败")
+                        }
+                    },
+                    error: function (e) {
+                        toastr['error'](e.status, "禁用服务信息失败");
+                    }
+                });
             });
         }
     }

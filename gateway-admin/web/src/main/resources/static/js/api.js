@@ -28,7 +28,11 @@ var Api = (function ($) {
         serverAdd: '/payload/server/add',
         serverEdit: '/payload/server/edit',
         serverDel: '/payload/server/del',
-        serverDiscoverList: '/payload/server/discover/list'
+        serverOn: '/payload/server/on',
+        serverOff: '/payload/server/off',
+        serverEnable: '/payload/server/enable',
+        serverDisable: '/payload/server/disable',
+        serverDiscoverList: '/payload/server/discover/list?lbMark=${lbMark}'
     };
     return $;
 })({});

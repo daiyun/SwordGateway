@@ -23,6 +23,7 @@ import com.doctorwork.sword.gateway.common.JacksonUtil;
 import com.doctorwork.sword.gateway.common.PageResult;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.ZookeeperInstance;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.apache.curator.framework.CuratorFramework;
@@ -209,7 +210,7 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         insert.setSrvWeight(edit.getSrvWeight());
         insert.setSrvName(edit.getSrvName());
         insert.setSrvStatus(0);
-        insert.setSrvEnable(1);
+        insert.setSrvEnable(0);
         insert.setSrvId(edit.getSrvIp().concat(":").concat(String.valueOf(edit.getSrvPort())));
         loadbalanceServerMapper.insert(insert);
     }
@@ -263,7 +264,7 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
         if (exits == null)
             throw new BusinessException("不存在该服务");
-        extLoadbalanceServerMapper.updateEnable(tmp, 0);
+        extLoadbalanceServerMapper.updateEnable(tmp, 1);
     }
 
     @Override
@@ -272,7 +273,7 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         LoadbalanceServer exits = extLoadbalanceServerMapper.get(tmp);
         if (exits == null)
             throw new BusinessException("不存在该服务");
-        extLoadbalanceServerMapper.updateEnable(tmp, 1);
+        extLoadbalanceServerMapper.updateEnable(tmp, 2);
     }
 
     @Override
@@ -281,7 +282,7 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         if (loadbalanceInfo == null)
             throw new BusinessException("未找到负载器信息");
         if (!Objects.equals(1, loadbalanceInfo.getDscrEnable()))
-            return new PageResult<PayloadDiscoverServerRes>(0, 0, req.getPageNum(), req.getPageSize(), Collections.emptyList());
+            return new PageResult<>(0, 0, req.getPageNum(), req.getPageSize(), Collections.emptyList());
         DiscoverConfig discoverConfig = extDiscoverConfigMapper.get(loadbalanceInfo.getDscrId());
         if (discoverConfig == null)
             throw new BusinessException("未获取服务发现配置");
@@ -300,13 +301,15 @@ public class GatewayPayloadServiceImpl implements GatewayPayloadService {
         List<PayloadDiscoverServerRes> resList = new ArrayList<>(nodes.size());
         for (String node : nodes) {
             byte[] nodeBytes = curatorFramework.getData().forPath(path.concat("/").concat(node));
-            ServiceInstance<ZookeeperInstance> nodeInstance = JacksonUtil.toObject(nodeBytes, ServiceInstance.class);
+            ServiceInstance nodeInstance = JacksonUtil.toObject(nodeBytes, ServiceInstance.class);
+            ZookeeperInstance zookeeperInstance = JacksonUtil.getInstance().convertValue(nodeInstance.getPayload(), new TypeReference<ZookeeperInstance>() {
+            });
             PayloadDiscoverServerRes res = new PayloadDiscoverServerRes();
             res.setId(nodeInstance.getId());
             res.setLbMark(req.getLbMark());
             res.setSrvIp(nodeInstance.getAddress());
             res.setSrvPort(nodeInstance.getPort());
-            res.setMetaData(nodeInstance.getPayload().getMetadata());
+            res.setMetaData(zookeeperInstance.getMetadata());
             resList.add(res);
         }
         return new PageResult<>(list.size(), list.size() % req.getPageSize(), req.getPageNum(), req.getPageSize(), resList);

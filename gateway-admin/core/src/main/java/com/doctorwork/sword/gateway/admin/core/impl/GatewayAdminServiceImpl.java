@@ -1,15 +1,10 @@
 package com.doctorwork.sword.gateway.admin.core.impl;
 
 import com.doctorwork.sword.gateway.admin.core.GatewayAdminService;
+import com.doctorwork.sword.gateway.admin.dal.mapper.ext.*;
+import com.doctorwork.sword.gateway.admin.dal.model.*;
 import com.doctorwork.sword.gateway.common.*;
-import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtDiscoverConfigMapper;
-import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtDiscoverRegistryConfigMapper;
-import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtLoadbalanceInfoMapper;
-import com.doctorwork.sword.gateway.admin.dal.mapper.ext.ExtLoadbalanceServerMapper;
-import com.doctorwork.sword.gateway.admin.dal.model.DiscoverConfig;
-import com.doctorwork.sword.gateway.admin.dal.model.DiscoverRegistryConfig;
-import com.doctorwork.sword.gateway.admin.dal.model.LoadbalanceInfo;
-import com.doctorwork.sword.gateway.admin.dal.model.LoadbalanceServer;
+import com.doctorwork.sword.gateway.common.RouteInfo;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.doctorwork.sword.gateway.common.Constant.*;
 
@@ -41,6 +37,15 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
 
     @Autowired
     private ExtDiscoverRegistryConfigMapper extDiscoverRegistryConfigMapper;
+
+    @Autowired
+    private ExtRouteInfoMapper extRouteInfoMapper;
+
+    @Autowired
+    private ExtRoutePredicateMapper extRoutePredicateMapper;
+
+    @Autowired
+    private ExtRouteFilterMapper extRouteFilterMapper;
 
 
     @Override
@@ -121,5 +126,36 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
                 .creatingParentContainersIfNeeded()
                 .withMode(CreateMode.PERSISTENT)
                 .forPath(REGISTRY_PATH.concat(REGISTRY_NODE).concat(registryId), JacksonUtil.toBytes(connectionInfo));
+    }
+
+    @Override
+    public void publishRouteConfig(String routeMark) throws Exception {
+        com.doctorwork.sword.gateway.admin.dal.model.RouteInfo tmp = extRouteInfoMapper.get(routeMark);
+        if (tmp == null)
+            return;
+        RouteInfo routeInfo = new RouteInfo();
+        routeInfo.setRouteUri(tmp.getRouteUri());
+        routeInfo.setRouteMark(tmp.getRouteMark());
+        routeInfo.setRouteName(tmp.getRouteName());
+        routeInfo.setRouteSort(tmp.getRouteSort());
+        List<RoutePredicate> routePredicates = extRoutePredicateMapper.getByRoute(tmp.getId());
+        List<RouteFilter> routeFilters = extRouteFilterMapper.getByRoute(tmp.getId());
+        routeInfo.setPredications(routePredicates.stream().map(routePredicate -> {
+            Predication predication = new Predication();
+            predication.setRoutePredicateKey(routePredicate.getRoutePredicateKey());
+            predication.setRoutePredicateValue(routePredicate.getRoutePredicateValue());
+            return predication;
+        }).collect(Collectors.toList()));
+        routeInfo.setFilters(routeFilters.stream().map(routeFilter -> {
+            FilterInfo filterInfo = new FilterInfo();
+            filterInfo.setRouteFilterKey(routeFilter.getRouteFilterKey());
+            filterInfo.setRouteFilterValue(routeFilter.getRouteFilterValue());
+            return filterInfo;
+        }).collect(Collectors.toList()));
+        curatorFramework.create()
+                .orSetData()
+                .creatingParentContainersIfNeeded()
+                .withMode(CreateMode.PERSISTENT)
+                .forPath(REGISTRY_PATH.concat(ROUTE_NODE).concat(routeMark), JacksonUtil.toBytes(routeInfo));
     }
 }

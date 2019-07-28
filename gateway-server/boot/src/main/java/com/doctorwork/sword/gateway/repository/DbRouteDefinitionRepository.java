@@ -9,6 +9,7 @@ import com.doctorwork.sword.gateway.common.event.RouteConfigDeleteEvent;
 import com.doctorwork.sword.gateway.common.event.RouteConfigLoadEvent;
 import com.doctorwork.sword.gateway.common.event.RouteEvent;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,14 @@ import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
 import org.springframework.cloud.gateway.support.NameUtils;
 import org.springframework.cloud.gateway.support.NotFoundException;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
@@ -37,13 +39,14 @@ import static java.util.Collections.synchronizedMap;
  * @author chenzhiqiang
  * @date 2019/6/21
  */
-@Component
-public class DbRouteDefinitionRepository implements RouteDefinitionRepository, com.doctorwork.sword.gateway.common.listener.EventListener<RouteEvent> {
+public class DbRouteDefinitionRepository implements RouteDefinitionRepository, com.doctorwork.sword.gateway.common.listener.EventListener<RouteEvent>, ApplicationEventPublisherAware {
 
     private static final Logger logger = LoggerFactory.getLogger(DbRouteDefinitionRepository.class);
 
     @Autowired
     private IRouteConfigRepository routeConfigRepository;
+
+    private ApplicationEventPublisher publisher;
 
     private final Map<String, RouteDefinition> routes = synchronizedMap(new LinkedHashMap<>());
 
@@ -98,7 +101,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
         }
     };
 
-    public DbRouteDefinitionRepository(EventBus eventBus) {
+    public DbRouteDefinitionRepository(@Autowired EventBus eventBus) {
         register(eventBus);
     }
 
@@ -107,7 +110,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
         return Flux.fromIterable(routes.values());
     }
 
-    @EventListener(RefreshRoutesEvent.class)
+    @PostConstruct
     public void handleRefresh() {
         Collection<RouteInfo> routeInfos = routeConfigRepository.routeInfos();
         if (CollectionUtils.isEmpty(routeInfos)) {
@@ -141,11 +144,12 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
 
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
-        return route.flatMap(r -> {
+        route.map(r -> {
             routes.put(r.getId(), r);
             logger.info("路由规则{}载入......\n路由规则:{}", r.getId(), JacksonUtil.toJSon(r));
             return Mono.empty();
-        });
+        }).subscribe();
+        return Mono.empty();
     }
 
     @Override
@@ -161,6 +165,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
     }
 
     @Override
+    @Subscribe
     public void handleEvent(RouteEvent routeEvent) {
         if (routeEvent instanceof RouteConfigLoadEvent) {
             RouteInfo routeInfo = routeConfigRepository.routeInfo(routeEvent.getRouteMark());
@@ -170,9 +175,16 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
                 return;
             }
             this.save(Mono.just(infoToDefinition.apply(routeInfo)));
+            this.publisher.publishEvent(new RefreshRoutesEvent(this));
         } else if (routeEvent instanceof RouteConfigDeleteEvent) {
             logger.info("[RouteConfigDeleteEvent] handle event for {}", routeEvent.getRouteMark());
             this.delete(Mono.just(routeEvent.getRouteMark()));
+            this.publisher.publishEvent(new RefreshRoutesEvent(this));
         }
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.publisher = applicationEventPublisher;
     }
 }

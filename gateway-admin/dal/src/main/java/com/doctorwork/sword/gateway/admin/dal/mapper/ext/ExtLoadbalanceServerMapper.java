@@ -21,5 +21,5 @@ public interface ExtLoadbalanceServerMapper {
 
     int updateStatus(@Param("id") Long id, @Param("srvStatus") Integer srvStatus);
 
-    int updateEnable(@Param("id") Long id, @Param("srvEnable") Integer srvStatus);
+    int updateEnable(@Param("id") Long id, @Param("srvEnable") Integer srvEnable);
 }
