@@ -144,7 +144,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
 
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
-        route.map(r -> {
+        route.flatMap(r -> {
             routes.put(r.getId(), r);
             logger.info("路由规则{}载入......\n路由规则:{}", r.getId(), JacksonUtil.toJSon(r));
             return Mono.empty();
