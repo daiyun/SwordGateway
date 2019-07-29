@@ -4,6 +4,7 @@
           http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="zookeeperProperties" class="com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties">
+		<property name="connectString" value="${app.registry.address}" />
 	</bean>
 
 </beans>
