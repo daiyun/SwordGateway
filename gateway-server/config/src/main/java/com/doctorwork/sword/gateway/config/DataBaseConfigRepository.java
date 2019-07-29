@@ -21,7 +21,10 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     private GatewayLoadBalanceService gatewayLoadBalanceService;
     private GatewayRouteService gatewayRouteService;
 
-    public DataBaseConfigRepository(GatewayLoadBalanceService gatewayLoadBalanceService, GatewayDiscoveryService gatewayDiscoveryService, GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService, GatewayConfig gatewayConfig, GatewayRouteService gatewayRouteService) {
+    public DataBaseConfigRepository(GatewayLoadBalanceService gatewayLoadBalanceService,
+                                    GatewayDiscoveryService gatewayDiscoveryService,
+                                    GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
+                                    GatewayConfig gatewayConfig, GatewayRouteService gatewayRouteService) {
         super(gatewayConfig);
         this.gatewayDiscoveryConnectionService = gatewayDiscoveryConnectionService;
         this.gatewayDiscoveryService = gatewayDiscoveryService;
@@ -70,6 +73,11 @@ public class DataBaseConfigRepository extends AbstractConfiguration {
     @Override
     public Collection<RouteInfo> routeInfos() {
         return gatewayRouteService.routeDefinitions();
+    }
+
+    @Override
+    public void init() {
+
     }
 
     @Override

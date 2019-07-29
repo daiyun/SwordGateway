@@ -7,16 +7,10 @@ import com.doctorwork.sword.gateway.common.config.IDiscoveryConfigRepository;
 import com.doctorwork.sword.gateway.common.config.ILoadBalancerConfigRepository;
 import com.doctorwork.sword.gateway.discovery.DiscoveryRepositoryManager;
 import com.doctorwork.sword.gateway.discovery.IDiscoveryRepository;
-import com.doctorwork.sword.gateway.discovery.api.IRespositoryManagerApi;
-import com.doctorwork.sword.gateway.discovery.api.RespositoryManagerApi;
 import com.doctorwork.sword.gateway.discovery.common.DiscoveryProperties;
 import com.doctorwork.sword.gateway.discovery.common.builder.ZookeeperProperties;
 import com.doctorwork.sword.gateway.discovery.config.DiscoveryConfig;
 import com.doctorwork.sword.gateway.loadbalance.CustomerLoadBalanceClient;
-import com.doctorwork.sword.gateway.service.GatewayDiscoveryConnectionService;
-import com.doctorwork.sword.gateway.service.GatewayDiscoveryService;
-import com.doctorwork.sword.gateway.service.GatewayLoadBalanceService;
-import com.doctorwork.sword.gateway.service.GatewayRouteService;
 import com.google.common.eventbus.EventBus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -48,15 +42,24 @@ public class LoadBalancerClientAutoConfiguration {
         return new LoadBalancerClientFilter(client, loadBalancerProperties);
     }
 
+//    @Bean
+//    public ConfigManager configManager(GatewayConfig gatewayConfig, GatewayRouteService gatewayRouteService,
+//                                       GatewayDiscoveryService gatewayDiscoveryService,
+//                                       GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
+//                                       GatewayLoadBalanceService gatewayLoadBalanceService,
+//                                       EventBus eventBus) throws Exception {
+//        DataBaseConfigRepository registryConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig, gatewayRouteService);
+//        ConfigManager configManager = new ConfigManager(gatewayConfig, registryConfigRepository);
+//        configManager.init();
+//        return configManager;
+//    }
+
     @Bean
-    public ConfigManager configManager(GatewayConfig gatewayConfig, GatewayDiscoveryService gatewayDiscoveryService,
-                                       GatewayDiscoveryConnectionService gatewayDiscoveryConnectionService,
-                                       GatewayLoadBalanceService gatewayLoadBalanceService, IRegistryConnectionRepository registryConnectionRepository,
-                                       GatewayRouteService gatewayRouteService,
+    public ConfigManager configManager(GatewayConfig gatewayConfig,
+                                       IRegistryConnectionRepository registryConnectionRepository,
                                        EventBus eventBus) throws Exception {
-        DataBaseConfigRepository dataBaseConfigRepository = new DataBaseConfigRepository(gatewayLoadBalanceService, gatewayDiscoveryService, gatewayDiscoveryConnectionService, gatewayConfig, gatewayRouteService);
         RegistryConfigRepository registryConfigRepository = new RegistryConfigRepository(registryConnectionRepository, eventBus, gatewayConfig);
-        ConfigManager configManager = new ConfigManager(gatewayConfig, dataBaseConfigRepository, registryConfigRepository);
+        ConfigManager configManager = new ConfigManager(gatewayConfig, registryConfigRepository);
         registryConnectionRepository.setConnectionConfig(configManager);
         configManager.init();
         return configManager;
@@ -90,10 +93,10 @@ public class LoadBalancerClientAutoConfiguration {
         return discoveryRepositoryManager;
     }
 
-    @Bean
-    public IRespositoryManagerApi respositoryManagerApi(IRegistryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
-        return new RespositoryManagerApi(discoveryConnectionRepository, discoveryRepository);
-    }
+//    @Bean
+//    public IRespositoryManagerApi respositoryManagerApi(IRegistryConnectionRepository discoveryConnectionRepository, IDiscoveryRepository discoveryRepository) {
+//        return new RespositoryManagerApi(discoveryConnectionRepository, discoveryRepository);
+//    }
 
     @Bean
     public CustomerLoadBalanceClient loadBalancerClient(ILoadBalancerConfigRepository loadBalancerConfigRepository,

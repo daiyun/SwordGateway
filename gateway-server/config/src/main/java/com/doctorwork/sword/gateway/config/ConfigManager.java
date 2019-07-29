@@ -11,13 +11,11 @@ import java.util.Collection;
  * @Modified By:
  */
 public class ConfigManager extends AbstractConfiguration {
-    private DataBaseConfigRepository dataBaseConfigRepository;
-    private RegistryConfigRepository registryConfigRepository;
+    private AbstractConfiguration configuration;
 
-    public ConfigManager(GatewayConfig gatewayConfig, DataBaseConfigRepository dataBaseConfigRepository, RegistryConfigRepository registryConfigRepository) {
+    public ConfigManager(GatewayConfig gatewayConfig, AbstractConfiguration configuration) {
         super(gatewayConfig);
-        this.dataBaseConfigRepository = dataBaseConfigRepository;
-        this.registryConfigRepository = registryConfigRepository;
+        this.configuration = configuration;
     }
 
     @Override
@@ -50,18 +48,14 @@ public class ConfigManager extends AbstractConfiguration {
         return getConfiguration().loadbalanceServer(lbMark);
     }
 
+    @Override
     public void init() throws Exception {
-        if (getGatewayConfig().isUseRegistry()) {
-            registryConfigRepository.init();
-        }
+        configuration.init();
     }
 
     @Override
     public AbstractConfiguration getConfiguration() {
-        if (getGatewayConfig().isUseRegistry()) {
-            return registryConfigRepository;
-        }
-        return dataBaseConfigRepository;
+        return configuration;
     }
 
     @Override

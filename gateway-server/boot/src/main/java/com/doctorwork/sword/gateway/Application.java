@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ImportResource;
  * @author wangkai
  */
 @SpringBootApplication
-@ImportResource(locations = {"classpath*:spring-*.xml"})
+@ImportResource(locations = {"classpath*:/spring/spring-*.xml"})
 public class Application {
     /**
      * NettyServer

@@ -52,13 +52,14 @@ public class RegistryConfigRepository extends AbstractConfiguration implements E
     private static final String ROUTE_FILTER_NODE = REGISTRY_PATH + "/route-filter/";
 
 
-    public RegistryConfigRepository(IRegistryConnectionRepository registryConnectionRepository, EventBus eventBus, GatewayConfig gatewayConfig) {
+    public RegistryConfigRepository(IRegistryConnectionRepository registryConnectionRepository, EventBus eventBus, GatewayConfig gatewayConfig) throws Exception {
         super(gatewayConfig);
         this.registryConnectionRepository = registryConnectionRepository;
         this.eventBus = eventBus;
         register(this.eventBus);
     }
 
+    @Override
     public void init() throws Exception {
         if (init.get())
             return;

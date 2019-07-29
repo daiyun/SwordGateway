@@ -23,6 +23,8 @@ public abstract class AbstractConfiguration implements IDiscoveryConfigRepositor
         this.gatewayConfig = gatewayConfig;
     }
 
+    public abstract void init() throws Exception;
+
     public void setGatewayConfig(GatewayConfig gatewayConfig) {
         this.gatewayConfig = gatewayConfig;
     }
