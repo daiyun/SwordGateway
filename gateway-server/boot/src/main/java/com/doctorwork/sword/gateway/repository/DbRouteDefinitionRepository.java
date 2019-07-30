@@ -12,10 +12,11 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
+import org.springframework.cloud.gateway.route.CachingRouteLocator;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
 import org.springframework.cloud.gateway.support.NameUtils;
@@ -45,6 +46,8 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
 
     @Autowired
     private IRouteConfigRepository routeConfigRepository;
+
+    private ObjectProvider<CachingRouteLocator> routeLocator;
 
     private ApplicationEventPublisher publisher;
 
@@ -101,7 +104,8 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
         }
     };
 
-    public DbRouteDefinitionRepository(@Autowired EventBus eventBus) {
+    public DbRouteDefinitionRepository(@Autowired EventBus eventBus, ObjectProvider<CachingRouteLocator> routeLocator) {
+        this.routeLocator = routeLocator;
         register(eventBus);
     }
 
@@ -144,12 +148,11 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
 
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
-        route.flatMap(r -> {
+        return route.flatMap(r -> {
             routes.put(r.getId(), r);
             logger.info("路由规则{}载入......\n路由规则:{}", r.getId(), JacksonUtil.toJSon(r));
             return Mono.empty();
-        }).subscribe();
-        return Mono.empty();
+        });
     }
 
     @Override
@@ -174,12 +177,16 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
                 logger.error("无法加载路由信息{}", routeEvent.getRouteMark());
                 return;
             }
-            this.save(Mono.just(infoToDefinition.apply(routeInfo)));
-            this.publisher.publishEvent(new RefreshRoutesEvent(this));
+            this.save(Mono.just(infoToDefinition.apply(routeInfo))).subscribe();
+            if (routeLocator != null) {
+                routeLocator.ifAvailable(locator -> locator.refresh());
+            }
         } else if (routeEvent instanceof RouteConfigDeleteEvent) {
             logger.info("[RouteConfigDeleteEvent] handle event for {}", routeEvent.getRouteMark());
-            this.delete(Mono.just(routeEvent.getRouteMark()));
-            this.publisher.publishEvent(new RefreshRoutesEvent(this));
+            this.delete(Mono.just(routeEvent.getRouteMark())).subscribe();
+            if (routeLocator != null) {
+                routeLocator.ifAvailable(locator -> locator.refresh());
+            }
         }
     }
 
