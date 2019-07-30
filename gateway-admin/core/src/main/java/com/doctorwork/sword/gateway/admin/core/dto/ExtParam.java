@@ -47,8 +47,10 @@ public class ExtParam implements Serialize {
             return null;
         ExtParam extParam = new ExtParam();
         extParam.setAutoRefresh(reload.getAutoRefresh());
-        extParam.setInitialDelayMs(Long.valueOf(reload.getPayloadRefreshInitialDelayMs()));
-        extParam.setRefreshIntervalMs(Long.valueOf(reload.getPayloadRefreshIntervalMs()));
+        if (reload.getPayloadRefreshInitialDelayMs() != null)
+            extParam.setInitialDelayMs(Long.valueOf(reload.getPayloadRefreshInitialDelayMs()));
+        if (reload.getPayloadRefreshIntervalMs() != null)
+            extParam.setRefreshIntervalMs(Long.valueOf(reload.getPayloadRefreshIntervalMs()));
         return extParam;
     }
 }

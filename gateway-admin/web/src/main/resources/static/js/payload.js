@@ -206,13 +206,13 @@ $(document).ready(function () {
                         formData.payloadPing.pingUrl = pingUrl;
                     }
                 }
-                if (payloadServerReload === 1) {
+                if (payloadServerReload == 1) {
                     formData.payloadServerReload = {
                         autoRefresh: true,
                         payloadRefreshInitialDelayMs: initialDelayMs,
                         payloadRefreshIntervalMs: intervalMs
                     }
-                } else if (payloadServerReload === 0) {
+                } else if (payloadServerReload == 0) {
                     formData.payloadServerReload = {
                         autoRefresh: false
                     }
