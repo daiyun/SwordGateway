@@ -46,7 +46,7 @@ public class ConfigServerList extends CustomerServerList<ConfigServer> {
             List<ConfigServer> list = new ArrayList<>();
             if (valid) {
                 for (LoadBalancerServer loadbalanceServer : servers) {
-                    if (!Objects.equals(1, loadbalanceServer.getSrvStatus()) || !Objects.equals(0, loadbalanceServer.getSrvEnable()))
+                    if (!loadbalanceServer.serverValid())
                         continue;
                     ConfigServer configServer = new ConfigServer(loadbalanceServer);
                     list.add(configServer);

@@ -1,5 +1,7 @@
 package com.doctorwork.sword.gateway.common.config;
 
+import java.util.Objects;
+
 /**
  * @Author:czq
  * @Description:
@@ -90,5 +92,9 @@ public class LoadBalancerServer {
 
     public void setSrvEnable(Integer srvEnable) {
         this.srvEnable = srvEnable;
+    }
+
+    public boolean serverValid() {
+        return Objects.equals(1, getSrvStatus()) && Objects.equals(1, getSrvEnable());
     }
 }
