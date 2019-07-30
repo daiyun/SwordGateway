@@ -84,6 +84,8 @@ public class GatewayAdminServiceImpl implements GatewayAdminService {
             loadBalancerServer.setSrvName(server.getSrvName());
             loadBalancerServer.setSrvPort(server.getSrvPort());
             loadBalancerServer.setSrvWeight(server.getSrvWeight());
+            loadBalancerServer.setSrvEnable(server.getSrvEnable());
+            loadBalancerServer.setSrvStatus(server.getSrvStatus());
             curatorFramework.create()
                     .orSetData()
                     .creatingParentContainersIfNeeded()

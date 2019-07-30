@@ -32,6 +32,11 @@ public class LoadBalancerServer {
      */
     private Integer srvWeight;
 
+    private Integer srvStatus;
+
+    private Integer srvEnable;
+
+
     public String getLbId() {
         return lbId;
     }
@@ -70,5 +75,21 @@ public class LoadBalancerServer {
 
     public void setSrvWeight(Integer srvWeight) {
         this.srvWeight = srvWeight;
+    }
+
+    public Integer getSrvStatus() {
+        return srvStatus;
+    }
+
+    public void setSrvStatus(Integer srvStatus) {
+        this.srvStatus = srvStatus;
+    }
+
+    public Integer getSrvEnable() {
+        return srvEnable;
+    }
+
+    public void setSrvEnable(Integer srvEnable) {
+        this.srvEnable = srvEnable;
     }
 }
