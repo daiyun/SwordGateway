@@ -21,6 +21,7 @@ import org.springframework.cloud.gateway.support.NameUtils;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.synchronizedMap;
+import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
 /**
  * @author chenzhiqiang
@@ -86,8 +88,13 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
                     FilterDefinition filterDefinition = new FilterDefinition();
                     filterDefinition.setName(filterArgEntry.getKey());
                     List<String> filterArgs = filterArgEntry.getValue();
-                    for (int i = 0, len = filterArgs.size(); i < len; i++) {
-                        filterDefinition.getArgs().put(NameUtils.generateName(i), filterArgs.get(i));
+                    for (String filterArg : filterArgs) {
+                        if (!StringUtils.isEmpty(filterArg)) {
+                            String[] args = tokenizeToStringArray(filterArg, ",");
+                            for (int j = 0; j < args.length; j++) {
+                                filterDefinition.getArgs().put(NameUtils.generateName(j), args[j]);
+                            }
+                        }
                     }
                     filterDefinitionList.add(filterDefinition);
                 }

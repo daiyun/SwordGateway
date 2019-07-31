@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: rewritepath_route
+          uri: https://example.org
+          predicates:
+            - Path=/foo/**
+          filters:
