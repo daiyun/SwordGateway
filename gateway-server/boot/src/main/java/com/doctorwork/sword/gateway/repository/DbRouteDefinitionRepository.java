@@ -12,23 +12,19 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
-import org.springframework.cloud.gateway.route.CachingRouteLocator;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
 import org.springframework.cloud.gateway.support.NameUtils;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
@@ -40,14 +36,11 @@ import static java.util.Collections.synchronizedMap;
  * @author chenzhiqiang
  * @date 2019/6/21
  */
-public class DbRouteDefinitionRepository implements RouteDefinitionRepository, com.doctorwork.sword.gateway.common.listener.EventListener<RouteEvent>, ApplicationEventPublisherAware {
+public class DbRouteDefinitionRepository implements RouteDefinitionRepository, com.doctorwork.sword.gateway.common.listener.EventListener<RouteEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(DbRouteDefinitionRepository.class);
 
-    @Autowired
     private IRouteConfigRepository routeConfigRepository;
-
-    private ObjectProvider<CachingRouteLocator> routeLocator;
 
     private ApplicationEventPublisher publisher;
 
@@ -104,9 +97,11 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
         }
     };
 
-    public DbRouteDefinitionRepository(@Autowired EventBus eventBus, ObjectProvider<CachingRouteLocator> routeLocator) {
-        this.routeLocator = routeLocator;
+    public DbRouteDefinitionRepository(EventBus eventBus, IRouteConfigRepository routeConfigRepository, ApplicationEventPublisher publisher) {
+        this.routeConfigRepository = routeConfigRepository;
+        this.publisher = publisher;
         register(eventBus);
+        refresh();
     }
 
     @Override
@@ -114,8 +109,7 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
         return Flux.fromIterable(routes.values());
     }
 
-    @PostConstruct
-    public void handleRefresh() {
+    public void refresh() {
         Collection<RouteInfo> routeInfos = routeConfigRepository.routeInfos();
         if (CollectionUtils.isEmpty(routeInfos)) {
             logger.warn("无路由信息载入");
@@ -178,20 +172,11 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
                 return;
             }
             this.save(Mono.just(infoToDefinition.apply(routeInfo))).subscribe();
-            if (routeLocator != null) {
-                routeLocator.ifAvailable(locator -> locator.refresh());
-            }
+            this.publisher.publishEvent(new RefreshRoutesEvent(this));
         } else if (routeEvent instanceof RouteConfigDeleteEvent) {
             logger.info("[RouteConfigDeleteEvent] handle event for {}", routeEvent.getRouteMark());
             this.delete(Mono.just(routeEvent.getRouteMark())).subscribe();
-            if (routeLocator != null) {
-                routeLocator.ifAvailable(locator -> locator.refresh());
-            }
+            this.publisher.publishEvent(new RefreshRoutesEvent(this));
         }
-    }
-
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.publisher = applicationEventPublisher;
     }
 }
