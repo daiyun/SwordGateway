@@ -69,8 +69,13 @@ public class DbRouteDefinitionRepository implements RouteDefinitionRepository, c
                     PredicateDefinition predicateDefinition = new PredicateDefinition();
                     predicateDefinition.setName(predicateArgEntry.getKey());
                     List<String> predicateArgs = predicateArgEntry.getValue();
-                    for (int i = 0, len = predicateArgs.size(); i < len; i++) {
-                        predicateDefinition.getArgs().put(NameUtils.generateName(i), predicateArgs.get(i));
+                    for (String filterArg : predicateArgs) {
+                        if (!StringUtils.isEmpty(filterArg)) {
+                            String[] args = tokenizeToStringArray(filterArg, ",");
+                            for (int j = 0; j < args.length; j++) {
+                                predicateDefinition.getArgs().put(NameUtils.generateName(j), args[j]);
+                            }
+                        }
                     }
                     predicateDefinitionList.add(predicateDefinition);
                 }
